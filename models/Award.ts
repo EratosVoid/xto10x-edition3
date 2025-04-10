@@ -7,7 +7,6 @@ const AwardSchema = new mongoose.Schema<Award>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     type: { type: String, required: true },
     description: { type: String, required: true },

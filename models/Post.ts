@@ -11,7 +11,7 @@ const PostSchema = new mongoose.Schema<Post>(
     title: { type: String, required: true },
     description: { type: String, required: true },
     summarizedDescription: { type: String },
-    locality: { type: String, required: true, index: true },
+    locality: { type: String, required: true },
     priority: {
       type: String,
       enum: ["low", "medium", "high"],
@@ -22,7 +22,6 @@ const PostSchema = new mongoose.Schema<Post>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     pollId: { type: mongoose.Schema.Types.ObjectId, ref: "Poll" },
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },

@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
-import { Tabs, Tab, Chip } from "@heroui/tabs";
+import { Tabs, Tab } from "@heroui/tabs";
 import { Divider } from "@heroui/divider";
-
+import { Chip } from "@heroui/chip";
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function DashboardPage() {
     if (status === "unauthenticated") {
       router.push("/login");
     } else if (status === "authenticated") {
-      setLocality(session?.user?.locality || "Your Community");
+      setLocality((session?.user as any).locality || "Your Community");
       // In a real app, fetch user stats here
       setStats({
         posts: 5,
@@ -55,7 +55,7 @@ export default function DashboardPage() {
               Welcome back, {session?.user?.name}!
             </h1>
             <p className="text-lg opacity-90 mb-4">
-              See what's happening in {locality} today.
+              See what&apos;s happening in {locality} today.
             </p>
             <Button
               color="secondary"

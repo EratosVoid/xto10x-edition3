@@ -7,14 +7,13 @@ const NotificationSchema = new mongoose.Schema<Notification>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     postId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
     },
     message: { type: String, required: true },
-    locality: { type: String, required: true, index: true },
+    locality: { type: String, required: true },
   },
   { timestamps: true }
 );

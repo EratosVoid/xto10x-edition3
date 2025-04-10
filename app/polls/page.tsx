@@ -294,7 +294,7 @@ export default function PollsPage() {
           <div className="flex flex-col items-center justify-center p-12 bg-default-50 rounded-lg">
             <p className="text-xl font-semibold mb-2">No polls found</p>
             <p className="text-default-500 text-center mb-6">
-              We couldn't find any polls matching your search.
+              We couldn&apos;t find any polls matching your search.
             </p>
             <Button color="primary" onClick={() => setSearchTerm("")}>
               Clear Search

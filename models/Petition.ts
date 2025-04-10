@@ -7,7 +7,6 @@ const PetitionSchema = new mongoose.Schema<Petition>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
       required: true,
-      index: true,
     },
     pollId: {
       type: mongoose.Schema.Types.ObjectId,

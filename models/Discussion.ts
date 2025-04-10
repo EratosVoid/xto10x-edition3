@@ -7,14 +7,12 @@ const DiscussionSchema = new mongoose.Schema<Discussion>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
       required: true,
-      index: true,
     },
     content: { type: String, required: true },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     parentId: {
       type: mongoose.Schema.Types.ObjectId,

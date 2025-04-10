@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema<User>(
       enum: ["user", "moderator", "admin"],
       default: "user",
     },
-    locality: { type: String, required: true, index: true },
+    locality: { type: String, required: true },
     points: { type: Number, default: 0 },
     eventsHosted: { type: Number, default: 0 },
     pollsVoted: { type: Number, default: 0 },
@@ -29,6 +29,5 @@ const UserSchema = new mongoose.Schema<User>(
 
 // Create indexes for better performance
 UserSchema.index({ locality: 1 });
-UserSchema.index({ email: 1 }, { unique: true });
 
 export default mongoose.models.User || mongoose.model<User>("User", UserSchema);

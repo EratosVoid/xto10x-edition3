@@ -163,7 +163,7 @@ export default function EventsPage() {
           className="max-w-xs"
         >
           {categories.map((category) => (
-            <SelectItem key={category.value} value={category.value}>
+            <SelectItem key={category.value} textValue={category.value}>
               {category.label}
             </SelectItem>
           ))}
@@ -222,7 +222,7 @@ export default function EventsPage() {
           <div className="col-span-2 flex flex-col items-center justify-center p-12 bg-default-50 rounded-lg">
             <p className="text-xl font-semibold mb-2">No events found</p>
             <p className="text-default-500 text-center mb-6">
-              We couldn't find any events matching your criteria.
+              We couldn&apos;t find any events matching your criteria.
             </p>
             <Button
               color="primary"

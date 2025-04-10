@@ -112,7 +112,7 @@ export const Navbar = () => {
                   <p className="font-semibold">Signed in as</p>
                   <p className="font-semibold">{session?.user?.email}</p>
                 </DropdownItem>
-                {siteConfig.navMenuItems.map((item) => (
+                {(siteConfig.navMenuItems as any).map((item: any) => (
                   <DropdownItem
                     key={item.href}
                     onClick={() =>
