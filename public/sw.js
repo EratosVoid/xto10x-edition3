@@ -1,4 +1,4 @@
-const CACHE_NAME = "xto10x-v1";
+const CACHE_NAME = "xto10x-v2-" + new Date().toISOString().slice(0, 10);
 const urlsToCache = [
   "/",
   "/offline",

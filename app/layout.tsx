@@ -9,6 +9,7 @@ import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
 import Footer from "@/components/footer";
+import { PWAStatus } from "@/components/pwa-status";
 
 export const metadata: Metadata = {
   title: {
@@ -52,7 +53,9 @@ export default function RootLayout({
 }) {
   return (
     <html suppressHydrationWarning lang="en">
-      <head />
+      <head>
+        <script src="/register-sw.js" defer />
+      </head>
       <body
         className={clsx(
           "min-h-screen bg-background font-sans antialiased",
@@ -71,6 +74,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
+            <PWAStatus />
           </div>
         </Providers>
       </body>
