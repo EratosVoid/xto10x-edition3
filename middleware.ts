@@ -22,6 +22,13 @@ export async function middleware(request: NextRequest) {
   const isApiPublicPath = path.startsWith("/api/user/register");
 
   if (isPublicPath || isApiPublicPath) {
+    // For logged-in users attempting to access login/register pages, redirect to dashboard
+    if (
+      (path === "/login" || path === "/register") &&
+      (await getToken({ req: request }))
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
     return NextResponse.next();
   }
 

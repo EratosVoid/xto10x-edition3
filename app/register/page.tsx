@@ -73,8 +73,8 @@ function RegisterForm() {
       }
 
       console.log("Registration successful, redirecting to login");
-      // Redirect to login page
-      router.push("/login?registered=true");
+      // Redirect to login page with dashboard as the callback URL
+      router.push("/login?registered=true&callbackUrl=/dashboard");
     } catch (err: any) {
       console.error("Registration error:", err);
       setError(err.message || "An error occurred during registration");

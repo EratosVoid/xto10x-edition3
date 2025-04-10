@@ -12,7 +12,7 @@ import { Input } from "@heroui/input";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const isRegistered = searchParams.get("registered") === "true";
