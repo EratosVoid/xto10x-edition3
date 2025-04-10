@@ -12,12 +12,22 @@ export async function middleware(request: NextRequest) {
   const moderatorPaths = ["/dashboard/moderation"];
   const adminPaths = ["/dashboard/admin"];
 
+  // Check if the path is public or a PWA-related file
+  const isPwaFile =
+    path === "/manifest.json" ||
+    path === "/sw.js" ||
+    path === "/register-sw.js" ||
+    path === "/offline.html" ||
+    path.startsWith("/images/icon-") ||
+    path.startsWith("/icons/");
+
   // Check if the path is public
   const isPublicPath =
     publicPaths.includes(path) ||
     path.startsWith("/api/auth") ||
     path.includes("favicon") ||
-    path.includes("_next");
+    path.includes("_next") ||
+    isPwaFile; // Add PWA files to public paths
 
   // Also exclude the registration API route
   const isApiPublicPath = path.startsWith("/api/user/register");

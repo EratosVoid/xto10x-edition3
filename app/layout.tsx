@@ -20,8 +20,8 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
     apple: [
-      { url: "/icons/icon-192x192.png" },
-      { url: "/icons/icon-512x512.png", sizes: "512x512" },
+      { url: "/images/icon-192x192.png" },
+      { url: "/images/icon-512x512.png", sizes: "512x512" },
     ],
   },
   manifest: "/manifest.json",
