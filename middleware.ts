@@ -18,7 +18,10 @@ export async function middleware(request: NextRequest) {
     (publicPath) => path === publicPath || path.startsWith("/api/auth/")
   );
 
-  if (isPublicPath) {
+  // Also exclude the registration API route
+  const isApiPublicPath = path.startsWith("/api/user/register");
+
+  if (isPublicPath || isApiPublicPath) {
     return NextResponse.next();
   }
 
@@ -49,5 +52,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api/socket|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    // Exclude Next.js assets and API registration routes from middleware
+    "/((?!api/user/register|api/socket|_next/static|_next/image|favicon.ico).*)",
+  ],
 };

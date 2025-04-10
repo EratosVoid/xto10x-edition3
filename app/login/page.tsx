@@ -4,6 +4,9 @@ import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
 
 // Create a client component to use useSearchParams
 function LoginForm() {
@@ -12,6 +15,7 @@ function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const isRegistered = searchParams.get("registered") === "true";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,73 +48,86 @@ function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight">
-            Sign in to your account
-          </h2>
-        </div>
-
-        {error && (
-          <div className="rounded-md bg-red-50 p-4 mt-4">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
-        )}
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="-space-y-px rounded-md shadow-sm">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="relative block w-full rounded-t-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Email address"
-              />
+    <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="flex flex-col gap-2 items-center">
+          <h2 className="text-3xl font-bold">Sign in to your account</h2>
+          {isRegistered && (
+            <div className="bg-green-50 p-3 rounded-md text-green-700 text-sm">
+              Account created successfully! Please sign in.
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="relative block w-full rounded-b-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Password"
-              />
-            </div>
-          </div>
+          )}
+        </CardHeader>
 
-          <div>
-            <button
+        <CardBody>
+          {error && (
+            <div className="rounded-md bg-red-50 p-4 mb-4">
+              <div className="text-sm text-red-700">{error}</div>
+            </div>
+          )}
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Email address
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="Email address"
+                  fullWidth
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  placeholder="Password"
+                  fullWidth
+                />
+              </div>
+            </div>
+
+            <Button
               type="submit"
+              color="primary"
+              fullWidth
+              isLoading={isLoading}
               disabled={isLoading}
-              className="group relative flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-indigo-400"
             >
               {isLoading ? "Signing in..." : "Sign in"}
-            </button>
-          </div>
+            </Button>
+          </form>
+        </CardBody>
 
+        <CardFooter className="flex justify-center">
           <div className="text-sm text-center">
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-primary hover:text-primary-400"
             >
               Sign up
             </Link>
           </div>
-        </form>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
@@ -119,9 +136,11 @@ function LoginForm() {
 function LoginFallback() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 text-center">
-        <p>Loading login page...</p>
-      </div>
+      <Card className="w-full max-w-md">
+        <CardBody className="py-8">
+          <div className="text-center">Loading login page...</div>
+        </CardBody>
+      </Card>
     </div>
   );
 }

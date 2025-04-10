@@ -14,14 +14,20 @@ const userSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("Registration API route hit");
     await connectDB();
 
     const body = await req.json();
+    console.log("Registration request body:", {
+      ...body,
+      password: "[REDACTED]",
+    });
 
     // Validate request body
     const result = userSchema.safeParse(body);
 
     if (!result.success) {
+      console.log("Validation error:", result.error.errors);
       return NextResponse.json({ error: result.error.errors }, { status: 400 });
     }
 
@@ -31,6 +37,7 @@ export async function POST(req: NextRequest) {
     const existingUser = await UserModel.findOne({ email });
 
     if (existingUser) {
+      console.log("User already exists:", email);
       return NextResponse.json(
         { error: "User with this email already exists" },
         { status: 409 }
@@ -39,6 +46,7 @@ export async function POST(req: NextRequest) {
 
     // Hash password
     const hashedPassword = await hash(password, 10);
+    console.log("Password hashed successfully");
 
     // Create new user
     const user = await UserModel.create({
@@ -53,6 +61,8 @@ export async function POST(req: NextRequest) {
       discussionsStarted: 0,
       petitionsCreated: 0,
     });
+
+    console.log("User created successfully:", user._id);
 
     // Return the user without password
     const { password: _, ...userWithoutPassword } = user.toObject();
