@@ -4,6 +4,11 @@ import { compare } from "bcrypt";
 import connectDB from "./db/connect";
 import UserModel from "@/models/User";
 
+// This helps ensure the right URL is used in different environments
+const useSecureCookies =
+  process.env.NEXTAUTH_URL?.startsWith("https://") || process.env.VERCEL;
+const cookiePrefix = useSecureCookies ? "__Secure-" : "";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -60,6 +65,17 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
     error: "/login", // Error code passed in query string as ?error=
   },
+  cookies: {
+    sessionToken: {
+      name: `${cookiePrefix}next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+  },
   callbacks: {
     async jwt({ token, user }: any) {
       if (user) {
@@ -92,7 +108,6 @@ export const authOptions: NextAuthOptions = {
   // Ensure JWT is correctly configured
   jwt: {
     secret: process.env.NEXTAUTH_SECRET,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 };
 

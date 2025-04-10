@@ -27,6 +27,7 @@ function LoginForm() {
     const password = formData.get("password") as string;
 
     try {
+      console.log("Attempting sign in with credentials");
       const result = await signIn("credentials", {
         redirect: false,
         email,
@@ -34,14 +35,22 @@ function LoginForm() {
         callbackUrl,
       });
 
+      console.log("Sign in result:", {
+        ok: result?.ok,
+        error: result?.error,
+        status: result?.status,
+      });
+
       if (result?.error) {
         setError(result.error);
-      } else {
+      } else if (result?.ok) {
         router.push(callbackUrl);
+      } else {
+        setError("An unknown error occurred during sign in");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("An error occurred while logging in");
+      setError("An error occurred while logging in. Please try again.");
     } finally {
       setIsLoading(false);
     }
