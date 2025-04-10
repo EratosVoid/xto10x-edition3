@@ -167,7 +167,8 @@ export default function CreatePostPage() {
         <CardHeader className="flex flex-col">
           <h1 className="text-3xl font-bold mb-2">Create a New Post</h1>
           <p className="text-default-500 mb-4">
-            Share something with your {session?.user?.locality} community
+            Share something with your {(session?.user as any)?.locality}{" "}
+            community
           </p>
 
           {error && (
@@ -215,7 +216,7 @@ export default function CreatePostPage() {
                   fullWidth
                 >
                   {postTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem key={type.value} textValue={type.value}>
                       {type.label}
                     </SelectItem>
                   ))}
@@ -239,7 +240,7 @@ export default function CreatePostPage() {
                   fullWidth
                 >
                   {categories.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
+                    <SelectItem key={category.value} textValue={category.value}>
                       {category.label}
                     </SelectItem>
                   ))}

@@ -28,7 +28,7 @@ const priorities = [
   { value: "high", label: "High Priority", color: "danger" },
 ];
 
-export default function EditPostPage({ params }: { params: { id: string } }) {
+export default function EditPostPage({ params }: any) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,7 +83,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
       const post = await response.json();
 
       // Check if current user is the post author
-      if (post.createdBy._id !== session?.user?.id) {
+      if (post.createdBy._id !== (session?.user as any)?.id) {
         throw new Error("You can only edit your own posts");
       }
 
@@ -269,7 +269,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
                 fullWidth
               >
                 {categories.map((category) => (
-                  <SelectItem key={category.value} value={category.value}>
+                  <SelectItem key={category.value} textValue={category.value}>
                     {category.label}
                   </SelectItem>
                 ))}

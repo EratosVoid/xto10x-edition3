@@ -25,11 +25,11 @@ export default function OfflinePage() {
             </svg>
           </div>
           <h1 className="text-2xl font-semibold text-gray-800">
-            You're Offline
+            You&apos;re Offline
           </h1>
           <p className="text-center text-gray-600">
-            It seems you've lost your internet connection. Please check your
-            network and try again.
+            It seems you&apos;ve lost your internet connection. Please check
+            your network and try again.
           </p>
           <Button
             color="primary"

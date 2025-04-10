@@ -30,7 +30,7 @@ const formatDate = (dateString: string) => {
   });
 };
 
-export default function PostDetailPage({ params }: { params: { id: string } }) {
+export default function PostDetailPage({ params }: any) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [post, setPost] = useState<any>(null);
@@ -158,11 +158,12 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
   };
 
   // Check if current user is the post author
-  const isAuthor = post?.createdBy?._id === session?.user?.id;
+  const isAuthor = post?.createdBy?._id === (session?.user as any)?.id;
 
   // Check if user is moderator or admin
   const isModeratorOrAdmin =
-    session?.user?.role === "moderator" || session?.user?.role === "admin";
+    (session?.user as any)?.role === "moderator" ||
+    (session?.user as any)?.role === "admin";
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">

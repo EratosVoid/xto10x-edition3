@@ -153,7 +153,7 @@ export default function PostsPage() {
         <div>
           <h1 className="text-4xl font-bold mb-2">Community Posts</h1>
           <p className="text-default-500">
-            Posts from your {session?.user?.locality} community
+            Posts from your {(session?.user as any)?.locality} community
           </p>
         </div>
         <Button
@@ -184,7 +184,7 @@ export default function PostsPage() {
             className="sm:w-40"
           >
             {postTypes.map((type) => (
-              <SelectItem key={type.value} value={type.value}>
+              <SelectItem key={type.value} textValue={type.value}>
                 {type.label}
               </SelectItem>
             ))}

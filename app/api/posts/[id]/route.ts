@@ -6,10 +6,7 @@ import UserModel from "@/models/User";
 import mongoose from "mongoose";
 
 // GET /api/posts/[id] - Get a specific post, checking locality
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: any) {
   try {
     const postId = params.id;
 
@@ -62,10 +59,7 @@ export async function GET(
 }
 
 // PUT /api/posts/[id] - Update a post
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: any) {
   try {
     const postId = params.id;
 
@@ -123,10 +117,7 @@ export async function PUT(
 }
 
 // DELETE /api/posts/[id] - Delete a post
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: any) {
   try {
     const postId = params.id;
 
