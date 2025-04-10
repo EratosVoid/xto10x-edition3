@@ -13,6 +13,10 @@ export const siteConfig = {
       href: "/dashboard",
     },
     {
+      label: "Posts",
+      href: "/posts",
+    },
+    {
       label: "Events",
       href: "/events",
     },
@@ -33,6 +37,10 @@ export const siteConfig = {
     {
       label: "Dashboard",
       href: "/dashboard",
+    },
+    {
+      label: "Posts",
+      href: "/posts",
     },
     {
       label: "Profile",
