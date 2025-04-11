@@ -31,9 +31,9 @@ const PostSchema = new mongoose.Schema<Post>(
 );
 
 // Create indexes for better performance
-PostSchema.index({ locality: 1 });
+// PostSchema.index({ locality: 1 });
 PostSchema.index({ createdBy: 1 });
-PostSchema.index({ type: 1, locality: 1 });
-PostSchema.index({ locality: 1 });
+PostSchema.index({ type: 1 });
+// PostSchema.index({ locality: 1 });
 
 export default mongoose.models.Post || mongoose.model<Post>("Post", PostSchema);
