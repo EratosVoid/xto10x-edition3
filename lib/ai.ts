@@ -45,16 +45,31 @@ export async function summarizeText(
 /**
  * Answers a frequently asked question using Gemini AI
  * @param question - The user's question
+ * @param locality - The user's locality for context (optional)
  * @returns Promise containing the AI response
  */
-export async function answerFAQ(question: string): Promise<string> {
+export async function answerFAQ(
+  question: string,
+  locality: string = ""
+): Promise<string> {
   try {
     // Use gemini-flash model for FAQ answering as well
     const model = genAI.getGenerativeModel({ model: "gemini-flash" });
 
-    const prompt = `Answer the following question clearly and concisely:
-    
-    ${question}`;
+    let prompt = `You are an AI assistant for a community engagement platform called LocalVoice. 
+Users can create and participate in events, polls, petitions, and discussions with others in their locality.
+
+${locality ? `The user asking this question is from the locality of ${locality}.` : ""}
+
+Answer the following question clearly and concisely, providing specific information relevant to community engagement:
+
+${question}
+
+When answering:
+- Focus on practical advice about community engagement
+- If the question is about events, petitions, polls, or discussions, provide specific actionable tips
+- If the locality was provided, mention it in your answer when relevant
+- Keep your tone helpful and encouraging`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;

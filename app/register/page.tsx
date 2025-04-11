@@ -10,11 +10,11 @@ import { Select, SelectItem } from "@heroui/select";
 
 // List of localities for the select input
 const localities = [
-  { value: "Downtown", label: "Downtown" },
-  { value: "Eastside", label: "Eastside" },
-  { value: "Westside", label: "Westside" },
-  { value: "Northside", label: "Northside" },
-  { value: "Southside", label: "Southside" },
+  { value: "North Delhi", label: "North Delhi" },
+  { value: "East Delhi", label: "East Delhi" },
+  { value: "South Delhi", label: "South Delhi" },
+  { value: "West Delhi", label: "West Delhi" },
+  { value: "Central Delhi", label: "Central Delhi" },
 ];
 
 function RegisterForm() {

@@ -12,7 +12,7 @@ import { Divider } from "@heroui/divider";
 import { useSession } from "next-auth/react";
 
 // Simulated discussion data
-const dummyDiscussions = [
+const initialDiscussions = [
   {
     id: "1",
     title: "Traffic Safety Improvements on Oak Street",
@@ -21,7 +21,7 @@ const dummyDiscussions = [
     createdBy: {
       id: "user1",
       name: "Sarah Johnson",
-      avatar: "https://i.pravatar.cc/150?img=1",
+      initials: "SJ",
     },
     createdAt: "2023-07-15T08:24:00",
     category: "safety",
@@ -34,7 +34,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user2",
           name: "Mike Peterson",
-          avatar: "https://i.pravatar.cc/150?img=2",
+          initials: "MP",
         },
         createdAt: "2023-07-15T09:45:00",
         likes: 8,
@@ -46,7 +46,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user3",
           name: "Emily Davis",
-          avatar: "https://i.pravatar.cc/150?img=3",
+          initials: "ED",
         },
         createdAt: "2023-07-15T10:15:00",
         likes: 5,
@@ -58,7 +58,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user4",
           name: "Thomas Wilson",
-          avatar: "https://i.pravatar.cc/150?img=4",
+          initials: "TW",
         },
         createdAt: "2023-07-15T13:30:00",
         likes: 12,
@@ -75,7 +75,7 @@ const dummyDiscussions = [
     createdBy: {
       id: "user5",
       name: "Jennifer Adams",
-      avatar: "https://i.pravatar.cc/150?img=5",
+      initials: "JA",
     },
     createdAt: "2023-07-10T15:30:00",
     category: "events",
@@ -88,7 +88,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user6",
           name: "Robert Chen",
-          avatar: "https://i.pravatar.cc/150?img=6",
+          initials: "RC",
         },
         createdAt: "2023-07-10T16:45:00",
         likes: 19,
@@ -100,7 +100,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user7",
           name: "Amanda King",
-          avatar: "https://i.pravatar.cc/150?img=7",
+          initials: "AK",
         },
         createdAt: "2023-07-11T08:20:00",
         likes: 15,
@@ -117,7 +117,7 @@ const dummyDiscussions = [
     createdBy: {
       id: "user8",
       name: "David Martinez",
-      avatar: "https://i.pravatar.cc/150?img=8",
+      initials: "DM",
     },
     createdAt: "2023-07-05T11:20:00",
     category: "business",
@@ -129,7 +129,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user9",
           name: "Lisa Thompson",
-          avatar: "https://i.pravatar.cc/150?img=9",
+          initials: "LT",
         },
         createdAt: "2023-07-05T12:30:00",
         likes: 14,
@@ -141,7 +141,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user10",
           name: "James Wilson",
-          avatar: "https://i.pravatar.cc/150?img=10",
+          initials: "JW",
         },
         createdAt: "2023-07-05T13:15:00",
         likes: 8,
@@ -153,7 +153,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user11",
           name: "Karen Lewis",
-          avatar: "https://i.pravatar.cc/150?img=11",
+          initials: "KL",
         },
         createdAt: "2023-07-06T09:45:00",
         likes: 21,
@@ -170,7 +170,7 @@ const dummyDiscussions = [
     createdBy: {
       id: "user12",
       name: "Paul Harrison",
-      avatar: "https://i.pravatar.cc/150?img=12",
+      initials: "PH",
     },
     createdAt: "2023-07-08T10:00:00",
     category: "environment",
@@ -182,7 +182,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user13",
           name: "Michelle Patel",
-          avatar: "https://i.pravatar.cc/150?img=13",
+          initials: "MP",
         },
         createdAt: "2023-07-08T10:45:00",
         likes: 7,
@@ -193,7 +193,7 @@ const dummyDiscussions = [
         createdBy: {
           id: "user14",
           name: "Daniel Wright",
-          avatar: "https://i.pravatar.cc/150?img=14",
+          initials: "DW",
         },
         createdAt: "2023-07-08T11:30:00",
         likes: 3,
@@ -255,9 +255,10 @@ export default function DiscussionsPage() {
     null,
   );
   const [replyContent, setReplyContent] = useState("");
+  const [discussions, setDiscussions] = useState(initialDiscussions);
 
   // Filter discussions based on search and category
-  const filteredDiscussions = dummyDiscussions.filter((discussion) => {
+  const filteredDiscussions = discussions.filter((discussion) => {
     const matchesSearch =
       discussion.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       discussion.content.toLowerCase().includes(searchTerm.toLowerCase());
@@ -287,8 +288,33 @@ export default function DiscussionsPage() {
       return;
     }
 
-    // In a real app, this would post to an API
-    console.log(`Replying to discussion ${discussionId}: ${replyContent}`);
+    // Create new response object
+    const newResponse = {
+      id: `r${discussionId}-${new Date().getTime()}`,
+      content: replyContent,
+      createdBy: {
+        id: "current-user",
+        name: session?.user?.name || "You",
+        initials: session?.user?.name
+          ? session.user.name.substring(0, 2).toUpperCase()
+          : "YO",
+      },
+      createdAt: new Date().toISOString(),
+      likes: 0,
+    };
+
+    // Update discussions with the new response
+    setDiscussions(
+      discussions.map((discussion) => {
+        if (discussion.id === discussionId) {
+          return {
+            ...discussion,
+            responses: [...discussion.responses, newResponse],
+          };
+        }
+        return discussion;
+      })
+    );
 
     // Clear the reply input
     setReplyContent("");
@@ -354,6 +380,8 @@ export default function DiscussionsPage() {
                     <div className="flex gap-3">
                       <Avatar
                         name={discussion.createdBy.name}
+                        showFallback
+                        fallback={discussion.createdBy.initials}
                         size="sm"
                         src={discussion.createdBy.avatar}
                       />
@@ -404,6 +432,8 @@ export default function DiscussionsPage() {
                           <div className="flex gap-3 items-start">
                             <Avatar
                               name={response.createdBy.name}
+                              showFallback
+                              fallback={response.createdBy.initials}
                               size="sm"
                               src={response.createdBy.avatar}
                             />
@@ -444,11 +474,11 @@ export default function DiscussionsPage() {
                           <div className="flex gap-3 items-start">
                             <Avatar
                               name={session?.user?.name || "You"}
+                              showFallback
+                              fallback={(
+                                session?.user?.name?.substring(0, 2) || "YO"
+                              ).toUpperCase()}
                               size="sm"
-                              src={
-                                session?.user?.image ||
-                                "https://i.pravatar.cc/150?img=0"
-                              }
                             />
                             <div className="flex-1">
                               <Textarea

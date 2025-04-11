@@ -18,7 +18,6 @@ import { useSession } from "next-auth/react";
 // Format date helper
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -28,10 +27,21 @@ const formatDate = (dateString: string) => {
   });
 };
 
+// Get initials from name
+const getInitials = (name: string): string => {
+  if (!name) return "??";
+
+  const parts = name.split(" ");
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
 interface User {
   _id: string;
   name: string;
-  image: string;
 }
 
 interface Discussion {
@@ -57,16 +67,20 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
   const [message, setMessage] = useState("");
   const [replyingTo, setReplyingTo] = useState<Discussion | null>(null);
   const [editingDiscussion, setEditingDiscussion] = useState<Discussion | null>(
-    null,
+    null
   );
   const [submitting, setSubmitting] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [discussionToDelete, setDiscussionToDelete] =
     useState<Discussion | null>(null);
 
-  // Fetch discussions
+  // Fetch discussions & refresh every 60 seconds
   useEffect(() => {
+    const interval = setInterval(() => {
+      fetchDiscussions();
+    }, 60000);
     fetchDiscussions();
+    return () => clearInterval(interval);
   }, [postId]);
 
   const fetchDiscussions = async () => {
@@ -78,12 +92,10 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-
         throw new Error(errorData.error || "Failed to fetch discussions");
       }
 
       const data = await response.json();
-
       setDiscussions(data);
     } catch (err: any) {
       console.error("Error fetching discussions:", err);
@@ -101,33 +113,40 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
 
     try {
       setSubmitting(true);
+      setError("");
 
+      // Prepare the request body
+      const requestBody = {
+        content: message,
+        ...(replyingTo && { parentId: replyingTo._id }),
+      };
+
+      // Send the API request
       const response = await fetch(`/api/posts/${postId}/discussions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          content: message,
-          ...(replyingTo && { parentId: replyingTo._id }),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-
         throw new Error(errorData.error || "Failed to post discussion");
       }
 
+      // Get the new discussion from the server
       const newDiscussion = await response.json();
 
-      if (replyingTo) {
-        setReplyingTo(null);
-      }
-
-      // Add to discussions
+      // Add the new discussion to the list
       setDiscussions([newDiscussion, ...discussions]);
+
+      // Reset form state
       setMessage("");
+      setReplyingTo(null);
+
+      // Fetch all discussions to ensure we have the latest data
+      fetchDiscussions();
     } catch (err: any) {
       console.error("Error posting discussion:", err);
       setError(err.message || "Failed to post discussion");
@@ -144,6 +163,7 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
 
     try {
       setSubmitting(true);
+      setError("");
 
       const response = await fetch(
         `/api/posts/${postId}/discussions/${editingDiscussion._id}`,
@@ -155,24 +175,24 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
           body: JSON.stringify({
             content: message,
           }),
-        },
+        }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-
         throw new Error(errorData.error || "Failed to update discussion");
       }
 
       const updatedDiscussion = await response.json();
 
-      // Update in discussions
+      // Update the discussion in the state
       setDiscussions(
         discussions.map((d) =>
-          d._id === updatedDiscussion._id ? updatedDiscussion : d,
-        ),
+          d._id === updatedDiscussion._id ? updatedDiscussion : d
+        )
       );
 
+      // Reset form
       setMessage("");
       setEditingDiscussion(null);
     } catch (err: any) {
@@ -188,26 +208,29 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
     if (!discussionToDelete) return;
 
     try {
+      setSubmitting(true);
+      setError("");
+      onClose(); // Close modal first
+
       const response = await fetch(
         `/api/posts/${postId}/discussions/${discussionToDelete._id}`,
         {
           method: "DELETE",
-        },
+        }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-
         throw new Error(errorData.error || "Failed to delete discussion");
       }
 
-      // Refresh discussions
+      // Refresh discussions to get the latest state
       fetchDiscussions();
-      onClose();
     } catch (err: any) {
       console.error("Error deleting discussion:", err);
       setError(err.message || "Failed to delete discussion");
     } finally {
+      setSubmitting(false);
       setDiscussionToDelete(null);
     }
   };
@@ -260,7 +283,6 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
 
     // Group replies by parent ID
     const replyMap: Record<string, Discussion[]> = {};
-
     replies.forEach((reply) => {
       if (reply.parentId) {
         if (!replyMap[reply.parentId]) {
@@ -275,179 +297,217 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
 
   const { topLevelDiscussions, replyMap } = organizeDiscussions(discussions);
 
+  // Render a discussion item
   const renderDiscussion = (discussion: Discussion, isReply = false) => {
-    const replies = replyMap[discussion._id] || [];
+    if (discussion.isDeleted) {
+      return (
+        <div
+          key={discussion._id}
+          className={`${
+            isReply ? "ml-12 mt-2" : "mt-4"
+          } p-3 bg-default-50 rounded-lg`}
+        >
+          <p className="text-default-400 italic">
+            This comment has been deleted.
+          </p>
+        </div>
+      );
+    }
 
     return (
-      <div key={discussion._id} className={`mb-4 ${isReply ? "ml-8" : ""}`}>
+      <div
+        key={discussion._id}
+        className={`${isReply ? "ml-12 mt-2" : "mt-4"} p-4 bg-default-50 rounded-lg`}
+      >
         <div className="flex gap-3">
           <Avatar
-            name={discussion.createdBy?.name || "User"}
+            name={discussion.createdBy.name}
+            showFallback
+            fallback={getInitials(discussion.createdBy.name)}
             size="sm"
-            src={
-              discussion.createdBy?.image || "https://i.pravatar.cc/150?img=1"
-            }
           />
           <div className="flex-1">
-            <div className="flex justify-between items-center mb-1">
-              <div>
-                <span className="font-medium">
-                  {discussion.createdBy?.name}
-                </span>
-                <span className="text-xs text-gray-500 ml-2">
-                  {formatDate(discussion.createdAt)}
-                </span>
-              </div>
-              {canModifyDiscussion(discussion) && !discussion.isDeleted && (
-                <div className="flex gap-2">
+            <div className="flex justify-between">
+              <p className="font-semibold text-foreground">
+                {discussion.createdBy.name}
+              </p>
+              <p className="text-xs text-default-400">
+                {formatDate(discussion.createdAt)}
+              </p>
+            </div>
+            <p className="mt-1 text-default-700">{discussion.content}</p>
+            <div className="flex gap-2 mt-2">
+              <Button
+                size="sm"
+                variant="light"
+                onPress={() => startReplying(discussion)}
+              >
+                Reply
+              </Button>
+              {canModifyDiscussion(discussion) && (
+                <>
                   <Button
-                    color="primary"
                     size="sm"
-                    variant="flat"
-                    onClick={() => startEditing(discussion)}
+                    variant="light"
+                    onPress={() => startEditing(discussion)}
                   >
                     Edit
                   </Button>
                   <Button
-                    color="danger"
                     size="sm"
-                    variant="flat"
-                    onClick={() => openDeleteModal(discussion)}
+                    variant="light"
+                    color="danger"
+                    onPress={() => openDeleteModal(discussion)}
                   >
                     Delete
                   </Button>
-                </div>
+                </>
               )}
             </div>
-            <div
-              className={`mb-2 ${discussion.isDeleted ? "italic text-gray-500" : ""}`}
-            >
-              {discussion.content}
-            </div>
-            <Button
-              color="default"
-              size="sm"
-              variant="flat"
-              onClick={() => startReplying(discussion)}
-            >
-              Reply
-            </Button>
           </div>
         </div>
-
-        {/* Render replies */}
-        {replies.length > 0 && (
-          <div className="mt-3 pl-6 border-l-2 border-gray-200">
-            {replies.map((reply) => renderDiscussion(reply, true))}
-          </div>
-        )}
       </div>
     );
   };
 
   return (
     <div className="mt-8">
-      <Card>
+      <h3 className="text-xl font-semibold mb-4">Discussion</h3>
+
+      {/* Comment input */}
+      <Card className="mb-6">
         <CardBody>
-          <h2 className="text-xl font-bold mb-4">Discussion</h2>
-
-          {error && (
-            <div className="bg-danger-50 p-4 rounded-lg mb-4 text-danger">
-              {error}
-            </div>
-          )}
-
-          {/* Comment Form */}
-          <form
-            className="mb-6"
-            onSubmit={editingDiscussion ? handleEditSubmit : handleSubmit}
-          >
-            <div className="mb-2">
-              {replyingTo && (
-                <div className="text-sm text-gray-600 mb-2">
-                  Replying to{" "}
-                  <span className="font-medium">
-                    {replyingTo.createdBy.name}
-                  </span>
-                  <Button
-                    className="ml-2"
-                    color="danger"
-                    size="sm"
-                    variant="flat"
-                    onClick={cancelAction}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-
-              {editingDiscussion && (
-                <div className="text-sm text-gray-600 mb-2">
-                  Editing comment
-                  <Button
-                    className="ml-2"
-                    color="danger"
-                    size="sm"
-                    variant="flat"
-                    onClick={cancelAction}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-
-              <Textarea
-                fullWidth
-                minRows={3}
-                placeholder="Share your thoughts..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
+          {error && <p className="text-danger mb-4">{error}</p>}
+          <form onSubmit={editingDiscussion ? handleEditSubmit : handleSubmit}>
+            <div className="flex gap-3">
+              <Avatar
+                name={session?.user?.name || "Guest"}
+                showFallback
+                fallback={getInitials(session?.user?.name || "Guest User")}
+                size="sm"
               />
+              <div className="flex-1">
+                {replyingTo && (
+                  <div className="mb-2 text-sm text-default-500">
+                    Replying to {replyingTo.createdBy.name}&apos;s comment
+                    <Button
+                      size="sm"
+                      variant="light"
+                      className="ml-2"
+                      onPress={cancelAction}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+                {editingDiscussion && (
+                  <div className="mb-2 text-sm text-default-500">
+                    Editing your comment
+                    <Button
+                      size="sm"
+                      variant="light"
+                      className="ml-2"
+                      onPress={cancelAction}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+                <Textarea
+                  placeholder={
+                    replyingTo
+                      ? `Reply to ${replyingTo.createdBy.name}...`
+                      : editingDiscussion
+                        ? "Edit your comment..."
+                        : "Add a comment..."
+                  }
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={3}
+                  disabled={!session?.user}
+                />
+                <div className="flex justify-end mt-2">
+                  <Button
+                    color="primary"
+                    type="submit"
+                    isDisabled={!message.trim() || submitting || !session?.user}
+                    isLoading={submitting}
+                  >
+                    {editingDiscussion
+                      ? "Save Edit"
+                      : replyingTo
+                        ? "Post Reply"
+                        : "Post Comment"}
+                  </Button>
+                </div>
+              </div>
             </div>
-            <Button
-              color="primary"
-              disabled={submitting || !message.trim()}
-              isLoading={submitting}
-              type="submit"
-            >
-              {editingDiscussion ? "Update" : "Post"}
-            </Button>
           </form>
 
-          <Divider className="my-4" />
-
-          {/* Discussions List */}
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Spinner />
-            </div>
-          ) : discussions.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">
-              Be the first to start the discussion!
-            </p>
-          ) : (
-            <div>
-              {topLevelDiscussions.map((discussion) =>
-                renderDiscussion(discussion),
-              )}
+          {!session?.user && (
+            <div className="text-center mt-4 text-default-500">
+              Please sign in to participate in discussions.
             </div>
           )}
         </CardBody>
       </Card>
 
+      {/* Comments List */}
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <Spinner />
+        </div>
+      ) : discussions.length === 0 ? (
+        <Card>
+          <CardBody>
+            <p className="text-center text-default-500 py-6">
+              No comments yet. Be the first to start the discussion!
+            </p>
+          </CardBody>
+        </Card>
+      ) : (
+        <div>
+          {discussions
+            .filter((discussion) => !discussion.parentId)
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            )
+            .map((discussion) => (
+              <div key={discussion._id} className="flex w-full flex-col">
+                {renderDiscussion(discussion)}
+                {/* Find and render all replies to this discussion */}
+                <div className="ml-12">
+                  {discussions
+                    .filter(
+                      (reply) => (reply.parentId as any)?._id === discussion._id
+                    )
+                    .sort(
+                      (a, b) =>
+                        new Date(a.createdAt).getTime() -
+                        new Date(b.createdAt).getTime()
+                    )
+                    .map((reply) => renderDiscussion(reply, true))}
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalContent>
-          <ModalHeader>Delete Comment</ModalHeader>
+          <ModalHeader>Confirm Deletion</ModalHeader>
           <ModalBody>
             Are you sure you want to delete this comment? This action cannot be
             undone.
           </ModalBody>
           <ModalFooter>
-            <Button variant="flat" onClick={onClose}>
+            <Button variant="flat" onPress={onClose}>
               Cancel
             </Button>
-            <Button color="danger" onClick={handleDelete}>
+            <Button color="danger" onPress={handleDelete}>
               Delete
             </Button>
           </ModalFooter>

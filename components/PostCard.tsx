@@ -11,6 +11,18 @@ const priorityColors: Record<string, "success" | "warning" | "danger"> = {
   high: "danger",
 };
 
+// Get initials from name
+const getInitials = (name: string): string => {
+  if (!name) return "??";
+
+  const parts = name.split(" ");
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
 // Format date
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -71,6 +83,8 @@ export default function PostCard({
             <Avatar
               className="border-2 border-primary"
               name={post.createdBy?.name || "User"}
+              showFallback
+              fallback={getInitials(post.createdBy?.name || "User")}
               size="sm"
               src={post.createdBy?.image || "https://i.pravatar.cc/150?img=1"}
             />

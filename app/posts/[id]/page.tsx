@@ -18,8 +18,19 @@ import {
 import { useDisclosure } from "@heroui/modal";
 import { Divider } from "@heroui/divider";
 import { use } from "react";
+import DiscussionThread from "../../../components/DiscussionThread";
 
-import DiscussionThread from "../components/DiscussionThread";
+// Get initials from name
+const getInitials = (name: string): string => {
+  if (!name) return "??";
+
+  const parts = name.split(" ");
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 // Format date
 const formatDate = (dateString: string) => {
@@ -275,8 +286,8 @@ export default function PostDetailPage({ params }: PageProps) {
       {post && (
         <>
           <Card className="w-full mb-6">
-            <CardHeader className="flex flex-col gap-2">
-              <div className="flex justify-between items-start">
+            <CardHeader className="flex flex-col gap-2 px-10">
+              <div className="flex justify-between items-start w-full pt-4">
                 <div>
                   <h1 className="text-3xl font-bold">{post.title}</h1>
                   <div className="flex items-center gap-2 mt-2">
@@ -297,13 +308,12 @@ export default function PostDetailPage({ params }: PageProps) {
                     {isAuthor && (
                       <Button
                         color="primary"
-                        variant="flat"
-                        onClick={() => router.push(`/posts/${post._id}/edit`)}
+                        onPress={() => router.push(`/posts/${post._id}/edit`)}
                       >
                         Edit
                       </Button>
                     )}
-                    <Button color="danger" variant="flat" onClick={onOpen}>
+                    <Button variant="flat" color="danger" onPress={onOpen}>
                       Delete
                     </Button>
                   </div>
@@ -312,26 +322,25 @@ export default function PostDetailPage({ params }: PageProps) {
 
               <Divider className="my-2" />
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4 mb-6 mr-auto">
                 <Avatar
                   name={post.createdBy?.name || "User"}
-                  size="sm"
-                  src={
-                    post.createdBy?.image || "https://i.pravatar.cc/150?img=1"
-                  }
+                  showFallback
+                  fallback={getInitials(post.createdBy?.name || "User")}
+                  size="lg"
                 />
                 <div>
-                  <div className="text-small font-medium">
+                  <p className="font-semibold text-xl">
                     {post.createdBy?.name}
-                  </div>
-                  <div className="text-tiny text-default-500">
+                  </p>
+                  <p className="text-default-500">
                     Posted on {formatDate(post.createdAt)}
-                  </div>
+                  </p>
                 </div>
               </div>
             </CardHeader>
 
-            <CardBody>
+            <CardBody className="px-10">
               <div className="prose max-w-none">
                 <p className="whitespace-pre-line">{post.description}</p>
               </div>
@@ -346,7 +355,7 @@ export default function PostDetailPage({ params }: PageProps) {
               </div>
             </CardBody>
 
-            <CardFooter>
+            <CardFooter className="px-10">
               <Button variant="flat" onClick={() => router.push("/posts")}>
                 Back to Posts
               </Button>

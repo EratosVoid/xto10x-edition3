@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site";
 
 export default function Footer() {
   return (
-    <footer className="w-full py-8 px-6 bg-content1">
+    <footer className="w-full py-8 px-6 bg-content1 mt-32">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="flex flex-col gap-2">
