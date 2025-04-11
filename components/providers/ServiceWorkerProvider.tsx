@@ -5,14 +5,13 @@ import { useEffect } from "react";
 export default function ServiceWorkerProvider() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      console.log("Service Worker is supported");
-      console.log(navigator.serviceWorker);
+      // Register service worker
       navigator.serviceWorker
-        .register("/sw.js")
+        .register("/sw.js", { updateViaCache: "none" })
         .then((registration) => {
           console.log(
             "Service Worker registered with scope:",
-            registration.scope,
+            registration.scope
           );
         })
         .catch((error) => {

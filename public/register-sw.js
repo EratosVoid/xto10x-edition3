@@ -1,30 +1,12 @@
 // Register service worker for offline support
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
-    // Check for any manifest issues
-    fetch("/manifest.json")
-      .then((response) => {
-        if (!response.ok) {
-          console.error("Manifest fetch failed, clearing caches");
-          clearCaches();
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching manifest:", error);
+    // Simple cache clearing
+    if (window.caches) {
+      caches.keys().then((keys) => {
+        keys.forEach((key) => caches.delete(key));
       });
-
-    // Clear caches if needed, for debugging purposes
-    const clearCaches = async () => {
-      if (window.caches) {
-        try {
-          const keys = await caches.keys();
-          await Promise.all(keys.map((key) => caches.delete(key)));
-          console.log("All caches cleared");
-        } catch (error) {
-          console.error("Error clearing caches:", error);
-        }
-      }
-    };
+    }
 
     // Register the service worker
     navigator.serviceWorker
