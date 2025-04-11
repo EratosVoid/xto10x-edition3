@@ -60,8 +60,8 @@ export default function DashboardPage() {
             <Button
               color="secondary"
               variant="flat"
-              className="mt-4"
-              onClick={() => router.push("/events/create")}
+              className="mt-4 bg-foreground-50"
+              onPress={() => router.push("/posts/create?type=event")}
             >
               Create New Event
             </Button>
@@ -126,7 +126,7 @@ export default function DashboardPage() {
                 <div className="flex justify-center mt-4">
                   <Button
                     color="primary"
-                    onClick={() => router.push("/events/create")}
+                    onClick={() => router.push("/posts/create?type=event")}
                   >
                     Create an Event
                   </Button>
@@ -153,7 +153,7 @@ export default function DashboardPage() {
                 <div className="flex justify-center mt-4">
                   <Button
                     color="primary"
-                    onClick={() => router.push("/posts/create")}
+                    onClick={() => router.push("/posts/create?type=general")}
                   >
                     Create a Post
                   </Button>
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                 <div className="flex justify-center mt-4">
                   <Button
                     color="primary"
-                    onClick={() => router.push("/polls/create")}
+                    onClick={() => router.push("/posts/create?type=poll")}
                   >
                     Create a Poll
                   </Button>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
                 color="primary"
                 variant="flat"
                 className="w-full"
-                onClick={() => router.push("/posts/create")}
+                onClick={() => router.push("/posts/create?type=general")}
               >
                 Start Writing
               </Button>
@@ -222,7 +222,7 @@ export default function DashboardPage() {
                 color="primary"
                 variant="flat"
                 className="w-full"
-                onClick={() => router.push("/petitions/create")}
+                onClick={() => router.push("/posts/create?type=petition")}
               >
                 Create Petition
               </Button>

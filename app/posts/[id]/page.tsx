@@ -17,6 +17,7 @@ import {
 } from "@heroui/modal";
 import { useDisclosure } from "@heroui/modal";
 import { Divider } from "@heroui/divider";
+import { use } from "react";
 
 // Format date
 const formatDate = (dateString: string) => {
@@ -30,7 +31,11 @@ const formatDate = (dateString: string) => {
   });
 };
 
-export default function PostDetailPage({ params }: any) {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function PostDetailPage({ params }: PageProps) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [post, setPost] = useState<any>(null);
@@ -38,25 +43,26 @@ export default function PostDetailPage({ params }: any) {
   const [error, setError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const resolvedParams = use(params);
 
   // Fetch post data
   useEffect(() => {
     if (status === "loading") return;
 
     if (status === "unauthenticated") {
-      router.push(`/login?callbackUrl=/posts/${params.id}`);
+      router.push(`/login?callbackUrl=/posts/${resolvedParams.id}`);
       return;
     }
 
     fetchPost();
-  }, [status, params.id]);
+  }, [status, resolvedParams.id]);
 
   const fetchPost = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`/api/posts/${params.id}`);
+      const response = await fetch(`/api/posts/${resolvedParams.id}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -83,7 +89,7 @@ export default function PostDetailPage({ params }: any) {
     try {
       setIsDeleting(true);
 
-      const response = await fetch(`/api/posts/${params.id}`, {
+      const response = await fetch(`/api/posts/${resolvedParams.id}`, {
         method: "DELETE",
       });
 
@@ -133,24 +139,11 @@ export default function PostDetailPage({ params }: any) {
     );
   }
 
-  // Get category color
-  const getCategoryColor = (category: string) => {
-    const categoryColors: Record<string, string> = {
-      community: "primary",
-      events: "success",
-      announcements: "warning",
-      help: "danger",
-      discussion: "secondary",
-    };
-
-    return categoryColors[category] || "default";
-  };
-
   // Get priority color
   const getPriorityColor = (priority: string) => {
     const priorityColors: Record<string, string> = {
-      low: "default",
-      medium: "primary",
+      low: "success",
+      medium: "warning",
       high: "danger",
     };
 
@@ -174,12 +167,6 @@ export default function PostDetailPage({ params }: any) {
               <div>
                 <h1 className="text-3xl font-bold">{post.title}</h1>
                 <div className="flex items-center gap-2 mt-2">
-                  <Chip
-                    color={getCategoryColor(post.category) as any}
-                    variant="flat"
-                  >
-                    {post.category}
-                  </Chip>
                   <Chip color="default" variant="flat">
                     {post.type}
                   </Chip>
@@ -248,14 +235,10 @@ export default function PostDetailPage({ params }: any) {
       {/* Delete Confirmation Modal */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            Confirm Deletion
-          </ModalHeader>
+          <ModalHeader>Delete Post</ModalHeader>
           <ModalBody>
-            <p>
-              Are you sure you want to delete this post? This action cannot be
-              undone.
-            </p>
+            Are you sure you want to delete this post? This action cannot be
+            undone.
           </ModalBody>
           <ModalFooter>
             <Button variant="flat" onClick={onClose} disabled={isDeleting}>
@@ -265,7 +248,6 @@ export default function PostDetailPage({ params }: any) {
               color="danger"
               onClick={handleDelete}
               isLoading={isDeleting}
-              disabled={isDeleting}
             >
               Delete
             </Button>

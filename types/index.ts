@@ -31,7 +31,6 @@ export interface Post {
   summarizedDescription?: string;
   locality: string;
   priority: "low" | "medium" | "high";
-  category: string;
   createdBy: ObjectId; // User ID
   pollId?: ObjectId;
   eventId?: ObjectId;
@@ -44,6 +43,7 @@ export interface Event {
   _id?: string;
   postId: ObjectId;
   startDate: Date;
+  endDate: Date;
   duration: number; // in minutes
   location: string;
   organizer: ObjectId; // User ID

@@ -9,6 +9,7 @@ const EventSchema = new mongoose.Schema<Event>(
       required: true,
     },
     startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
     duration: { type: Number, required: true }, // in minutes
     location: { type: String, required: true },
     organizer: {

@@ -17,7 +17,6 @@ const PostSchema = new mongoose.Schema<Post>(
       enum: ["low", "medium", "high"],
       default: "medium",
     },
-    category: { type: String, required: true },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -34,6 +33,6 @@ const PostSchema = new mongoose.Schema<Post>(
 PostSchema.index({ locality: 1 });
 PostSchema.index({ createdBy: 1 });
 PostSchema.index({ type: 1, locality: 1 });
-PostSchema.index({ category: 1, locality: 1 });
+PostSchema.index({ locality: 1 });
 
 export default mongoose.models.Post || mongoose.model<Post>("Post", PostSchema);

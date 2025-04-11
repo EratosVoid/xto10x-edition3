@@ -87,10 +87,10 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const body = await req.json();
-    const { title, description, type, category, priority = "medium" } = body;
+    const { title, description, type, priority = "medium" } = body;
 
     // Validate required fields
-    if (!title || !description || !type || !category) {
+    if (!title || !description || !type) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -108,7 +108,6 @@ export async function POST(req: NextRequest) {
       title,
       description,
       type,
-      category,
       priority,
       locality: user.locality,
       createdBy: token.id,
