@@ -276,7 +276,7 @@ export default function PostDetailPage({ params }: PageProps) {
             <Button
               color="primary"
               isDisabled={post.petitionId?.supporters?.some(
-                (supporter: any) => supporter._id === (session?.user as any)?.id
+                (supporter: any) => supporter === (session?.user as any)?.id
               )}
               onClick={async () => {
                 if (!session) {
@@ -305,7 +305,7 @@ export default function PostDetailPage({ params }: PageProps) {
               }}
             >
               {post.petitionId?.supporters?.some(
-                (supporter: any) => supporter._id === (session?.user as any)?.id
+                (supporter: any) => supporter === (session?.user as any)?.id
               )
                 ? "Already Signed"
                 : "Sign Petition"}

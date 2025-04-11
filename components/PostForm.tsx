@@ -8,11 +8,11 @@ import { Select, SelectItem } from "@heroui/select";
 
 // Post types
 const postTypes = [
-  { value: "general", label: "General" },
-  { value: "event", label: "Event" },
-  { value: "poll", label: "Poll" },
-  { value: "petition", label: "Petition" },
-  { value: "announcement", label: "Announcement" },
+  { value: "general", label: "General", icon: "📝" },
+  { value: "event", label: "Event", icon: "🗓️" },
+  { value: "poll", label: "Poll", icon: "📊" },
+  { value: "petition", label: "Petition", icon: "✍️" },
+  { value: "announcement", label: "Announcement", icon: "📢" },
 ];
 
 // Priority options
@@ -20,6 +20,20 @@ const priorities = [
   { value: "low", label: "Low Priority", color: "success" },
   { value: "medium", label: "Medium Priority", color: "warning" },
   { value: "high", label: "High Priority", color: "danger" },
+];
+
+// Department options for petitions
+const departments = [
+  { value: "cityDevelopment", label: "City Development Department" },
+  { value: "publicWorks", label: "Public Works Department" },
+  { value: "parks", label: "Parks and Recreation Department" },
+  { value: "transportation", label: "Transportation Department" },
+  { value: "police", label: "Police Department" },
+  { value: "health", label: "Health Department" },
+  { value: "education", label: "Education Department" },
+  { value: "housing", label: "Housing Department" },
+  { value: "environment", label: "Environmental Protection Department" },
+  { value: "other", label: "Other (Please specify in description)" },
 ];
 
 export interface PostFormData {
@@ -61,6 +75,12 @@ function getInitialTypeFromUrl() {
 
   return null;
 }
+
+// Helper function to get icon for post type
+const getTypeIcon = (type: string): string => {
+  const postType = postTypes.find((pt) => pt.value === type);
+  return postType?.icon || "📝";
+};
 
 export default function PostForm({
   initialData = {
@@ -116,6 +136,11 @@ export default function PostForm({
     if (initialData && !typeFromUrl) {
       setFormData(initialData);
       setSelectedType(initialData.type || "general");
+    } else {
+      if (typeFromUrl) {
+        setSelectedType(typeFromUrl);
+        setFormData((prev) => ({ ...prev, type: typeFromUrl }));
+      }
     }
   }, [initialData, typeFromUrl]);
 
@@ -249,7 +274,7 @@ export default function PostForm({
     // Validate Petition fields
     if (formData.type === "petition") {
       if (!formData.target?.trim()) {
-        errors.target = "Target is required";
+        errors.target = "Please select a department";
         isValid = false;
       }
       if (!formData.goal || formData.goal <= 0) {
@@ -288,7 +313,10 @@ export default function PostForm({
     <Card className="w-full">
       <CardHeader className="flex flex-col">
         <h1 className="text-3xl font-bold mb-2">
-          {isEditing ? "Edit Post" : "Create Post"}
+          {getTypeIcon(formData.type)}{" "}
+          {isEditing
+            ? `Edit ${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)}`
+            : `Create ${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)}`}
         </h1>
 
         {error && (
@@ -352,7 +380,7 @@ export default function PostForm({
                 </label>
                 <Select
                   fullWidth
-                  defaultSelectedKeys={[selectedType]}
+                  selectedKeys={[selectedType]}
                   errorMessage={validationErrors.type}
                   id="type"
                   isInvalid={!!validationErrors.type}
@@ -363,7 +391,7 @@ export default function PostForm({
                 >
                   {postTypes.map((type) => (
                     <SelectItem key={type.value} textValue={type.value}>
-                      {type.label}
+                      {type.icon} {type.label}
                     </SelectItem>
                   ))}
                 </Select>
@@ -512,24 +540,32 @@ export default function PostForm({
             <div className="border p-4 rounded-lg">
               <h3 className="text-lg font-semibold mb-4">Petition Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Target */}
+                {/* Target Department */}
                 <div>
                   <label
                     className="block text-sm font-medium mb-1"
                     htmlFor="target"
                   >
-                    Target <span className="text-danger">*</span>
+                    Which department should address this issue?{" "}
+                    <span className="text-danger">*</span>
                   </label>
-                  <Input
+                  <Select
                     fullWidth
                     errorMessage={validationErrors.target}
                     id="target"
                     isInvalid={!!validationErrors.target}
                     name="target"
-                    placeholder="Who is this petition targeting?"
-                    value={formData.target || ""}
+                    placeholder="Select department"
+                    size="lg"
+                    selectedKeys={formData.target ? [formData.target] : []}
                     onChange={handleChange}
-                  />
+                  >
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.value} textValue={dept.value}>
+                        {dept.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
                 </div>
 
                 {/* Goal */}
@@ -551,6 +587,10 @@ export default function PostForm({
                     value={formData.goal?.toString() || ""}
                     onChange={handleChange}
                   />
+                  <p className="text-xs mt-1 text-default-500">
+                    Note: The more signatures your petition receives, the more
+                    visibility it will gain with the targeted department.
+                  </p>
                 </div>
               </div>
             </div>
@@ -568,7 +608,9 @@ export default function PostForm({
           isLoading={isSubmitting}
           onClick={handleSubmit}
         >
-          {isEditing ? "Update Post" : "Create Post"}
+          {isEditing
+            ? `Update ${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)}`
+            : `Create ${formData.type.charAt(0).toUpperCase() + formData.type.slice(1)}`}
         </Button>
       </CardFooter>
     </Card>
