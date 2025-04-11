@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { z } from "zod";
+
 import connectDB from "@/lib/db/connect";
 import PostModel from "@/models/Post";
 import { summarizeText } from "@/lib/ai";
@@ -60,9 +61,10 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error fetching posts:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to fetch posts" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -103,13 +105,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { message: "Post created successfully", post },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error: any) {
     console.error("Error creating post:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to create post" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

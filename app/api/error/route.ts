@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[Error Logger Failed]", err);
+
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }

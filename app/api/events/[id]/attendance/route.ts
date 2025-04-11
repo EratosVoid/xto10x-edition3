@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import mongoose from "mongoose";
+
 import connectDB from "@/lib/db/connect";
 import EventModel from "@/models/Event";
 import UserModel from "@/models/User";
-import PostModel from "@/models/Post";
-import mongoose from "mongoose";
 
 // POST /api/events/[id]/attendance - Attend an event
 export async function POST(req: NextRequest, { params }: any) {
@@ -18,6 +18,7 @@ export async function POST(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -26,12 +27,14 @@ export async function POST(req: NextRequest, { params }: any) {
 
     // Get user
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Find event by ID
     const event = await EventModel.findById(eventId).populate("postId");
+
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
@@ -40,7 +43,7 @@ export async function POST(req: NextRequest, { params }: any) {
     if (event.postId.locality !== user.locality) {
       return NextResponse.json(
         { error: "You don't have access to this event" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest, { params }: any) {
     if (event.attendees.includes(token.id as any)) {
       return NextResponse.json(
         { error: "You're already attending this event" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -56,7 +59,7 @@ export async function POST(req: NextRequest, { params }: any) {
     const updatedEvent = await EventModel.findByIdAndUpdate(
       eventId,
       { $addToSet: { attendees: token.id } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     )
       .populate("organizer", "name image")
       .populate("attendees", "name image");
@@ -64,9 +67,10 @@ export async function POST(req: NextRequest, { params }: any) {
     return NextResponse.json(updatedEvent);
   } catch (error: any) {
     console.error("Error attending event:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to attend event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -83,6 +87,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -91,6 +96,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Find event by ID
     const event = await EventModel.findById(eventId);
+
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
@@ -99,7 +105,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!event.attendees.includes(token.id as any)) {
       return NextResponse.json(
         { error: "You're not attending this event" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -107,7 +113,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (event.organizer.toString() === token.id) {
       return NextResponse.json(
         { error: "As the organizer, you cannot leave your own event" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -115,7 +121,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     const updatedEvent = await EventModel.findByIdAndUpdate(
       eventId,
       { $pull: { attendees: token.id } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     )
       .populate("organizer", "name image")
       .populate("attendees", "name image");
@@ -123,9 +129,10 @@ export async function DELETE(req: NextRequest, { params }: any) {
     return NextResponse.json(updatedEvent);
   } catch (error: any) {
     console.error("Error leaving event:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to leave event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

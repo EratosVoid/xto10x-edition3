@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import { Notification } from "@/types";
 
 const NotificationSchema = new mongoose.Schema<Notification>(
@@ -15,7 +16,7 @@ const NotificationSchema = new mongoose.Schema<Notification>(
     message: { type: String, required: true },
     locality: { type: String, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Create indexes for better performance

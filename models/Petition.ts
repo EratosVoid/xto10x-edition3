@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import { Petition } from "@/types";
 
 const PetitionSchema = new mongoose.Schema<Petition>(
@@ -15,7 +16,7 @@ const PetitionSchema = new mongoose.Schema<Petition>(
     target: { type: String, required: true },
     goal: { type: Number, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Create indexes for better performance

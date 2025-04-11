@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcrypt";
 import { z } from "zod";
+
 import connectDB from "@/lib/db/connect";
 import UserModel from "@/models/User";
 
@@ -18,6 +19,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const body = await req.json();
+
     console.log("Registration request body:", {
       ...body,
       password: "[REDACTED]",
@@ -28,6 +30,7 @@ export async function POST(req: NextRequest) {
 
     if (!result.success) {
       console.log("Validation error:", result.error.errors);
+
       return NextResponse.json({ error: result.error.errors }, { status: 400 });
     }
 
@@ -38,14 +41,16 @@ export async function POST(req: NextRequest) {
 
     if (existingUser) {
       console.log("User already exists:", email);
+
       return NextResponse.json(
         { error: "User with this email already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
     // Hash password
     const hashedPassword = await hash(password, 10);
+
     console.log("Password hashed successfully");
 
     // Create new user
@@ -69,13 +74,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { message: "User created successfully", user: userWithoutPassword },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error: any) {
     console.error("Error creating user:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to create user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

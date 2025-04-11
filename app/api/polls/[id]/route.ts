@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import mongoose from "mongoose";
+
 import connectDB from "@/lib/db/connect";
 import PollModel from "@/models/Poll";
 import UserModel from "@/models/User";
 import PostModel from "@/models/Post";
-import mongoose from "mongoose";
 
 // GET /api/polls/[id] - Get a specific poll
 export async function GET(req: NextRequest, { params }: any) {
@@ -18,6 +19,7 @@ export async function GET(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -26,6 +28,7 @@ export async function GET(req: NextRequest, { params }: any) {
 
     // Get user's locality
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -44,16 +47,17 @@ export async function GET(req: NextRequest, { params }: any) {
     if (poll.postId.locality !== user.locality) {
       return NextResponse.json(
         { error: "You don't have access to this poll" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     return NextResponse.json(poll);
   } catch (error: any) {
     console.error("Error fetching poll:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to fetch poll" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -70,6 +74,7 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -78,6 +83,7 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     // Find the poll
     const poll = await PollModel.findById(pollId).populate("postId");
+
     if (!poll) {
       return NextResponse.json({ error: "Poll not found" }, { status: 404 });
     }
@@ -86,7 +92,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (poll.postId.createdBy.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only edit polls for your own posts" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -98,16 +104,17 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (!options || !Object.keys(options).length) {
       return NextResponse.json(
         { error: "Poll options are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Check if there are already votes
     const hasVotes = [...poll.options.values()].some((count) => count > 0);
+
     if (hasVotes) {
       return NextResponse.json(
         { error: "Cannot update poll options after voting has started" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -115,15 +122,16 @@ export async function PUT(req: NextRequest, { params }: any) {
     const updatedPoll = await PollModel.findByIdAndUpdate(
       pollId,
       { options },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).populate("votedUsers", "name image");
 
     return NextResponse.json(updatedPoll);
   } catch (error: any) {
     console.error("Error updating poll:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to update poll" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -140,6 +148,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -148,12 +157,14 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Find poll
     const poll = await PollModel.findById(pollId).populate("postId");
+
     if (!poll) {
       return NextResponse.json({ error: "Poll not found" }, { status: 404 });
     }
 
     // Check if user is the creator of the associated post or an admin/moderator
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -166,12 +177,13 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!isAuthorized) {
       return NextResponse.json(
         { error: "You don't have permission to delete this poll" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // Find the associated post
     const post = await PostModel.findById(poll.postId._id);
+
     if (post) {
       // Remove poll reference from post
       await PostModel.findByIdAndUpdate(post._id, { $unset: { pollId: 1 } });
@@ -183,9 +195,10 @@ export async function DELETE(req: NextRequest, { params }: any) {
     return NextResponse.json({ message: "Poll deleted successfully" });
   } catch (error: any) {
     console.error("Error deleting poll:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to delete poll" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

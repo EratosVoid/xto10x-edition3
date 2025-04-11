@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
@@ -20,7 +20,7 @@ const dummyPetitions = [
     goal: 500,
     currentSignatures: 324,
     createdBy: "Cycling Coalition",
-    expiration: "2023-08-15",
+    expiration: "2026-08-15",
     locality: "Downtown",
     category: "transportation",
     targetOfficial: "City Transportation Department",
@@ -93,12 +93,14 @@ const categories = [
 // Get category color
 const getCategoryColor = (category: string) => {
   const found = categories.find((c) => c.value === category);
+
   return found ? found.color : "default";
 };
 
 // Format date
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
+
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -109,14 +111,36 @@ const formatDate = (dateString: string) => {
 export default function PetitionsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const [petitions, setPetitions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [signedPetitions, setSignedPetitions] = useState<
     Record<string, boolean>
   >({});
 
-  // Filter petitions based on search and category
-  const filteredPetitions = dummyPetitions.filter((petition) => {
+  // Fetch petitions from API
+  useEffect(() => {
+    const fetchPetitions = async () => {
+      try {
+        const res = await fetch("/api/petitions");
+
+        if (!res.ok) throw new Error("Failed to load petitions");
+        const data = await res.json();
+
+        setPetitions(data.petitions);
+      } catch (err: any) {
+        setError(err.message || "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPetitions();
+  }, []);
+
+  const filteredPetitions = petitions.filter((petition) => {
     const matchesSearch =
       petition.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       petition.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -127,6 +151,18 @@ export default function PetitionsPage() {
     return matchesSearch && matchesCategory;
   });
 
+  // // Filter petitions based on search and category
+  // const filteredPetitions = dummyPetitions.filter((petition) => {
+  //   const matchesSearch =
+  //     petition.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     petition.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+  //   const matchesCategory =
+  //     selectedCategory === "all" || petition.category === selectedCategory;
+
+  //   return matchesSearch && matchesCategory;
+  // });
+
   // Calculate percentage completion
   const calculateCompletionPercentage = (current: number, goal: number) => {
     return Math.min(Math.round((current / goal) * 100), 100);
@@ -136,6 +172,7 @@ export default function PetitionsPage() {
   const handleSign = (petitionId: string) => {
     if (status !== "authenticated") {
       router.push("/login?callbackUrl=/petitions");
+
       return;
     }
 
@@ -146,13 +183,14 @@ export default function PetitionsPage() {
     });
 
     // This would update the signature count in a real application
-    console.log(`Signed petition ${petitionId}`);
+    console.log(`Signed petition ${petitionId}`, session);
   };
 
   // Check if petition is expired
   const isPetitionExpired = (expirationDate: string) => {
     const expiration = new Date(expirationDate);
     const now = new Date();
+
     return expiration < now;
   };
 
@@ -166,8 +204,8 @@ export default function PetitionsPage() {
           </p>
         </div>
         <Button
-          color="primary"
           className="mt-4 md:mt-0"
+          color="primary"
           onClick={() => router.push("/petitions/create")}
         >
           Start a Petition
@@ -177,10 +215,10 @@ export default function PetitionsPage() {
       {/* Search */}
       <div className="my-6">
         <Input
+          className="max-w-md"
           placeholder="Search petitions..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
         />
 
         {/* Category tags */}
@@ -188,13 +226,13 @@ export default function PetitionsPage() {
           {categories.map((category) => (
             <Chip
               key={category.value}
+              className="cursor-pointer"
               color={
                 category.value === selectedCategory
                   ? (category.color as any)
                   : "default"
               }
               variant={category.value === selectedCategory ? "solid" : "flat"}
-              className="cursor-pointer"
               onClick={() => setSelectedCategory(category.value)}
             >
               {category.label}
@@ -211,7 +249,7 @@ export default function PetitionsPage() {
             const hasSigned = signedPetitions[petition.id];
             const completionPercentage = calculateCompletionPercentage(
               petition.currentSignatures,
-              petition.goal
+              petition.goal,
             );
             const isCompleted = completionPercentage >= 100;
 
@@ -255,10 +293,10 @@ export default function PetitionsPage() {
                   </div>
 
                   <Progress
-                    value={completionPercentage}
-                    color={isCompleted ? "success" : "primary"}
-                    className="h-3 mb-4"
                     aria-label={`${completionPercentage}% complete`}
+                    className="h-3 mb-4"
+                    color={isCompleted ? "success" : "primary"}
+                    value={completionPercentage}
                   />
 
                   <div className="flex justify-between items-center text-small text-default-500">

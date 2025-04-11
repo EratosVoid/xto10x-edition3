@@ -48,14 +48,14 @@ export default function Home() {
         </p>
         <div className="flex gap-4 mt-8 justify-center">
           <Link
-            href="/login"
             className="bg-primary text-white px-6 py-3 rounded-md font-semibold hover:bg-primary/80"
+            href="/login"
           >
             Sign In
           </Link>
           <Link
-            href="/register"
             className="bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-semibold hover:bg-gray-300"
+            href="/register"
           >
             Sign Up
           </Link>

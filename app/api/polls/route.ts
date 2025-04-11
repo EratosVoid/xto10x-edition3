@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import mongoose from "mongoose";
+
 import connectDB from "@/lib/db/connect";
 import PollModel from "@/models/Poll";
 import UserModel from "@/models/User";
 import PostModel from "@/models/Post";
-import mongoose from "mongoose";
 
 // GET /api/polls - Get all polls (with optional filtering)
 export async function GET(req: NextRequest) {
   try {
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -19,6 +21,7 @@ export async function GET(req: NextRequest) {
 
     // Get user's locality
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -37,6 +40,7 @@ export async function GET(req: NextRequest) {
 
     // Filter polls by user's locality
     const accessiblePolls = [];
+
     for (const poll of polls) {
       if (poll.postId && poll.postId.locality === user.locality) {
         accessiblePolls.push(poll);
@@ -57,9 +61,10 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error fetching polls:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to fetch polls" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -69,6 +74,7 @@ export async function POST(req: NextRequest) {
   try {
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -77,6 +83,7 @@ export async function POST(req: NextRequest) {
 
     // Get user
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -89,7 +96,7 @@ export async function POST(req: NextRequest) {
     if (!postId || !options || !Object.keys(options).length) {
       return NextResponse.json(
         { error: "Missing required poll details" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -100,6 +107,7 @@ export async function POST(req: NextRequest) {
 
     // Check if post exists and is of type 'poll'
     const post = await PostModel.findById(postId);
+
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -107,7 +115,7 @@ export async function POST(req: NextRequest) {
     if (post.type !== "poll") {
       return NextResponse.json(
         { error: "Post is not of type 'poll'" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -115,21 +123,23 @@ export async function POST(req: NextRequest) {
     if (post.createdBy.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only create polls for your own posts" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // Check if a poll already exists for this post
     const existingPoll = await PollModel.findOne({ postId });
+
     if (existingPoll) {
       return NextResponse.json(
         { error: "A poll already exists for this post" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
     // Initialize options with 0 votes
     const pollOptions: any = {};
+
     Object.keys(options).forEach((option) => {
       pollOptions[option] = 0;
     });
@@ -149,9 +159,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(newPoll, { status: 201 });
   } catch (error: any) {
     console.error("Error creating poll:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to create poll" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

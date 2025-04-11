@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import { Discussion } from "@/types";
 
 const DiscussionSchema = new mongoose.Schema<Discussion>(
@@ -19,7 +20,7 @@ const DiscussionSchema = new mongoose.Schema<Discussion>(
       ref: "Discussion",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Create indexes for better performance

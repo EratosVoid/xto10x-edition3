@@ -52,6 +52,7 @@ export default function CreateDiscussionPage() {
     if (typeof window !== "undefined") {
       router.push("/login?callbackUrl=/discussions/create");
     }
+
     return (
       <div className="max-w-3xl mx-auto py-12 px-4 text-center">
         Redirecting to login...
@@ -84,6 +85,7 @@ export default function CreateDiscussionPage() {
     }
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -91,9 +93,10 @@ export default function CreateDiscussionPage() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -142,18 +145,18 @@ export default function CreateDiscussionPage() {
         </CardHeader>
 
         <CardBody>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="title" className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1" htmlFor="title">
                 Title <span className="text-danger">*</span>
               </label>
               <Input
+                className={errors.title ? "border-danger" : ""}
                 id="title"
                 name="title"
                 placeholder="Give your discussion a descriptive title"
                 value={formData.title}
                 onChange={handleChange}
-                className={errors.title ? "border-danger" : ""}
               />
               {errors.title && (
                 <p className="mt-1 text-danger text-xs">{errors.title}</p>
@@ -162,19 +165,19 @@ export default function CreateDiscussionPage() {
 
             <div>
               <label
-                htmlFor="content"
                 className="block text-sm font-medium mb-1"
+                htmlFor="content"
               >
                 Content <span className="text-danger">*</span>
               </label>
               <Textarea
+                className={errors.content ? "border-danger" : ""}
                 id="content"
+                minRows={6}
                 name="content"
                 placeholder="Describe your topic in detail. What would you like to discuss with the community?"
                 value={formData.content}
                 onChange={handleChange}
-                minRows={6}
-                className={errors.content ? "border-danger" : ""}
               />
               {errors.content && (
                 <p className="mt-1 text-danger text-xs">{errors.content}</p>
@@ -184,18 +187,18 @@ export default function CreateDiscussionPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
-                  htmlFor="category"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="category"
                 >
                   Category <span className="text-danger">*</span>
                 </label>
                 <Select
+                  className={errors.category ? "border-danger" : ""}
                   id="category"
                   name="category"
                   placeholder="Select a category"
                   value={formData.category}
                   onChange={handleChange}
-                  className={errors.category ? "border-danger" : ""}
                 >
                   {categories.map((category) => (
                     <SelectItem key={category.value} textValue={category.value}>
@@ -210,18 +213,18 @@ export default function CreateDiscussionPage() {
 
               <div>
                 <label
-                  htmlFor="locality"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="locality"
                 >
                   Locality <span className="text-danger">*</span>
                 </label>
                 <Select
+                  className={errors.locality ? "border-danger" : ""}
                   id="locality"
                   name="locality"
                   placeholder="Select a locality"
                   value={formData.locality}
                   onChange={handleChange}
-                  className={errors.locality ? "border-danger" : ""}
                 >
                   {localities.map((locality) => (
                     <SelectItem key={locality.value} textValue={locality.value}>

@@ -92,9 +92,10 @@ export default function PostForm({
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear validation error when field is edited
@@ -106,6 +107,7 @@ export default function PostForm({
   // Handle poll options changes
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...(formData.options || [""])];
+
     newOptions[index] = value;
     setFormData((prev) => ({ ...prev, options: newOptions }));
 
@@ -126,6 +128,7 @@ export default function PostForm({
   // Remove poll option
   const removePollOption = (index: number) => {
     const newOptions = [...(formData.options || [""])];
+
     newOptions.splice(index, 1);
     setFormData((prev) => ({ ...prev, options: newOptions }));
   };
@@ -211,6 +214,7 @@ export default function PostForm({
     }
 
     setValidationErrors(errors);
+
     return isValid;
   };
 
@@ -248,44 +252,44 @@ export default function PostForm({
       </CardHeader>
 
       <CardBody>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium mb-1" htmlFor="title">
               Post Title <span className="text-danger">*</span>
             </label>
             <Input
+              fullWidth
+              errorMessage={validationErrors.title}
               id="title"
+              isInvalid={!!validationErrors.title}
               name="title"
+              placeholder="Enter a title for your post"
+              size="lg"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Enter a title for your post"
-              isInvalid={!!validationErrors.title}
-              errorMessage={validationErrors.title}
-              fullWidth
-              size="lg"
             />
           </div>
 
           {/* Description */}
           <div>
             <label
-              htmlFor="description"
               className="block text-sm font-medium mb-1"
+              htmlFor="description"
             >
               Description <span className="text-danger">*</span>
             </label>
             <Textarea
+              fullWidth
+              errorMessage={validationErrors.description}
               id="description"
+              isInvalid={!!validationErrors.description}
+              minRows={5}
               name="description"
+              placeholder="Enter your post description"
+              size="lg"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Enter your post description"
-              isInvalid={!!validationErrors.description}
-              errorMessage={validationErrors.description}
-              minRows={5}
-              fullWidth
-              size="lg"
             />
           </div>
 
@@ -294,21 +298,21 @@ export default function PostForm({
               {/* Type */}
               <div>
                 <label
-                  htmlFor="type"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="type"
                 >
                   Post Type <span className="text-danger">*</span>
                 </label>
                 <Select
+                  fullWidth
+                  errorMessage={validationErrors.type}
                   id="type"
+                  isInvalid={!!validationErrors.type}
                   name="type"
+                  placeholder="Select post type"
+                  size="lg"
                   value={formData.type}
                   onChange={handleChange}
-                  placeholder="Select post type"
-                  isInvalid={!!validationErrors.type}
-                  errorMessage={validationErrors.type}
-                  fullWidth
-                  size="lg"
                 >
                   {postTypes.map((type) => (
                     <SelectItem key={type.value} textValue={type.value}>
@@ -321,18 +325,18 @@ export default function PostForm({
               {/* Priority */}
               <div>
                 <label
-                  htmlFor="priority"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="priority"
                 >
                   Priority
                 </label>
                 <Select
+                  fullWidth
                   id="priority"
                   name="priority"
+                  size="lg"
                   value={formData.priority}
                   onChange={handleChange}
-                  fullWidth
-                  size="lg"
                 >
                   {priorities.map((priority) => (
                     <SelectItem key={priority.value} textValue={priority.value}>
@@ -352,61 +356,61 @@ export default function PostForm({
                 {/* Start Date */}
                 <div>
                   <label
-                    htmlFor="startDate"
                     className="block text-sm font-medium mb-1"
+                    htmlFor="startDate"
                   >
                     Start Date <span className="text-danger">*</span>
                   </label>
                   <Input
+                    fullWidth
+                    errorMessage={validationErrors.startDate}
                     id="startDate"
+                    isInvalid={!!validationErrors.startDate}
                     name="startDate"
                     type="datetime-local"
                     value={formData.startDate || ""}
                     onChange={handleChange}
-                    isInvalid={!!validationErrors.startDate}
-                    errorMessage={validationErrors.startDate}
-                    fullWidth
                   />
                 </div>
 
                 {/* End Date */}
                 <div>
                   <label
-                    htmlFor="endDate"
                     className="block text-sm font-medium mb-1"
+                    htmlFor="endDate"
                   >
                     End Date <span className="text-danger">*</span>
                   </label>
                   <Input
+                    fullWidth
+                    errorMessage={validationErrors.endDate}
                     id="endDate"
+                    isInvalid={!!validationErrors.endDate}
+                    min={formData.startDate}
                     name="endDate"
                     type="datetime-local"
                     value={formData.endDate || ""}
                     onChange={handleChange}
-                    isInvalid={!!validationErrors.endDate}
-                    errorMessage={validationErrors.endDate}
-                    fullWidth
-                    min={formData.startDate}
                   />
                 </div>
 
                 {/* Location */}
                 <div>
                   <label
-                    htmlFor="location"
                     className="block text-sm font-medium mb-1 col-span-full"
+                    htmlFor="location"
                   >
                     Location <span className="text-danger">*</span>
                   </label>
                   <Input
+                    fullWidth
+                    errorMessage={validationErrors.location}
                     id="location"
+                    isInvalid={!!validationErrors.location}
                     name="location"
+                    placeholder="Enter event location"
                     value={formData.location || ""}
                     onChange={handleChange}
-                    placeholder="Enter event location"
-                    isInvalid={!!validationErrors.location}
-                    errorMessage={validationErrors.location}
-                    fullWidth
                   />
                 </div>
               </div>
@@ -420,18 +424,18 @@ export default function PostForm({
               {formData.options?.map((option, index) => (
                 <div key={index} className="flex items-center mb-3">
                   <Input
+                    fullWidth
+                    className="mr-2"
+                    placeholder={`Option ${index + 1}`}
                     value={option}
                     onChange={(e) => handleOptionChange(index, e.target.value)}
-                    placeholder={`Option ${index + 1}`}
-                    className="mr-2"
-                    fullWidth
                   />
                   {index > 1 && (
                     <Button
-                      type="button"
                       color="danger"
-                      variant="flat"
                       size="sm"
+                      type="button"
+                      variant="flat"
                       onClick={() => removePollOption(index)}
                     >
                       Remove
@@ -440,11 +444,11 @@ export default function PostForm({
                 </div>
               ))}
               <Button
-                type="button"
+                className="mt-2"
                 color="primary"
+                type="button"
                 variant="flat"
                 onClick={addPollOption}
-                className="mt-2"
               >
                 Add Option
               </Button>
@@ -464,41 +468,41 @@ export default function PostForm({
                 {/* Target */}
                 <div>
                   <label
-                    htmlFor="target"
                     className="block text-sm font-medium mb-1"
+                    htmlFor="target"
                   >
                     Target <span className="text-danger">*</span>
                   </label>
                   <Input
+                    fullWidth
+                    errorMessage={validationErrors.target}
                     id="target"
+                    isInvalid={!!validationErrors.target}
                     name="target"
+                    placeholder="Who is this petition targeting?"
                     value={formData.target || ""}
                     onChange={handleChange}
-                    placeholder="Who is this petition targeting?"
-                    isInvalid={!!validationErrors.target}
-                    errorMessage={validationErrors.target}
-                    fullWidth
                   />
                 </div>
 
                 {/* Goal */}
                 <div>
                   <label
-                    htmlFor="goal"
                     className="block text-sm font-medium mb-1"
+                    htmlFor="goal"
                   >
                     Signature Goal <span className="text-danger">*</span>
                   </label>
                   <Input
+                    fullWidth
+                    errorMessage={validationErrors.goal}
                     id="goal"
+                    isInvalid={!!validationErrors.goal}
                     name="goal"
+                    placeholder="Number of signatures needed"
                     type="number"
                     value={formData.goal?.toString() || ""}
                     onChange={handleChange}
-                    placeholder="Number of signatures needed"
-                    isInvalid={!!validationErrors.goal}
-                    errorMessage={validationErrors.goal}
-                    fullWidth
                   />
                 </div>
               </div>
@@ -508,14 +512,14 @@ export default function PostForm({
       </CardBody>
 
       <CardFooter className="flex justify-between">
-        <Button variant="flat" onClick={handleCancel} disabled={isSubmitting}>
+        <Button disabled={isSubmitting} variant="flat" onClick={handleCancel}>
           Cancel
         </Button>
         <Button
           color="primary"
-          onClick={handleSubmit}
-          isLoading={isSubmitting}
           disabled={isSubmitting}
+          isLoading={isSubmitting}
+          onClick={handleSubmit}
         >
           {isEditing ? "Update Post" : "Create Post"}
         </Button>

@@ -69,10 +69,10 @@ export default function PostCard({
         <div className="flex justify-between items-start">
           <div className="flex gap-3">
             <Avatar
-              src={post.createdBy?.image || "https://i.pravatar.cc/150?img=1"}
+              className="border-2 border-primary"
               name={post.createdBy?.name || "User"}
               size="sm"
-              className="border-2 border-primary"
+              src={post.createdBy?.image || "https://i.pravatar.cc/150?img=1"}
             />
             <div>
               <h3 className="text-xl font-bold text-foreground">
@@ -87,20 +87,20 @@ export default function PostCard({
           </div>
           <div className="flex gap-2">
             <Chip
-              color="primary"
-              variant="flat"
-              size="sm"
               className="capitalize"
+              color="primary"
+              size="sm"
+              variant="flat"
             >
               {post.type}
             </Chip>
             <Chip
+              className="capitalize"
               color={
                 priorityColors[post.priority as keyof typeof priorityColors]
               }
-              variant="flat"
               size="sm"
-              className="capitalize"
+              variant="flat"
             >
               {post.priority}
             </Chip>
@@ -114,19 +114,19 @@ export default function PostCard({
 
       <CardFooter className="flex gap-2">
         <Button
+          className="flex-1"
           color="primary"
           variant="flat"
           onPress={() => router.push(`/posts/${post._id}`)}
-          className="flex-1"
         >
           View Details
         </Button>
         {showEdit && (
           <Button
+            className="flex-1"
             color="secondary"
             variant="flat"
             onPress={() => handleEditPost(post._id)}
-            className="flex-1"
           >
             Edit
           </Button>

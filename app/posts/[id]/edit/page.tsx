@@ -7,6 +7,7 @@ import { Spinner } from "@heroui/spinner";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { use } from "react";
+
 import PostForm, { PostFormData } from "@/components/PostForm";
 
 interface PageProps {
@@ -28,6 +29,7 @@ export default function EditPostPage({ params }: PageProps) {
 
     if (status === "unauthenticated") {
       router.push(`/login?callbackUrl=/posts/${resolvedParams.id}/edit`);
+
       return;
     }
 
@@ -48,6 +50,7 @@ export default function EditPostPage({ params }: PageProps) {
           throw new Error("You don't have access to this post");
         } else {
           const errorData = await response.json();
+
           throw new Error(errorData.error || "Failed to fetch post");
         }
       }
@@ -95,6 +98,7 @@ export default function EditPostPage({ params }: PageProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to update post");
       }
 
@@ -143,12 +147,12 @@ export default function EditPostPage({ params }: PageProps) {
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
       {post && (
         <PostForm
+          error={error}
           initialData={post}
           isEditing={true}
+          isSubmitting={isSubmitting}
           postId={resolvedParams.id}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          error={error}
         />
       )}
     </div>

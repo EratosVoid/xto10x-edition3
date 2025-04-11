@@ -8,12 +8,6 @@ import { Input } from "@heroui/input";
 import { Avatar } from "@heroui/avatar";
 import { Chip } from "@heroui/chip";
 import { Textarea } from "@heroui/input";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
 import { Divider } from "@heroui/divider";
 import { useSession } from "next-auth/react";
 
@@ -224,6 +218,7 @@ const categories = [
 // Get category color
 const getCategoryColor = (category: string) => {
   const found = categories.find((c) => c.value === category);
+
   return found ? found.color : "default";
 };
 
@@ -257,7 +252,7 @@ export default function DiscussionsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedDiscussion, setExpandedDiscussion] = useState<string | null>(
-    null
+    null,
   );
   const [replyContent, setReplyContent] = useState("");
 
@@ -288,6 +283,7 @@ export default function DiscussionsPage() {
       if (status !== "authenticated") {
         router.push("/login?callbackUrl=/discussions");
       }
+
       return;
     }
 
@@ -308,8 +304,8 @@ export default function DiscussionsPage() {
           </p>
         </div>
         <Button
-          color="primary"
           className="mt-4 md:mt-0"
+          color="primary"
           onClick={() => router.push("/discussions/create")}
         >
           Start a Discussion
@@ -319,10 +315,10 @@ export default function DiscussionsPage() {
       {/* Search and Filter */}
       <div className="my-6">
         <Input
+          className="max-w-md"
           placeholder="Search discussions..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
         />
 
         {/* Category tags */}
@@ -330,13 +326,13 @@ export default function DiscussionsPage() {
           {categories.map((category) => (
             <Chip
               key={category.value}
+              className="cursor-pointer"
               color={
                 category.value === selectedCategory
                   ? (category.color as any)
                   : "default"
               }
               variant={category.value === selectedCategory ? "solid" : "flat"}
-              className="cursor-pointer"
               onClick={() => setSelectedCategory(category.value)}
             >
               {category.label}
@@ -357,9 +353,9 @@ export default function DiscussionsPage() {
                   <div className="flex justify-between items-start">
                     <div className="flex gap-3">
                       <Avatar
-                        src={discussion.createdBy.avatar}
                         name={discussion.createdBy.name}
                         size="sm"
+                        src={discussion.createdBy.avatar}
                       />
                       <div>
                         <h3 className="text-xl font-bold">
@@ -407,9 +403,9 @@ export default function DiscussionsPage() {
                         >
                           <div className="flex gap-3 items-start">
                             <Avatar
-                              src={response.createdBy.avatar}
                               name={response.createdBy.name}
                               size="sm"
+                              src={response.createdBy.avatar}
                             />
                             <div className="flex-1">
                               <div className="flex justify-between">
@@ -423,16 +419,16 @@ export default function DiscussionsPage() {
                               <p className="mt-1">{response.content}</p>
                               <div className="flex items-center mt-2 gap-2">
                                 <Button
+                                  className="text-tiny text-default-500"
                                   size="sm"
                                   variant="light"
-                                  className="text-tiny text-default-500"
                                 >
                                   👍 {response.likes}
                                 </Button>
                                 <Button
+                                  className="text-tiny text-default-500"
                                   size="sm"
                                   variant="light"
-                                  className="text-tiny text-default-500"
                                 >
                                   Reply
                                 </Button>
@@ -447,28 +443,28 @@ export default function DiscussionsPage() {
                         <div className="mt-4">
                           <div className="flex gap-3 items-start">
                             <Avatar
+                              name={session?.user?.name || "You"}
+                              size="sm"
                               src={
                                 session?.user?.image ||
                                 "https://i.pravatar.cc/150?img=0"
                               }
-                              name={session?.user?.name || "You"}
-                              size="sm"
                             />
                             <div className="flex-1">
                               <Textarea
+                                className="w-full"
+                                minRows={2}
                                 placeholder="Add a response..."
                                 value={replyContent}
                                 onChange={(e) =>
                                   setReplyContent(e.target.value)
                                 }
-                                className="w-full"
-                                minRows={2}
                               />
                               <div className="flex justify-end mt-2">
                                 <Button
                                   color="primary"
-                                  size="sm"
                                   isDisabled={!replyContent.trim()}
+                                  size="sm"
                                   onClick={() => handleReply(discussion.id)}
                                 >
                                   Post Response
@@ -483,8 +479,8 @@ export default function DiscussionsPage() {
                             <Button
                               as="a"
                               color="primary"
-                              variant="flat"
                               href="/login?callbackUrl=/discussions"
+                              variant="flat"
                             >
                               Sign in
                             </Button>{" "}

@@ -1,7 +1,9 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
+
 import connectDB from "./db/connect";
+
 import UserModel from "@/models/User";
 
 // This helps ensure the right URL is used in different environments
@@ -34,7 +36,7 @@ export const authOptions: NextAuthOptions = {
 
           const isPasswordValid = await compare(
             credentials.password,
-            user.password!
+            user.password!,
           );
 
           if (!isPasswordValid) {
@@ -52,6 +54,7 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           console.error("Auth error:", error);
+
           return null;
         }
       },
@@ -84,6 +87,7 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.locality = user.locality;
       }
+
       return token;
     },
     async session({ session, token }: any) {
@@ -93,6 +97,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
         session.user.locality = token.locality as string;
       }
+
       return session;
     },
     async redirect({ url, baseUrl }) {
@@ -100,6 +105,7 @@ export const authOptions: NextAuthOptions = {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url;
+
       return baseUrl;
     },
   },

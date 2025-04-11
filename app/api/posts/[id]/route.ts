@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import mongoose from "mongoose";
+
 import connectDB from "@/lib/db/connect";
 import PostModel from "@/models/Post";
 import UserModel from "@/models/User";
-import mongoose from "mongoose";
 
 // GET /api/posts/[id] - Get a specific post, checking locality
 export async function GET(req: NextRequest, { params }: any) {
@@ -17,6 +18,7 @@ export async function GET(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -25,6 +27,7 @@ export async function GET(req: NextRequest, { params }: any) {
 
     // Get user's locality
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -32,7 +35,7 @@ export async function GET(req: NextRequest, { params }: any) {
     // Find post by ID and populate creator info
     const post = await PostModel.findById(postId).populate(
       "createdBy",
-      "name image"
+      "name image",
     );
 
     // Check if post exists
@@ -44,16 +47,17 @@ export async function GET(req: NextRequest, { params }: any) {
     if (post.locality !== user.locality) {
       return NextResponse.json(
         { error: "You don't have access to this post" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     return NextResponse.json(post);
   } catch (error: any) {
     console.error("Error fetching post:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to fetch post" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -70,6 +74,7 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -78,6 +83,7 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     // Find the post
     const post = await PostModel.findById(postId);
+
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -86,7 +92,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (post.createdBy.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only edit your own posts" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -103,15 +109,16 @@ export async function PUT(req: NextRequest, { params }: any) {
         ...(category && { category }),
         ...(priority && { priority }),
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).populate("createdBy", "name image");
 
     return NextResponse.json(updatedPost);
   } catch (error: any) {
     console.error("Error updating post:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to update post" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -128,6 +135,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -136,12 +144,14 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Find post
     const post = await PostModel.findById(postId);
+
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
     // Check if user is the creator of the post or an admin/moderator
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -154,7 +164,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!isAuthorized) {
       return NextResponse.json(
         { error: "You don't have permission to delete this post" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -164,9 +174,10 @@ export async function DELETE(req: NextRequest, { params }: any) {
     return NextResponse.json({ message: "Post deleted successfully" });
   } catch (error: any) {
     console.error("Error deleting post:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to delete post" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

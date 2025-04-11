@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import { Event } from "@/types";
 
 const EventSchema = new mongoose.Schema<Event>(
@@ -24,7 +25,7 @@ const EventSchema = new mongoose.Schema<Event>(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Create indexes for better performance

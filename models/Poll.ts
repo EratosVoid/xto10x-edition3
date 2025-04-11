@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import { Poll } from "@/types";
 
 const PollSchema = new mongoose.Schema<Poll>(
@@ -24,7 +25,7 @@ const PollSchema = new mongoose.Schema<Poll>(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Create indexes for better performance

@@ -23,6 +23,7 @@ export default function SessionProvider({ children }: SessionProviderProps) {
     };
 
     window.addEventListener("error", handleError);
+
     return () => window.removeEventListener("error", handleError);
   }, []);
 

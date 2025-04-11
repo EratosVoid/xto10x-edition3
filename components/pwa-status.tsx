@@ -15,8 +15,9 @@ export const PWAStatus = () => {
 
       // Check if iOS
       const ios = /iphone|ipad|ipod/.test(
-        window.navigator.userAgent.toLowerCase()
+        window.navigator.userAgent.toLowerCase(),
       );
+
       setIsIOS(ios);
 
       // Check if already installed (in standalone mode)
@@ -80,12 +81,12 @@ export const PWAStatus = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-blue-600 text-white p-3 text-center z-50">
         Install this app on your device by tapping
         <span className="mx-1 font-bold">Share</span>
-        <span role="img" aria-label="share icon" className="mx-1">
+        <span aria-label="share icon" className="mx-1" role="img">
           ⎋
         </span>
         and then
         <span className="mx-1 font-bold">Add to Home Screen</span>
-        <span role="img" aria-label="plus icon" className="mx-1">
+        <span aria-label="plus icon" className="mx-1" role="img">
           ➕
         </span>
       </div>

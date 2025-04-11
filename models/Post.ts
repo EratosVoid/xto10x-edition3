@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import { Post } from "@/types";
 
 const PostSchema = new mongoose.Schema<Post>(
@@ -26,7 +27,7 @@ const PostSchema = new mongoose.Schema<Post>(
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
     petitionId: { type: mongoose.Schema.Types.ObjectId, ref: "Petition" },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Create indexes for better performance

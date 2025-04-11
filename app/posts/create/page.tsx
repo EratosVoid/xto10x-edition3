@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Spinner } from "@heroui/spinner";
+
 import PostForm, { PostFormData } from "@/components/PostForm";
 
 export default function CreatePostPage() {
@@ -28,6 +29,7 @@ export default function CreatePostPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to create post");
       }
 
@@ -54,6 +56,7 @@ export default function CreatePostPage() {
 
   if (status === "unauthenticated") {
     router.push("/login?callbackUrl=/posts/create");
+
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Spinner size="lg" />
@@ -64,6 +67,7 @@ export default function CreatePostPage() {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
       <PostForm
+        error={error}
         initialData={{
           title: "",
           description: "",
@@ -71,9 +75,8 @@ export default function CreatePostPage() {
           priority: "medium",
         }}
         isEditing={false}
-        onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
-        error={error}
+        onSubmit={handleSubmit}
       />
     </div>
   );

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import { User } from "@/types";
 
 const UserSchema = new mongoose.Schema<User>(
@@ -24,7 +25,7 @@ const UserSchema = new mongoose.Schema<User>(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Create indexes for better performance

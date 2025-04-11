@@ -3,11 +3,10 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
+import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Divider } from "@heroui/divider";
 import { Chip } from "@heroui/chip";
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -40,7 +39,7 @@ export default function DashboardPage() {
   if (status === "loading" || isLoading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
-        <Spinner size="lg" color="primary" />
+        <Spinner color="primary" size="lg" />
       </div>
     );
   }
@@ -58,9 +57,9 @@ export default function DashboardPage() {
               See what&apos;s happening in {locality} today.
             </p>
             <Button
+              className="mt-4 bg-foreground-50"
               color="secondary"
               variant="flat"
-              className="mt-4 bg-foreground-50"
               onPress={() => router.push("/posts/create?type=event")}
             >
               Create New Event
@@ -99,20 +98,20 @@ export default function DashboardPage() {
       <div className="my-8">
         <Tabs
           aria-label="Community Activity"
-          color="primary"
-          variant="underlined"
           classNames={{
             tabList: "gap-6",
             cursor: "w-full",
             tab: "max-w-fit px-2 h-12",
           }}
+          color="primary"
+          variant="underlined"
         >
           <Tab
             key="upcoming"
             title={
               <div className="flex items-center space-x-2">
                 <span>Upcoming Events</span>
-                <Chip size="sm" color="primary">
+                <Chip color="primary" size="sm">
                   3
                 </Chip>
               </div>
@@ -139,7 +138,7 @@ export default function DashboardPage() {
             title={
               <div className="flex items-center space-x-2">
                 <span>Recent Posts</span>
-                <Chip size="sm" color="primary">
+                <Chip color="primary" size="sm">
                   5
                 </Chip>
               </div>
@@ -166,7 +165,7 @@ export default function DashboardPage() {
             title={
               <div className="flex items-center space-x-2">
                 <span>Active Polls</span>
-                <Chip size="sm" color="primary">
+                <Chip color="primary" size="sm">
                   2
                 </Chip>
               </div>
@@ -202,9 +201,9 @@ export default function DashboardPage() {
                 Share news, updates, or ideas with your community.
               </p>
               <Button
+                className="w-full"
                 color="primary"
                 variant="flat"
-                className="w-full"
                 onClick={() => router.push("/posts/create?type=general")}
               >
                 Start Writing
@@ -219,9 +218,9 @@ export default function DashboardPage() {
                 Create a petition to gather support for local changes.
               </p>
               <Button
+                className="w-full"
                 color="primary"
                 variant="flat"
-                className="w-full"
                 onClick={() => router.push("/posts/create?type=petition")}
               >
                 Create Petition
@@ -236,9 +235,9 @@ export default function DashboardPage() {
                 Get answers about community initiatives and local policies.
               </p>
               <Button
+                className="w-full"
                 color="primary"
                 variant="flat"
-                className="w-full"
                 onClick={() => router.push("/ask-ai")}
               >
                 Ask Question

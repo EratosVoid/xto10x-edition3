@@ -13,7 +13,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
  */
 export async function summarizeText(
   description: string,
-  maxLength: number = 150
+  maxLength: number = 150,
 ): Promise<string> {
   try {
     // For text-only input, use the gemini-flash model
@@ -34,6 +34,7 @@ export async function summarizeText(
       : text;
   } catch (error) {
     console.error("Error summarizing text with Gemini:", error);
+
     // Return a truncated version of the original as fallback
     return description.length > maxLength
       ? description.substring(0, maxLength) + "..."
@@ -57,9 +58,11 @@ export async function answerFAQ(question: string): Promise<string> {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
+
     return response.text();
   } catch (error) {
     console.error("Error answering FAQ with Gemini:", error);
+
     return "Sorry, I was unable to answer your question at this time.";
   }
 }

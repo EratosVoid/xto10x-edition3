@@ -79,46 +79,46 @@ function LoginForm() {
             <div className="space-y-4">
               <div>
                 <label
-                  htmlFor="email"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="email"
                 >
                   Email address
                 </label>
                 <Input
+                  fullWidth
+                  required
+                  autoComplete="email"
                   id="email"
                   name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
                   placeholder="Email address"
-                  fullWidth
+                  type="email"
                 />
               </div>
               <div>
                 <label
-                  htmlFor="password"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="password"
                 >
                   Password
                 </label>
                 <Input
+                  fullWidth
+                  required
+                  autoComplete="current-password"
                   id="password"
                   name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
                   placeholder="Password"
-                  fullWidth
+                  type="password"
                 />
               </div>
             </div>
 
             <Button
-              type="submit"
-              color="primary"
               fullWidth
-              isLoading={isLoading}
+              color="primary"
               disabled={isLoading}
+              isLoading={isLoading}
+              type="submit"
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
@@ -129,8 +129,8 @@ function LoginForm() {
           <div className="text-sm text-center">
             Don&apos;t have an account?{" "}
             <Link
-              href="/register"
               className="font-medium text-primary hover:text-primary-400"
+              href="/register"
             >
               Sign up
             </Link>

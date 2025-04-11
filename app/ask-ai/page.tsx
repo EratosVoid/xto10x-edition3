@@ -7,7 +7,7 @@ import { Button } from "@heroui/button";
 import { Avatar } from "@heroui/avatar";
 import { Divider } from "@heroui/divider";
 import { Spinner } from "@heroui/spinner";
-import { Chip } from "@heroui/chip";
+
 import { answerFAQ } from "@/lib/ai";
 
 // Message type
@@ -115,11 +115,11 @@ export default function AskAiPage() {
           <CardHeader className="border-b">
             <div className="flex items-center gap-3">
               <Avatar
+                isBordered
+                color="primary"
                 name="AI"
                 size="sm"
                 src="/ai-assistant.png"
-                color="primary"
-                isBordered
               />
               <div>
                 <h3 className="text-lg font-semibold">LocalVoice AI</h3>
@@ -157,7 +157,7 @@ export default function AskAiPage() {
             {isLoading && (
               <div className="flex justify-start mb-4">
                 <div className="rounded-lg p-3 bg-default-100 rounded-tl-none flex items-center gap-2">
-                  <Spinner size="sm" color="primary" />
+                  <Spinner color="primary" size="sm" />
                   <span>Thinking...</span>
                 </div>
               </div>
@@ -170,17 +170,17 @@ export default function AskAiPage() {
           <CardFooter>
             <div className="flex w-full gap-2">
               <Input
+                fullWidth
+                disabled={isLoading}
                 placeholder="Ask a question..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                disabled={isLoading}
-                fullWidth
               />
               <Button
                 color="primary"
-                onClick={() => handleSendMessage()}
                 isDisabled={isLoading || !input.trim()}
+                onClick={() => handleSendMessage()}
               >
                 Send
               </Button>
@@ -198,11 +198,11 @@ export default function AskAiPage() {
               {suggestedQuestions.map((question, index) => (
                 <Button
                   key={index}
-                  variant="flat"
-                  color="primary"
                   className="justify-start text-left h-auto py-2"
-                  onClick={() => handleSendMessage(question)}
+                  color="primary"
                   disabled={isLoading}
+                  variant="flat"
+                  onClick={() => handleSendMessage(question)}
                 >
                   {question}
                 </Button>

@@ -18,11 +18,13 @@ import {
 import { useDisclosure } from "@heroui/modal";
 import { Divider } from "@heroui/divider";
 import { use } from "react";
+
 import DiscussionThread from "../components/DiscussionThread";
 
 // Format date
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
+
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -52,6 +54,7 @@ export default function PostDetailPage({ params }: PageProps) {
 
     if (status === "unauthenticated") {
       router.push(`/login?callbackUrl=/posts/${resolvedParams.id}`);
+
       return;
     }
 
@@ -72,11 +75,13 @@ export default function PostDetailPage({ params }: PageProps) {
           throw new Error("You don't have access to this post");
         } else {
           const errorData = await response.json();
+
           throw new Error(errorData.error || "Failed to fetch post");
         }
       }
 
       const data = await response.json();
+
       setPost(data);
     } catch (err: any) {
       console.error("Error fetching post:", err);
@@ -96,6 +101,7 @@ export default function PostDetailPage({ params }: PageProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to delete post");
       }
 
@@ -212,14 +218,14 @@ export default function PostDetailPage({ params }: PageProps) {
                       <span>{option}</span>
                       <span className="font-medium">{votes} votes</span>
                     </div>
-                  )
+                  ),
                 )}
               {(!post.pollDetails?.options ||
                 Object.keys(post.pollDetails.options).length === 0) && (
                 <p className="text-gray-500">No poll options available</p>
               )}
             </div>
-            <Button color="primary" className="mt-4">
+            <Button className="mt-4" color="primary">
               Vote
             </Button>
           </div>
@@ -242,7 +248,7 @@ export default function PostDetailPage({ params }: PageProps) {
                   {Math.floor(
                     ((post.petitionDetails?.supporters || 0) /
                       (post.petitionDetails?.goal || 100)) *
-                      100
+                      100,
                   )}
                   %
                 </span>
@@ -253,7 +259,7 @@ export default function PostDetailPage({ params }: PageProps) {
                   style={{
                     width: `${Math.min(((post.petitionDetails?.supporters || 0) / (post.petitionDetails?.goal || 100)) * 100, 100)}%`,
                   }}
-                ></div>
+                />
               </div>
             </div>
             <Button color="primary">Sign Petition</Button>
@@ -279,8 +285,8 @@ export default function PostDetailPage({ params }: PageProps) {
                     </Chip>
                     <Chip
                       color={getPriorityColor(post.priority) as any}
-                      variant="flat"
                       size="sm"
+                      variant="flat"
                     >
                       {post.priority} priority
                     </Chip>
@@ -290,14 +296,14 @@ export default function PostDetailPage({ params }: PageProps) {
                   <div className="flex gap-2">
                     {isAuthor && (
                       <Button
-                        variant="flat"
                         color="primary"
+                        variant="flat"
                         onClick={() => router.push(`/posts/${post._id}/edit`)}
                       >
                         Edit
                       </Button>
                     )}
-                    <Button variant="flat" color="danger" onClick={onOpen}>
+                    <Button color="danger" variant="flat" onClick={onOpen}>
                       Delete
                     </Button>
                   </div>
@@ -308,11 +314,11 @@ export default function PostDetailPage({ params }: PageProps) {
 
               <div className="flex items-center gap-2">
                 <Avatar
+                  name={post.createdBy?.name || "User"}
+                  size="sm"
                   src={
                     post.createdBy?.image || "https://i.pravatar.cc/150?img=1"
                   }
-                  name={post.createdBy?.name || "User"}
-                  size="sm"
                 />
                 <div>
                   <div className="text-small font-medium">
@@ -358,13 +364,13 @@ export default function PostDetailPage({ params }: PageProps) {
             undone.
           </ModalBody>
           <ModalFooter>
-            <Button variant="flat" onClick={onClose} disabled={isDeleting}>
+            <Button disabled={isDeleting} variant="flat" onClick={onClose}>
               Cancel
             </Button>
             <Button
               color="danger"
-              onClick={handleDelete}
               isLoading={isDeleting}
+              onClick={handleDelete}
             >
               Delete
             </Button>

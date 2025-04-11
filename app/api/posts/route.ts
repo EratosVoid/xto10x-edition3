@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+
 import connectDB from "@/lib/db/connect";
 import PostModel from "@/models/Post";
 import UserModel from "@/models/User";
@@ -16,6 +17,7 @@ export async function GET(req: NextRequest) {
 
     // Verify user is authenticated and get their locality
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -24,6 +26,7 @@ export async function GET(req: NextRequest) {
 
     // Get user's locality from database
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -69,9 +72,10 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error fetching posts:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to fetch posts" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -80,6 +84,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -93,12 +98,13 @@ export async function POST(req: NextRequest) {
     if (!title || !description || !type) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Get user's locality
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -116,15 +122,16 @@ export async function POST(req: NextRequest) {
     // Populate the creator info
     const populatedPost = await PostModel.findById(post._id).populate(
       "createdBy",
-      "name image"
+      "name image",
     );
 
     return NextResponse.json(populatedPost, { status: 201 });
   } catch (error: any) {
     console.error("Error creating post:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to create post" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

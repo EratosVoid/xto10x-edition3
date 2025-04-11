@@ -10,7 +10,6 @@ import {
   NavbarMenuItem,
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
-import { Link } from "@heroui/link";
 import { Input } from "@heroui/input";
 import { Avatar } from "@heroui/avatar";
 import {
@@ -86,7 +85,7 @@ export const Navbar = () => {
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium"
+                  "data-[active=true]:text-primary data-[active=true]:font-medium",
                 )}
                 color="foreground"
                 href={item.href}
@@ -145,10 +144,10 @@ export const Navbar = () => {
           </NavbarItem>
         ) : (
           <NavbarItem className="hidden md:flex gap-2">
-            <Button as={NextLink} href="/login" variant="flat" color="primary">
+            <Button as={NextLink} color="primary" href="/login" variant="flat">
               Sign In
             </Button>
-            <Button as={NextLink} href="/register" color="primary">
+            <Button as={NextLink} color="primary" href="/register">
               Sign Up
             </Button>
           </NavbarItem>

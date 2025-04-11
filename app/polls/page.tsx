@@ -25,7 +25,7 @@ const dummyPolls = [
     ],
     totalVotes: 115,
     createdBy: "Parks Department",
-    expiration: "2023-07-15",
+    expiration: "2026-07-15",
     locality: "Downtown",
     category: "parks",
   },
@@ -107,7 +107,10 @@ export default function PollsPage() {
     if (!userVotes[pollId]) return;
 
     // In a real app, we would call an API to save the vote
-    console.log(`Voted for poll ${pollId}, option ${userVotes[pollId]}`);
+    console.log(
+      `Voted for poll ${pollId}, option ${userVotes[pollId]}`,
+      session,
+    );
 
     // Mark poll as voted
     setVotedPolls({
@@ -119,6 +122,7 @@ export default function PollsPage() {
   // Format expiration date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -130,6 +134,7 @@ export default function PollsPage() {
   const isPollExpired = (expirationDate: string) => {
     const expiration = new Date(expirationDate);
     const now = new Date();
+
     return expiration < now;
   };
 
@@ -143,8 +148,8 @@ export default function PollsPage() {
           </p>
         </div>
         <Button
-          color="primary"
           className="mt-4 md:mt-0"
+          color="primary"
           onClick={() => router.push("/polls/create")}
         >
           Create Poll
@@ -154,10 +159,10 @@ export default function PollsPage() {
       {/* Search */}
       <div className="my-6">
         <Input
+          className="max-w-md"
           placeholder="Search polls..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
         />
       </div>
 
@@ -201,8 +206,9 @@ export default function PollsPage() {
                       {poll.options.map((option) => {
                         const percentage = calculatePercentage(
                           option.votes,
-                          poll.totalVotes
+                          poll.totalVotes,
                         );
+
                         return (
                           <div key={option.id} className="space-y-1">
                             <div className="flex justify-between items-center">
@@ -212,14 +218,14 @@ export default function PollsPage() {
                               </p>
                             </div>
                             <Progress
-                              value={percentage}
+                              aria-label={`${option.text} - ${percentage}%`}
+                              className="h-3"
                               color={
                                 userVotes[poll.id] === option.id
                                   ? "primary"
                                   : "default"
                               }
-                              className="h-3"
-                              aria-label={`${option.text} - ${percentage}%`}
+                              value={percentage}
                             />
                           </div>
                         );
@@ -251,7 +257,7 @@ export default function PollsPage() {
                 <CardFooter className="flex justify-between">
                   <div>
                     <Chip variant="flat">{poll.locality}</Chip>
-                    <Chip variant="flat" className="ml-2">
+                    <Chip className="ml-2" variant="flat">
                       {poll.category}
                     </Chip>
                   </div>
@@ -269,8 +275,8 @@ export default function PollsPage() {
                     status === "authenticated" &&
                     !isExpired && (
                       <Button
-                        variant="flat"
                         color="primary"
+                        variant="flat"
                         onClick={() =>
                           setVotedPolls({ ...votedPolls, [poll.id]: false })
                         }

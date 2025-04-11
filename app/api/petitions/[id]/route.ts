@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import mongoose from "mongoose";
+
 import connectDB from "@/lib/db/connect";
 import PetitionModel from "@/models/Petition";
 import PollModel from "@/models/Poll";
 import UserModel from "@/models/User";
 import PostModel from "@/models/Post";
-import mongoose from "mongoose";
 
 // GET /api/petitions/[id] - Get a specific petition
 export async function GET(req: NextRequest, { params }: any) {
@@ -16,12 +17,13 @@ export async function GET(req: NextRequest, { params }: any) {
     if (!mongoose.Types.ObjectId.isValid(petitionId)) {
       return NextResponse.json(
         { error: "Invalid petition ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -30,6 +32,7 @@ export async function GET(req: NextRequest, { params }: any) {
 
     // Get user's locality
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -43,7 +46,7 @@ export async function GET(req: NextRequest, { params }: any) {
     if (!petition) {
       return NextResponse.json(
         { error: "Petition not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -51,14 +54,16 @@ export async function GET(req: NextRequest, { params }: any) {
     if (petition.postId.locality !== user.locality) {
       return NextResponse.json(
         { error: "You don't have access to this petition" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // Get signature count from poll (if it exists)
     let supporters = 0;
+
     if (petition.pollId) {
       const poll = await PollModel.findById(petition.pollId);
+
       if (poll && poll.options.has("Yes")) {
         supporters = poll.options.get("Yes") || 0;
       }
@@ -73,9 +78,10 @@ export async function GET(req: NextRequest, { params }: any) {
     return NextResponse.json(petitionWithSupporters);
   } catch (error: any) {
     console.error("Error fetching petition:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to fetch petition" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -89,12 +95,13 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (!mongoose.Types.ObjectId.isValid(petitionId)) {
       return NextResponse.json(
         { error: "Invalid petition ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -104,10 +111,11 @@ export async function PUT(req: NextRequest, { params }: any) {
     // Find the petition
     const petition =
       await PetitionModel.findById(petitionId).populate("postId");
+
     if (!petition) {
       return NextResponse.json(
         { error: "Petition not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -115,7 +123,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (petition.postId.createdBy.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only edit petitions for your own posts" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -130,7 +138,7 @@ export async function PUT(req: NextRequest, { params }: any) {
         ...(target && { target }),
         ...(goal && { goal }),
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     )
       .populate("postId")
       .populate("pollId");
@@ -138,9 +146,10 @@ export async function PUT(req: NextRequest, { params }: any) {
     return NextResponse.json(updatedPetition);
   } catch (error: any) {
     console.error("Error updating petition:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to update petition" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -154,12 +163,13 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!mongoose.Types.ObjectId.isValid(petitionId)) {
       return NextResponse.json(
         { error: "Invalid petition ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -169,15 +179,17 @@ export async function DELETE(req: NextRequest, { params }: any) {
     // Find petition
     const petition =
       await PetitionModel.findById(petitionId).populate("postId");
+
     if (!petition) {
       return NextResponse.json(
         { error: "Petition not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Check if user is the creator of the associated post or an admin/moderator
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -190,7 +202,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!isAuthorized) {
       return NextResponse.json(
         { error: "You don't have permission to delete this petition" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -220,9 +232,10 @@ export async function DELETE(req: NextRequest, { params }: any) {
     return NextResponse.json({ message: "Petition deleted successfully" });
   } catch (error: any) {
     console.error("Error deleting petition:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to delete petition" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

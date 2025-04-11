@@ -1,5 +1,6 @@
 import { Link } from "@heroui/link";
 import { Divider } from "@heroui/divider";
+
 import { siteConfig } from "@/config/site";
 
 export default function Footer() {
@@ -49,8 +50,8 @@ export default function Footer() {
               <Link
                 key={key}
                 isExternal
-                href={url}
                 className="text-default-500 hover:text-primary"
+                href={url}
               >
                 {key.charAt(0).toUpperCase() + key.slice(1)}
               </Link>

@@ -1,4 +1,5 @@
 import { Server as NetServer } from "http";
+
 import { Server as SocketIOServer } from "socket.io";
 import { NextApiRequest } from "next";
 import { NextApiResponse } from "next";
@@ -13,7 +14,7 @@ export type NextApiResponseWithSocket = NextApiResponse & {
 
 export const initSocketServer = (
   req: NextApiRequest,
-  res: NextApiResponseWithSocket
+  res: NextApiResponseWithSocket,
 ) => {
   if (!res.socket.server.io) {
     const io = new SocketIOServer(res.socket.server);
@@ -42,7 +43,7 @@ export const emitToLocality = (
   io: SocketIOServer,
   locality: string,
   event: string,
-  data: any
+  data: any,
 ) => {
   io.to(locality).emit(event, data);
 };

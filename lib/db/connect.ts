@@ -32,6 +32,7 @@ async function connectDB() {
       .connect(MONGODB_URI, opts)
       .then((mongoose) => {
         console.log("Connected to MongoDB");
+
         return mongoose;
       })
       .catch((error) => {
@@ -43,6 +44,7 @@ async function connectDB() {
 
   try {
     cached.conn = await cached.promise;
+
     return cached.conn;
   } catch (error) {
     console.error("Failed to establish MongoDB connection:", error);

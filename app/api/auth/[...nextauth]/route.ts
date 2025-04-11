@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+
 import authOptions from "@/lib/auth";
 
 // Log any initialization errors to help with debugging in production
@@ -13,7 +14,7 @@ try {
 
   if (!process.env.NEXTAUTH_SECRET) {
     console.warn(
-      "Warning: NEXTAUTH_SECRET is not defined. This is required for production."
+      "Warning: NEXTAUTH_SECRET is not defined. This is required for production.",
     );
   }
 } catch (error) {

@@ -38,6 +38,7 @@ function RegisterForm() {
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       setIsLoading(false);
+
       return;
     }
 
@@ -66,6 +67,7 @@ function RegisterForm() {
 
       console.log("Registration API response status:", response.status);
       const data = await response.json();
+
       console.log("Registration API response:", data);
 
       if (!response.ok) {
@@ -101,80 +103,87 @@ function RegisterForm() {
             <div className="space-y-4">
               <div>
                 <label
-                  htmlFor="name"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="name"
+                  id="label-name"
                 >
                   Full Name
                 </label>
                 <Input
+                  fullWidth
+                  required
+                  aria-labelledby="label-name"
                   id="name"
                   name="name"
+                  placeholder="John Doe"
                   type="text"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  required
-                  placeholder="John Doe"
-                  fullWidth
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="email"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="email"
                 >
                   Email address
                 </label>
                 <Input
+                  fullWidth
+                  required
+                  autoComplete="email"
                   id="email"
                   name="email"
+                  placeholder="john@example.com"
                   type="email"
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  autoComplete="email"
-                  required
-                  placeholder="john@example.com"
-                  fullWidth
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="password"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="password"
                 >
                   Password
                 </label>
                 <Input
+                  fullWidth
+                  required
+                  autoComplete="new-password"
                   id="password"
+                  minLength={6}
                   name="password"
+                  placeholder="••••••••"
                   type="password"
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  autoComplete="new-password"
-                  required
-                  placeholder="••••••••"
-                  minLength={6}
-                  fullWidth
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="confirmPassword"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="confirmPassword"
                 >
                   Confirm Password
                 </label>
                 <Input
+                  fullWidth
+                  required
+                  autoComplete="new-password"
                   id="confirmPassword"
+                  minLength={6}
                   name="confirmPassword"
+                  placeholder="••••••••"
                   type="password"
                   value={formData.confirmPassword}
                   onChange={(e) =>
@@ -183,26 +192,21 @@ function RegisterForm() {
                       confirmPassword: e.target.value,
                     })
                   }
-                  autoComplete="new-password"
-                  required
-                  placeholder="••••••••"
-                  minLength={6}
-                  fullWidth
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="locality"
                   className="block text-sm font-medium mb-1"
+                  htmlFor="locality"
                 >
                   Locality
                 </label>
                 <Select
+                  required
                   id="locality"
                   name="locality"
                   placeholder="Select your locality"
-                  required
                   value={formData.locality}
                   onChange={(e) =>
                     setFormData({ ...formData, locality: e.target.value })
@@ -218,11 +222,11 @@ function RegisterForm() {
             </div>
 
             <Button
-              type="submit"
-              color="primary"
               fullWidth
-              isLoading={isLoading}
+              color="primary"
               disabled={isLoading}
+              isLoading={isLoading}
+              type="submit"
             >
               {isLoading ? "Creating account..." : "Sign up"}
             </Button>
@@ -233,8 +237,8 @@ function RegisterForm() {
           <div className="text-sm text-center">
             Already have an account?{" "}
             <Link
-              href="/login"
               className="font-medium text-primary hover:text-primary-400"
+              href="/login"
             >
               Sign in
             </Link>

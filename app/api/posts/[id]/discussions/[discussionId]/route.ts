@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import mongoose from "mongoose";
+
 import connectDB from "@/lib/db/connect";
 import UserModel from "@/models/User";
 import DiscussionModel from "@/models/Discussion";
-import mongoose from "mongoose";
 
 // DELETE /api/posts/[id]/discussions/[discussionId] - Delete a specific discussion
 export async function DELETE(req: NextRequest, { params }: any) {
@@ -20,6 +21,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -28,16 +30,18 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Get user
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Find the discussion
     const discussion = await DiscussionModel.findById(discussionId);
+
     if (!discussion) {
       return NextResponse.json(
         { error: "Discussion not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -45,7 +49,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (discussion.postId.toString() !== postId) {
       return NextResponse.json(
         { error: "Discussion doesn't belong to this post" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -58,7 +62,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!isAuthorized) {
       return NextResponse.json(
         { error: "You don't have permission to delete this discussion" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -79,9 +83,10 @@ export async function DELETE(req: NextRequest, { params }: any) {
     return NextResponse.json({ message: "Discussion deleted successfully" });
   } catch (error: any) {
     console.error("Error deleting discussion:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to delete discussion" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -101,6 +106,7 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -109,10 +115,11 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     // Find the discussion
     const discussion = await DiscussionModel.findById(discussionId);
+
     if (!discussion) {
       return NextResponse.json(
         { error: "Discussion not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -120,7 +127,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (discussion.postId.toString() !== postId) {
       return NextResponse.json(
         { error: "Discussion doesn't belong to this post" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -128,7 +135,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (discussion.createdBy.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only edit your own discussions" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -140,7 +147,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (!content || content.trim() === "") {
       return NextResponse.json(
         { error: "Discussion content is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -148,15 +155,16 @@ export async function PUT(req: NextRequest, { params }: any) {
     const updatedDiscussion = await DiscussionModel.findByIdAndUpdate(
       discussionId,
       { content },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).populate("createdBy", "name image");
 
     return NextResponse.json(updatedDiscussion);
   } catch (error: any) {
     console.error("Error updating discussion:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to update discussion" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

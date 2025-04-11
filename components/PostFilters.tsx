@@ -33,20 +33,20 @@ export default function PostFilters({
 
   return (
     <div className="bg-default-50 p-4 rounded-lg">
-      <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-4">
+      <form className="flex flex-col sm:flex-row gap-4" onSubmit={onSubmit}>
         <Input
+          className="flex-grow"
           placeholder="Search posts..."
+          size="lg"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-grow"
-          size="lg"
         />
         <Select
+          className="sm:w-40"
           placeholder="Filter by type"
+          size="lg"
           value={selectedType}
           onChange={(e) => onTypeChange(e.target.value)}
-          className="sm:w-40"
-          size="lg"
         >
           {postTypes.map((type) => (
             <SelectItem key={type.value} textValue={type.value}>
@@ -56,15 +56,15 @@ export default function PostFilters({
         </Select>
         <div className="flex gap-2">
           <Button
-            type="submit"
             color="primary"
             size="lg"
+            type="submit"
             onPress={() => onSearchChange(searchTerm)}
           >
             Search
           </Button>
           {(selectedType !== "all" || searchTerm) && (
-            <Button variant="flat" onPress={onClear} size="lg">
+            <Button size="lg" variant="flat" onPress={onClear}>
               Clear
             </Button>
           )}

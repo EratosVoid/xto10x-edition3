@@ -18,6 +18,7 @@ import { useSession } from "next-auth/react";
 // Format date helper
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
+
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -56,7 +57,7 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
   const [message, setMessage] = useState("");
   const [replyingTo, setReplyingTo] = useState<Discussion | null>(null);
   const [editingDiscussion, setEditingDiscussion] = useState<Discussion | null>(
-    null
+    null,
   );
   const [submitting, setSubmitting] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -77,10 +78,12 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to fetch discussions");
       }
 
       const data = await response.json();
+
       setDiscussions(data);
     } catch (err: any) {
       console.error("Error fetching discussions:", err);
@@ -112,6 +115,7 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to post discussion");
       }
 
@@ -151,11 +155,12 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
           body: JSON.stringify({
             content: message,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to update discussion");
       }
 
@@ -164,8 +169,8 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
       // Update in discussions
       setDiscussions(
         discussions.map((d) =>
-          d._id === updatedDiscussion._id ? updatedDiscussion : d
-        )
+          d._id === updatedDiscussion._id ? updatedDiscussion : d,
+        ),
       );
 
       setMessage("");
@@ -187,11 +192,12 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
         `/api/posts/${postId}/discussions/${discussionToDelete._id}`,
         {
           method: "DELETE",
-        }
+        },
       );
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to delete discussion");
       }
 
@@ -254,6 +260,7 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
 
     // Group replies by parent ID
     const replyMap: Record<string, Discussion[]> = {};
+
     replies.forEach((reply) => {
       if (reply.parentId) {
         if (!replyMap[reply.parentId]) {
@@ -275,11 +282,11 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
       <div key={discussion._id} className={`mb-4 ${isReply ? "ml-8" : ""}`}>
         <div className="flex gap-3">
           <Avatar
+            name={discussion.createdBy?.name || "User"}
+            size="sm"
             src={
               discussion.createdBy?.image || "https://i.pravatar.cc/150?img=1"
             }
-            name={discussion.createdBy?.name || "User"}
-            size="sm"
           />
           <div className="flex-1">
             <div className="flex justify-between items-center mb-1">
@@ -294,17 +301,17 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
               {canModifyDiscussion(discussion) && !discussion.isDeleted && (
                 <div className="flex gap-2">
                   <Button
+                    color="primary"
                     size="sm"
                     variant="flat"
-                    color="primary"
                     onClick={() => startEditing(discussion)}
                   >
                     Edit
                   </Button>
                   <Button
+                    color="danger"
                     size="sm"
                     variant="flat"
-                    color="danger"
                     onClick={() => openDeleteModal(discussion)}
                   >
                     Delete
@@ -318,9 +325,9 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
               {discussion.content}
             </div>
             <Button
+              color="default"
               size="sm"
               variant="flat"
-              color="default"
               onClick={() => startReplying(discussion)}
             >
               Reply
@@ -352,8 +359,8 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
 
           {/* Comment Form */}
           <form
-            onSubmit={editingDiscussion ? handleEditSubmit : handleSubmit}
             className="mb-6"
+            onSubmit={editingDiscussion ? handleEditSubmit : handleSubmit}
           >
             <div className="mb-2">
               {replyingTo && (
@@ -363,10 +370,10 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
                     {replyingTo.createdBy.name}
                   </span>
                   <Button
+                    className="ml-2"
+                    color="danger"
                     size="sm"
                     variant="flat"
-                    color="danger"
-                    className="ml-2"
                     onClick={cancelAction}
                   >
                     Cancel
@@ -378,10 +385,10 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
                 <div className="text-sm text-gray-600 mb-2">
                   Editing comment
                   <Button
+                    className="ml-2"
+                    color="danger"
                     size="sm"
                     variant="flat"
-                    color="danger"
-                    className="ml-2"
                     onClick={cancelAction}
                   >
                     Cancel
@@ -390,18 +397,18 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
               )}
 
               <Textarea
+                fullWidth
+                minRows={3}
+                placeholder="Share your thoughts..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Share your thoughts..."
-                minRows={3}
-                fullWidth
               />
             </div>
             <Button
-              type="submit"
               color="primary"
-              isLoading={submitting}
               disabled={submitting || !message.trim()}
+              isLoading={submitting}
+              type="submit"
             >
               {editingDiscussion ? "Update" : "Post"}
             </Button>
@@ -421,7 +428,7 @@ export default function DiscussionThread({ postId }: DiscussionThreadProps) {
           ) : (
             <div>
               {topLevelDiscussions.map((discussion) =>
-                renderDiscussion(discussion)
+                renderDiscussion(discussion),
               )}
             </div>
           )}

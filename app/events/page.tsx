@@ -90,12 +90,14 @@ const categories = [
 // Get category color
 const getCategoryColor = (category: string) => {
   const found = categories.find((c) => c.value === category);
+
   return found ? found.color : "default";
 };
 
 // Format date
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
+
   return date.toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
@@ -127,7 +129,7 @@ export default function EventsPage() {
   // Paginate the results
   const displayedEvents = filteredEvents.slice(
     (page - 1) * itemsPerPage,
-    page * itemsPerPage
+    page * itemsPerPage,
   );
 
   return (
@@ -140,8 +142,8 @@ export default function EventsPage() {
           </p>
         </div>
         <Button
-          color="primary"
           className="mt-4 md:mt-0"
+          color="primary"
           onClick={() => router.push("/events/create")}
         >
           Create Event
@@ -151,16 +153,16 @@ export default function EventsPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 my-6">
         <Input
+          className="max-w-md"
           placeholder="Search events..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
         />
         <Select
+          className="max-w-xs"
           placeholder="Filter by category"
           selectedKeys={[selectedCategory]}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="max-w-xs"
         >
           {categories.map((category) => (
             <SelectItem key={category.value} textValue={category.value}>
@@ -241,9 +243,9 @@ export default function EventsPage() {
       {filteredEvents.length > itemsPerPage && (
         <div className="flex justify-center mt-10">
           <Pagination
-            total={Math.ceil(filteredEvents.length / itemsPerPage)}
             initialPage={1}
             page={page}
+            total={Math.ceil(filteredEvents.length / itemsPerPage)}
             onChange={setPage}
           />
         </div>

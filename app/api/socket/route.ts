@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { initSocketServer } from "@/lib/socket";
 
 export async function GET(req: NextRequest) {
   // The NextResponse object doesn't have socket property,

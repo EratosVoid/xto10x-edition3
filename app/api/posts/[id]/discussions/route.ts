@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import mongoose from "mongoose";
+
 import connectDB from "@/lib/db/connect";
 import PostModel from "@/models/Post";
 import UserModel from "@/models/User";
 import DiscussionModel from "@/models/Discussion";
-import mongoose from "mongoose";
 
 // GET /api/posts/[id]/discussions - Get all discussions for a post
 export async function GET(req: NextRequest, { params }: any) {
@@ -18,6 +19,7 @@ export async function GET(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -26,12 +28,14 @@ export async function GET(req: NextRequest, { params }: any) {
 
     // Get user's locality
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Find post by ID to check locality
     const post = await PostModel.findById(postId);
+
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -40,7 +44,7 @@ export async function GET(req: NextRequest, { params }: any) {
     if (post.locality !== user.locality) {
       return NextResponse.json(
         { error: "You don't have access to this post's discussions" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -59,9 +63,10 @@ export async function GET(req: NextRequest, { params }: any) {
     return NextResponse.json(discussions);
   } catch (error: any) {
     console.error("Error fetching discussions:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to fetch discussions" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -78,6 +83,7 @@ export async function POST(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -86,12 +92,14 @@ export async function POST(req: NextRequest, { params }: any) {
 
     // Get user
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Find post by ID to check locality
     const post = await PostModel.findById(postId);
+
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -100,7 +108,7 @@ export async function POST(req: NextRequest, { params }: any) {
     if (post.locality !== user.locality) {
       return NextResponse.json(
         { error: "You don't have access to this post's discussions" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -112,7 +120,7 @@ export async function POST(req: NextRequest, { params }: any) {
     if (!content || content.trim() === "") {
       return NextResponse.json(
         { error: "Discussion content is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -120,17 +128,18 @@ export async function POST(req: NextRequest, { params }: any) {
     if (parentId && !mongoose.Types.ObjectId.isValid(parentId)) {
       return NextResponse.json(
         { error: "Invalid parent discussion ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // If parentId is provided, check if it exists
     if (parentId) {
       const parentDiscussion = await DiscussionModel.findById(parentId);
+
       if (!parentDiscussion) {
         return NextResponse.json(
           { error: "Parent discussion not found" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -138,7 +147,7 @@ export async function POST(req: NextRequest, { params }: any) {
       if (parentDiscussion.postId.toString() !== postId) {
         return NextResponse.json(
           { error: "Parent discussion doesn't belong to this post" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -155,7 +164,7 @@ export async function POST(req: NextRequest, { params }: any) {
 
     // Return populated discussion
     const populatedDiscussion = await DiscussionModel.findById(
-      newDiscussion._id
+      newDiscussion._id,
     )
       .populate("createdBy", "name image")
       .populate({
@@ -169,9 +178,10 @@ export async function POST(req: NextRequest, { params }: any) {
     return NextResponse.json(populatedDiscussion, { status: 201 });
   } catch (error: any) {
     console.error("Error creating discussion:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to create discussion" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

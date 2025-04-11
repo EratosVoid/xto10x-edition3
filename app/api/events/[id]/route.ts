@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import mongoose from "mongoose";
+
 import connectDB from "@/lib/db/connect";
 import EventModel from "@/models/Event";
 import UserModel from "@/models/User";
 import PostModel from "@/models/Post";
-import mongoose from "mongoose";
 
 // GET /api/events/[id] - Get a specific event
 export async function GET(req: NextRequest, { params }: any) {
@@ -18,6 +19,7 @@ export async function GET(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -26,6 +28,7 @@ export async function GET(req: NextRequest, { params }: any) {
 
     // Get user's locality
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -45,16 +48,17 @@ export async function GET(req: NextRequest, { params }: any) {
     if (event.postId.locality !== user.locality) {
       return NextResponse.json(
         { error: "You don't have access to this event" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     return NextResponse.json(event);
   } catch (error: any) {
     console.error("Error fetching event:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to fetch event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -71,6 +75,7 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -79,6 +84,7 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     // Find the event
     const event = await EventModel.findById(eventId).populate("postId");
+
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
@@ -87,7 +93,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (event.organizer.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only edit events you organized" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -104,7 +110,7 @@ export async function PUT(req: NextRequest, { params }: any) {
         ...(duration && { duration }),
         ...(location && { location }),
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     )
       .populate("organizer", "name image")
       .populate("attendees", "name image");
@@ -112,9 +118,10 @@ export async function PUT(req: NextRequest, { params }: any) {
     return NextResponse.json(updatedEvent);
   } catch (error: any) {
     console.error("Error updating event:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to update event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -131,6 +138,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -139,12 +147,14 @@ export async function DELETE(req: NextRequest, { params }: any) {
 
     // Find event
     const event = await EventModel.findById(eventId);
+
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
     // Check if user is the organizer of the event or an admin/moderator
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -157,12 +167,13 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!isAuthorized) {
       return NextResponse.json(
         { error: "You don't have permission to delete this event" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // Find the associated post
     const post = await PostModel.findOne({ eventId });
+
     if (post) {
       // Remove event reference from post
       await PostModel.findByIdAndUpdate(post._id, { $unset: { eventId: 1 } });
@@ -174,9 +185,10 @@ export async function DELETE(req: NextRequest, { params }: any) {
     return NextResponse.json({ message: "Event deleted successfully" });
   } catch (error: any) {
     console.error("Error deleting event:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to delete event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

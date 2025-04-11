@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import { Award } from "@/types";
 
 const AwardSchema = new mongoose.Schema<Award>(
@@ -12,7 +13,7 @@ const AwardSchema = new mongoose.Schema<Award>(
     description: { type: String, required: true },
     earnedAt: { type: Date, required: true, default: Date.now },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Create indexes for better performance

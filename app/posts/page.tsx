@@ -7,6 +7,7 @@ import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { Pagination } from "@heroui/pagination";
 import { Tabs, Tab } from "@heroui/tabs";
+
 import PostFilters from "@/components/PostFilters";
 import PostCard from "@/components/PostCard";
 
@@ -32,6 +33,7 @@ export default function PostsPage() {
 
     if (status === "unauthenticated") {
       router.push("/login?callbackUrl=/posts");
+
       return;
     }
 
@@ -47,6 +49,7 @@ export default function PostsPage() {
 
       // Build query parameters
       const params = new URLSearchParams();
+
       params.append("page", pagination.page.toString());
       params.append("limit", pagination.limit.toString());
 
@@ -66,10 +69,12 @@ export default function PostsPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to fetch posts");
       }
 
       const data = await response.json();
+
       setPosts(data.posts);
       setPagination(data.pagination);
     } catch (err: any) {
@@ -116,20 +121,20 @@ export default function PostsPage() {
           </p>
         </div>
         <Button
-          color="primary"
           className="mt-4 md:mt-0"
-          onPress={() => router.push("/posts/create")}
+          color="primary"
           size="lg"
+          onPress={() => router.push("/posts/create")}
         >
           Create Post
         </Button>
       </div>
 
       <Tabs
-        selectedKey={activeTab}
-        onSelectionChange={(key) => setActiveTab(key as string)}
         className="mb-6"
+        selectedKey={activeTab}
         size="lg"
+        onSelectionChange={(key) => setActiveTab(key as string)}
       >
         <Tab key="all" title="All Posts" />
         <Tab key="my" title="My Posts" />
@@ -138,10 +143,10 @@ export default function PostsPage() {
       <PostFilters
         searchTerm={searchTerm.current}
         selectedType={selectedType}
-        onSearchChange={(value: string) => (searchTerm.current = value)}
-        onTypeChange={setSelectedType}
-        onSubmit={handleSearch}
         onClear={handleClearFilters}
+        onSearchChange={(value: string) => (searchTerm.current = value)}
+        onSubmit={handleSearch}
+        onTypeChange={setSelectedType}
       />
 
       {/* Error display */}
@@ -174,8 +179,8 @@ export default function PostsPage() {
               </p>
               <Button
                 color="primary"
-                onPress={() => router.push("/posts/create")}
                 size="lg"
+                onPress={() => router.push("/posts/create")}
               >
                 Create Post
               </Button>
@@ -190,8 +195,8 @@ export default function PostsPage() {
                 <PostCard
                   key={post._id}
                   post={post}
-                  showEdit={true}
                   showAuthor={false}
+                  showEdit={true}
                 />
               ))}
             </div>
@@ -203,8 +208,8 @@ export default function PostsPage() {
               </p>
               <Button
                 color="primary"
-                onPress={() => router.push("/posts/create")}
                 size="lg"
+                onPress={() => router.push("/posts/create")}
               >
                 Create Post
               </Button>
@@ -217,10 +222,10 @@ export default function PostsPage() {
       {activeTab === "all" && pagination.pages > 1 && (
         <div className="flex justify-center mt-8">
           <Pagination
-            total={pagination.pages}
             initialPage={pagination.page}
-            onChange={handlePageChange}
             size="lg"
+            total={pagination.pages}
+            onChange={handlePageChange}
           />
         </div>
       )}

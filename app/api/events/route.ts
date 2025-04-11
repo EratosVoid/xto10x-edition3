@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import mongoose from "mongoose";
+
 import connectDB from "@/lib/db/connect";
 import EventModel from "@/models/Event";
 import UserModel from "@/models/User";
 import PostModel from "@/models/Post";
-import mongoose from "mongoose";
 
 // GET /api/events - Get all events (with optional filtering)
 export async function GET(req: NextRequest) {
   try {
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -19,6 +21,7 @@ export async function GET(req: NextRequest) {
 
     // Get user's locality
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -40,6 +43,7 @@ export async function GET(req: NextRequest) {
 
     // Add date filters
     const now = new Date();
+
     if (upcoming === "true") {
       query.startDate = { $gte: now };
     } else if (past === "true") {
@@ -56,6 +60,7 @@ export async function GET(req: NextRequest) {
 
     // For each event, check if the post is in the user's locality
     const accessibleEvents = [];
+
     for (const event of events) {
       if (event.postId && event.postId.locality === user.locality) {
         accessibleEvents.push(event);
@@ -76,9 +81,10 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error fetching events:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to fetch events" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -88,6 +94,7 @@ export async function POST(req: NextRequest) {
   try {
     // Check authentication
     const token = await getToken({ req });
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -96,6 +103,7 @@ export async function POST(req: NextRequest) {
 
     // Get user
     const user = await UserModel.findById(token.id);
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -108,7 +116,7 @@ export async function POST(req: NextRequest) {
     if (!postId || !startDate || !endDate || !duration || !location) {
       return NextResponse.json(
         { error: "Missing required event details" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -119,6 +127,7 @@ export async function POST(req: NextRequest) {
 
     // Check if post exists and is of type 'event'
     const post = await PostModel.findById(postId);
+
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -126,7 +135,7 @@ export async function POST(req: NextRequest) {
     if (post.type !== "event") {
       return NextResponse.json(
         { error: "Post is not of type 'event'" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -134,16 +143,17 @@ export async function POST(req: NextRequest) {
     if (post.createdBy.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only create events for your own posts" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // Check if an event already exists for this post
     const existingEvent = await EventModel.findOne({ postId });
+
     if (existingEvent) {
       return NextResponse.json(
         { error: "An event already exists for this post" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -171,9 +181,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(populatedEvent, { status: 201 });
   } catch (error: any) {
     console.error("Error creating event:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to create event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
