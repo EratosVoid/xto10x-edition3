@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Spinner } from "@heroui/spinner";
-import PostForm, { PostFormData } from "../components/PostForm";
+import PostForm, { PostFormData } from "@/components/PostForm";
 
 export default function CreatePostPage() {
   const router = useRouter();

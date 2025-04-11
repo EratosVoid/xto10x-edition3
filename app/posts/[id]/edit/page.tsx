@@ -7,7 +7,7 @@ import { Spinner } from "@heroui/spinner";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { use } from "react";
-import PostForm, { PostFormData } from "../../components/PostForm";
+import PostForm, { PostFormData } from "@/components/PostForm";
 
 interface PageProps {
   params: Promise<{ id: string }>;

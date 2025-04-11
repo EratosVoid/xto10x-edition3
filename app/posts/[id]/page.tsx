@@ -18,6 +18,7 @@ import {
 import { useDisclosure } from "@heroui/modal";
 import { Divider } from "@heroui/divider";
 import { use } from "react";
+import DiscussionThread from "../components/DiscussionThread";
 
 // Format date
 const formatDate = (dateString: string) => {
@@ -158,78 +159,194 @@ export default function PostDetailPage({ params }: PageProps) {
     (session?.user as any)?.role === "moderator" ||
     (session?.user as any)?.role === "admin";
 
+  // Render post details based on type
+  const renderPostTypeDetails = () => {
+    if (!post) return null;
+
+    switch (post.type) {
+      case "event":
+        return (
+          <div className="mt-6 bg-primary-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-2">Event Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-medium">Start Date:</p>
+                <p>
+                  {post.eventDetails?.startDate
+                    ? formatDate(post.eventDetails.startDate)
+                    : "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">End Date:</p>
+                <p>
+                  {post.eventDetails?.endDate
+                    ? formatDate(post.eventDetails.endDate)
+                    : "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">Duration:</p>
+                <p>
+                  {post.eventDetails?.duration
+                    ? `${post.eventDetails.duration} minutes`
+                    : "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">Location:</p>
+                <p>{post.eventDetails?.location || "N/A"}</p>
+              </div>
+            </div>
+          </div>
+        );
+      case "poll":
+        return (
+          <div className="mt-6 bg-primary-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-2">Poll</h3>
+            <div className="space-y-2">
+              {post.pollDetails?.options &&
+                Object.entries(post.pollDetails.options).map(
+                  ([option, votes]: [string, any]) => (
+                    <div key={option} className="flex justify-between">
+                      <span>{option}</span>
+                      <span className="font-medium">{votes} votes</span>
+                    </div>
+                  )
+                )}
+              {(!post.pollDetails?.options ||
+                Object.keys(post.pollDetails.options).length === 0) && (
+                <p className="text-gray-500">No poll options available</p>
+              )}
+            </div>
+            <Button color="primary" className="mt-4">
+              Vote
+            </Button>
+          </div>
+        );
+      case "petition":
+        return (
+          <div className="mt-6 bg-primary-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-2">Petition</h3>
+            <div className="mb-4">
+              <p className="font-medium">Target:</p>
+              <p>{post.petitionDetails?.target || "N/A"}</p>
+            </div>
+            <div className="mb-4">
+              <div className="flex justify-between mb-1">
+                <span>
+                  Progress: {post.petitionDetails?.supporters || 0} /{" "}
+                  {post.petitionDetails?.goal || 100}
+                </span>
+                <span>
+                  {Math.floor(
+                    ((post.petitionDetails?.supporters || 0) /
+                      (post.petitionDetails?.goal || 100)) *
+                      100
+                  )}
+                  %
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-primary h-2.5 rounded-full"
+                  style={{
+                    width: `${Math.min(((post.petitionDetails?.supporters || 0) / (post.petitionDetails?.goal || 100)) * 100, 100)}%`,
+                  }}
+                ></div>
+              </div>
+            </div>
+            <Button color="primary">Sign Petition</Button>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
       {post && (
-        <Card className="w-full">
-          <CardHeader className="flex flex-col gap-2">
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-3xl font-bold">{post.title}</h1>
-                <div className="flex items-center gap-2 mt-2">
-                  <Chip color="default" variant="flat">
-                    {post.type}
-                  </Chip>
-                  <Chip
-                    color={getPriorityColor(post.priority) as any}
-                    variant="flat"
-                    size="sm"
-                  >
-                    {post.priority} priority
-                  </Chip>
-                </div>
-              </div>
-              {(isAuthor || isModeratorOrAdmin) && (
-                <div className="flex gap-2">
-                  {isAuthor && (
-                    <Button
+        <>
+          <Card className="w-full mb-6">
+            <CardHeader className="flex flex-col gap-2">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h1 className="text-3xl font-bold">{post.title}</h1>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Chip color="default" variant="flat">
+                      {post.type}
+                    </Chip>
+                    <Chip
+                      color={getPriorityColor(post.priority) as any}
                       variant="flat"
-                      color="primary"
-                      onClick={() => router.push(`/posts/${post._id}/edit`)}
+                      size="sm"
                     >
-                      Edit
+                      {post.priority} priority
+                    </Chip>
+                  </div>
+                </div>
+                {(isAuthor || isModeratorOrAdmin) && (
+                  <div className="flex gap-2">
+                    {isAuthor && (
+                      <Button
+                        variant="flat"
+                        color="primary"
+                        onClick={() => router.push(`/posts/${post._id}/edit`)}
+                      >
+                        Edit
+                      </Button>
+                    )}
+                    <Button variant="flat" color="danger" onClick={onOpen}>
+                      Delete
                     </Button>
-                  )}
-                  <Button variant="flat" color="danger" onClick={onOpen}>
-                    Delete
-                  </Button>
-                </div>
-              )}
-            </div>
+                  </div>
+                )}
+              </div>
 
-            <Divider className="my-2" />
+              <Divider className="my-2" />
 
-            <div className="flex items-center gap-2">
-              <Avatar
-                src={post.createdBy?.image || "https://i.pravatar.cc/150?img=1"}
-                name={post.createdBy?.name || "User"}
-                size="sm"
-              />
-              <div>
-                <div className="text-small font-medium">
-                  {post.createdBy?.name}
-                </div>
-                <div className="text-tiny text-default-500">
-                  Posted on {formatDate(post.createdAt)}
+              <div className="flex items-center gap-2">
+                <Avatar
+                  src={
+                    post.createdBy?.image || "https://i.pravatar.cc/150?img=1"
+                  }
+                  name={post.createdBy?.name || "User"}
+                  size="sm"
+                />
+                <div>
+                  <div className="text-small font-medium">
+                    {post.createdBy?.name}
+                  </div>
+                  <div className="text-tiny text-default-500">
+                    Posted on {formatDate(post.createdAt)}
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardHeader>
+            </CardHeader>
 
-          <CardBody>
-            <p className="whitespace-pre-line">{post.description}</p>
+            <CardBody>
+              <div className="prose max-w-none">
+                <p className="whitespace-pre-line">{post.description}</p>
+              </div>
 
-            <div className="mt-6 text-small text-default-500">
-              <p>Locality: {post.locality}</p>
-            </div>
-          </CardBody>
+              {renderPostTypeDetails()}
 
-          <CardFooter>
-            <Button variant="flat" onClick={() => router.push("/posts")}>
-              Back to Posts
-            </Button>
-          </CardFooter>
-        </Card>
+              <div className="mt-6 text-small text-default-500">
+                <p>Locality: {post.locality}</p>
+              </div>
+            </CardBody>
+
+            <CardFooter>
+              <Button variant="flat" onClick={() => router.push("/posts")}>
+                Back to Posts
+              </Button>
+            </CardFooter>
+          </Card>
+
+          {/* Discussion Thread */}
+          <DiscussionThread postId={post._id} />
+        </>
       )}
 
       {/* Delete Confirmation Modal */}
