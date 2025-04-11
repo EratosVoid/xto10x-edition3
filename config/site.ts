@@ -5,12 +5,12 @@ export const siteConfig = {
   description: "Building stronger communities together.",
   navItems: [
     {
-      label: "Home",
-      href: "/",
-    },
-    {
       label: "Dashboard",
       href: "/dashboard",
+    },
+    {
+      label: "Petitions",
+      href: "/petitions",
     },
     {
       label: "Posts",
@@ -24,10 +24,7 @@ export const siteConfig = {
       label: "Polls",
       href: "/polls",
     },
-    {
-      label: "Petitions",
-      href: "/petitions",
-    },
+
     {
       label: "Discussions",
       href: "/discussions",

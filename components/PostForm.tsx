@@ -48,6 +48,20 @@ interface PostFormProps {
   error: string;
 }
 
+// Get type from URL if present
+function getInitialTypeFromUrl() {
+  if (typeof window === "undefined") return null;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const typeFromUrl = urlParams.get("type");
+
+  if (typeFromUrl && postTypes.some((pt) => pt.value === typeFromUrl)) {
+    return typeFromUrl;
+  }
+
+  return null;
+}
+
 export default function PostForm({
   initialData = {
     title: "",
@@ -63,17 +77,25 @@ export default function PostForm({
   error,
 }: PostFormProps) {
   const router = useRouter();
-  // Form state
-  const [formData, setFormData] = useState<PostFormData>(initialData);
 
-  //based on ?type in url add it to the form data
+  // Get the type from URL before initializing state
+  const typeFromUrl = getInitialTypeFromUrl();
+
+  // Initialize form state with URL type if present
+  const [formData, setFormData] = useState<PostFormData>({
+    ...initialData,
+    type: typeFromUrl || initialData.type,
+  });
+
+  const [selectedType, setSelectedType] = useState<string>(
+    typeFromUrl || initialData.type || "general"
+  );
+
+  // Debug logs
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const type = urlParams.get("type");
-    if (type) {
-      setFormData((prev) => ({ ...prev, type }));
-    }
-  }, []);
+    console.log("Current form type:", formData.type);
+    console.log("Current selected type:", selectedType);
+  }, [formData.type, selectedType]);
 
   // Form validation errors
   const [validationErrors, setValidationErrors] = useState({
@@ -91,10 +113,11 @@ export default function PostForm({
 
   // Update form data when initialData changes
   useEffect(() => {
-    if (initialData) {
+    if (initialData && !typeFromUrl) {
       setFormData(initialData);
+      setSelectedType(initialData.type || "general");
     }
-  }, [initialData]);
+  }, [initialData, typeFromUrl]);
 
   // Handle input changes
   const handleChange = (
@@ -106,9 +129,27 @@ export default function PostForm({
 
     setFormData((prev) => ({ ...prev, [name]: value }));
 
+    // Update selectedType if the type field changes
+    if (name === "type") {
+      setSelectedType(value);
+    }
+
     // Clear validation error when field is edited
     if (validationErrors[name as keyof typeof validationErrors]) {
       setValidationErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  // Handle type selection
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    console.log("Type changed to:", value);
+    setSelectedType(value);
+    setFormData((prev) => ({ ...prev, type: value }));
+
+    // Clear validation error when field is edited
+    if (validationErrors.type) {
+      setValidationErrors((prev) => ({ ...prev, type: "" }));
     }
   };
 
@@ -226,7 +267,7 @@ export default function PostForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log(validateForm());
+    console.log("Form data at submission:", formData);
 
     if (!validateForm()) {
       return;
@@ -311,14 +352,14 @@ export default function PostForm({
                 </label>
                 <Select
                   fullWidth
+                  defaultSelectedKeys={[selectedType]}
                   errorMessage={validationErrors.type}
                   id="type"
                   isInvalid={!!validationErrors.type}
                   name="type"
                   placeholder="Select post type"
                   size="lg"
-                  onChange={handleChange}
-                  selectedKeys={new Set([formData.type])}
+                  onChange={handleTypeChange}
                 >
                   {postTypes.map((type) => (
                     <SelectItem key={type.value} textValue={type.value}>
@@ -338,10 +379,10 @@ export default function PostForm({
                 </label>
                 <Select
                   fullWidth
+                  defaultSelectedKeys={[formData.priority]}
                   id="priority"
                   name="priority"
                   size="lg"
-                  value={formData.priority}
                   onChange={handleChange}
                 >
                   {priorities.map((priority) => (

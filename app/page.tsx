@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const features = [
   {
@@ -35,6 +38,9 @@ const features = [
 ];
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <div className="inline-block max-w-lg text-center justify-center">
@@ -47,18 +53,37 @@ export default function Home() {
           collaborate, and create positive change where you live.
         </p>
         <div className="flex gap-4 mt-8 justify-center">
-          <Link
-            className="bg-primary text-white px-6 py-3 rounded-md font-semibold hover:bg-primary/80"
-            href="/login"
-          >
-            Sign In
-          </Link>
-          <Link
-            className="bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-semibold hover:bg-gray-300"
-            href="/register"
-          >
-            Sign Up
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                className="bg-primary text-white px-6 py-3 rounded-md font-semibold hover:bg-primary/80"
+                href="/dashboard"
+              >
+                Dashboard
+              </Link>
+              <Link
+                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-semibold hover:bg-gray-300"
+                href="/posts"
+              >
+                Browse Posts
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                className="bg-primary text-white px-6 py-3 rounded-md font-semibold hover:bg-primary/80"
+                href="/login"
+              >
+                Sign In
+              </Link>
+              <Link
+                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-semibold hover:bg-gray-300"
+                href="/register"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
