@@ -174,8 +174,6 @@ export default function AskAiPage() {
                 size="sm"
                 showFallback
                 fallback="AI"
-                color="primary"
-                isBordered
               />
               <div>
                 <h3 className="text-lg font-semibold">LocalVoice AI</h3>

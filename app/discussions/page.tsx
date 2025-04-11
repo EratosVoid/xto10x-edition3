@@ -252,7 +252,7 @@ export default function DiscussionsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [expandedDiscussion, setExpandedDiscussion] = useState<string | null>(
-    null,
+    null
   );
   const [replyContent, setReplyContent] = useState("");
   const [discussions, setDiscussions] = useState(initialDiscussions);
@@ -383,7 +383,6 @@ export default function DiscussionsPage() {
                         showFallback
                         fallback={discussion.createdBy.initials}
                         size="sm"
-                        src={discussion.createdBy.avatar}
                       />
                       <div>
                         <h3 className="text-xl font-bold">
@@ -435,7 +434,6 @@ export default function DiscussionsPage() {
                               showFallback
                               fallback={response.createdBy.initials}
                               size="sm"
-                              src={response.createdBy.avatar}
                             />
                             <div className="flex-1">
                               <div className="flex justify-between">
