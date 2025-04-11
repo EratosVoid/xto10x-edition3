@@ -6,7 +6,14 @@ const PostSchema = new mongoose.Schema<Post>(
   {
     type: {
       type: String,
-      enum: ["general", "event", "poll", "petition", "announcement"],
+      enum: [
+        "general",
+        "event",
+        "poll",
+        "petition",
+        "announcement",
+        "proposal",
+      ],
       required: true,
     },
     title: { type: String, required: true },
@@ -27,7 +34,7 @@ const PostSchema = new mongoose.Schema<Post>(
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
     petitionId: { type: mongoose.Schema.Types.ObjectId, ref: "Petition" },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Create indexes for better performance

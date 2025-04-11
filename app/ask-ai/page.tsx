@@ -269,6 +269,7 @@ export default function AskAiPage() {
                 color="primary"
                 isDisabled={isLoading || !input.trim()}
                 size="lg"
+                onClick={() => handleSendMessage()}
               >
                 Send
               </Button>

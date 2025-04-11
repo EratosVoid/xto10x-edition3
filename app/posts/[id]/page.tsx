@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
@@ -19,6 +19,51 @@ import { useDisclosure } from "@heroui/modal";
 import { Divider } from "@heroui/divider";
 import { use } from "react";
 import DiscussionThread from "../../../components/DiscussionThread";
+import {
+  resetSpeechSynthesis,
+  speakText,
+  isSpeechSynthesisSupported,
+} from "@/lib/speechSynthesis";
+
+// Sparkle icon for AI summarize button
+const SparkleIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="mr-1"
+  >
+    <path
+      d="M12 3L13.775 8.4254H19.5L14.863 11.8492L16.638 17.2746L12 13.8508L7.36206 17.2746L9.13709 11.8492L4.5 8.4254H10.225L12 3Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+// Audio icon for voice playback
+const AudioIcon = ({ isPlaying = false }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="mr-1"
+  >
+    {isPlaying ? (
+      // Pause icon when playing
+      <path d="M10 9H6V15H10V9ZM18 9H14V15H18V9Z" fill="currentColor" />
+    ) : (
+      // Play icon when paused
+      <path
+        d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z"
+        fill="currentColor"
+      />
+    )}
+  </svg>
+);
 
 // Get initials from name
 const getInitials = (name: string): string => {
@@ -58,6 +103,27 @@ export default function PostDetailPage({ params }: PageProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const resolvedParams = use(params);
+  const [summarizing, setSummarizing] = useState(false);
+  const [summary, setSummary] = useState("");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [speechError, setSpeechError] = useState<string | null>(null);
+
+  // Cancel speech synthesis when component unmounts
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) {
+        resetSpeechSynthesis();
+      }
+    };
+  }, []);
+
+  // Check speech synthesis support on component mount
+  useEffect(() => {
+    const supported = isSpeechSynthesisSupported();
+    if (!supported) {
+      console.warn("Speech synthesis is not supported in this browser");
+    }
+  }, []);
 
   // Fetch post data
   useEffect(() => {
@@ -123,6 +189,78 @@ export default function PostDetailPage({ params }: PageProps) {
       onClose(); // Close modal on error
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // Handle summarize action
+  const handleSummarize = async () => {
+    if (summarizing || summary) return;
+
+    try {
+      setSummarizing(true);
+
+      const response = await fetch(`/api/ai/summarize`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ postId: resolvedParams.id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to summarize post");
+      }
+
+      const data = await response.json();
+      setSummary(data.summary);
+    } catch (err: any) {
+      console.error("Error summarizing post:", err);
+      setError(err.message || "Failed to summarize post");
+    } finally {
+      setSummarizing(false);
+    }
+  };
+
+  // Handle voice playback
+  const handleVoicePlayback = async () => {
+    if (!summary) return;
+
+    // Reset any previous errors
+    setSpeechError(null);
+
+    // If the browser doesn't support speech synthesis
+    if (!isSpeechSynthesisSupported()) {
+      setSpeechError("Your browser doesn't support speech synthesis");
+      return;
+    }
+
+    // If already playing, stop it
+    if (isPlaying) {
+      resetSpeechSynthesis();
+      setIsPlaying(false);
+      return;
+    }
+
+    try {
+      // Start playing
+      setIsPlaying(true);
+
+      console.log("Starting to speak summary with length:", summary.length);
+
+      // Attempt to speak the entire summary
+      const success = await speakText(summary);
+
+      if (!success) {
+        setSpeechError("Failed to play the summary");
+      }
+
+      // Speech completes naturally or was stopped
+      setIsPlaying(false);
+    } catch (error) {
+      console.error("Speech synthesis error:", error);
+      setIsPlaying(false);
+      setSpeechError("An error occurred during playback");
     }
   };
 
@@ -341,6 +479,13 @@ export default function PostDetailPage({ params }: PageProps) {
                 </div>
                 {(isAuthor || isModeratorOrAdmin) && (
                   <div className="flex gap-2">
+                    <Button
+                      color="secondary"
+                      startContent={<SparkleIcon />}
+                      onPress={() => handleSummarize()}
+                    >
+                      Summarize
+                    </Button>
                     {isAuthor && (
                       <Button
                         color="primary"
@@ -381,8 +526,44 @@ export default function PostDetailPage({ params }: PageProps) {
                 <p className="whitespace-pre-line">{post.description}</p>
               </div>
 
-              {/* here if post type is poll, open the /polls page */}
-              {/* similar for event, petition and announcement */}
+              {/* Summary section */}
+              {(summarizing || summary) && (
+                <div className="mt-6 bg-secondary-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <SparkleIcon />
+                      <h3 className="text-lg font-semibold">AI Summary</h3>
+                    </div>
+                    {summary && (
+                      <Button
+                        size="sm"
+                        color="secondary"
+                        variant="flat"
+                        startContent={<AudioIcon isPlaying={isPlaying} />}
+                        onClick={handleVoicePlayback}
+                        isDisabled={summarizing}
+                      >
+                        {isPlaying ? "Stop" : "Play"}
+                      </Button>
+                    )}
+                  </div>
+                  {summarizing ? (
+                    <div className="flex items-center gap-2">
+                      <Spinner size="sm" color="secondary" />
+                      <span>Generating summary...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="whitespace-pre-line">{summary}</p>
+                      {speechError && (
+                        <p className="text-danger text-sm mt-2">
+                          {speechError}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
 
               {renderPostTypeDetails()}
 
