@@ -1,6 +1,7 @@
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
+import { useState } from "react";
 
 interface PostFiltersProps {
   searchTerm: string;
@@ -21,20 +22,22 @@ const postTypes = [
 ];
 
 export default function PostFilters({
-  searchTerm,
+  searchTerm: defaultSearchTerm,
   selectedType,
   onSearchChange,
   onTypeChange,
   onSubmit,
   onClear,
 }: PostFiltersProps) {
+  const [searchTerm, setSearchTerm] = useState(defaultSearchTerm);
+
   return (
     <div className="bg-default-50 p-4 rounded-lg">
       <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-4">
         <Input
           placeholder="Search posts..."
           value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="flex-grow"
           size="lg"
         />
@@ -52,7 +55,12 @@ export default function PostFilters({
           ))}
         </Select>
         <div className="flex gap-2">
-          <Button type="submit" color="primary" size="lg">
+          <Button
+            type="submit"
+            color="primary"
+            size="lg"
+            onPress={() => onSearchChange(searchTerm)}
+          >
             Search
           </Button>
           {(selectedType !== "all" || searchTerm) && (

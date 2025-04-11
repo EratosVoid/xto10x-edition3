@@ -27,6 +27,16 @@ export interface PostFormData {
   description: string;
   type: string;
   priority: string;
+  // Event fields
+  startDate?: string;
+  endDate?: string;
+  duration?: number;
+  location?: string;
+  // Poll fields
+  options?: string[];
+  // Petition fields
+  target?: string;
+  goal?: number;
 }
 
 interface PostFormProps {
@@ -44,6 +54,7 @@ export default function PostForm({
     description: "",
     type: "general",
     priority: "medium",
+    options: [""],
   },
   isEditing = false,
   postId,
@@ -61,6 +72,13 @@ export default function PostForm({
     title: "",
     description: "",
     type: "",
+    startDate: "",
+    endDate: "",
+    duration: "",
+    location: "",
+    options: "",
+    target: "",
+    goal: "",
   });
 
   // Update form data when initialData changes
@@ -85,12 +103,46 @@ export default function PostForm({
     }
   };
 
+  // Handle poll options changes
+  const handleOptionChange = (index: number, value: string) => {
+    const newOptions = [...(formData.options || [""])];
+    newOptions[index] = value;
+    setFormData((prev) => ({ ...prev, options: newOptions }));
+
+    // Clear validation error when field is edited
+    if (validationErrors.options) {
+      setValidationErrors((prev) => ({ ...prev, options: "" }));
+    }
+  };
+
+  // Add poll option
+  const addPollOption = () => {
+    setFormData((prev) => ({
+      ...prev,
+      options: [...(prev.options || [""]), ""],
+    }));
+  };
+
+  // Remove poll option
+  const removePollOption = (index: number) => {
+    const newOptions = [...(formData.options || [""])];
+    newOptions.splice(index, 1);
+    setFormData((prev) => ({ ...prev, options: newOptions }));
+  };
+
   // Validate form
   const validateForm = () => {
     const errors = {
       title: "",
       description: "",
       type: "",
+      startDate: "",
+      endDate: "",
+      duration: "",
+      location: "",
+      options: "",
+      target: "",
+      goal: "",
     };
     let isValid = true;
 
@@ -113,6 +165,49 @@ export default function PostForm({
     if (!isEditing && !formData.type) {
       errors.type = "Please select a type";
       isValid = false;
+    }
+
+    // Validate Event fields
+    if (formData.type === "event") {
+      if (!formData.startDate) {
+        errors.startDate = "Start date is required";
+        isValid = false;
+      }
+      if (!formData.endDate) {
+        errors.endDate = "End date is required";
+        isValid = false;
+      }
+      if (!formData.duration) {
+        errors.duration = "Duration is required";
+        isValid = false;
+      }
+      if (!formData.location?.trim()) {
+        errors.location = "Location is required";
+        isValid = false;
+      }
+    }
+
+    // Validate Poll fields
+    if (formData.type === "poll") {
+      if (!formData.options || formData.options.length < 2) {
+        errors.options = "At least 2 options are required";
+        isValid = false;
+      } else if (formData.options.some((option) => !option.trim())) {
+        errors.options = "All options must have content";
+        isValid = false;
+      }
+    }
+
+    // Validate Petition fields
+    if (formData.type === "petition") {
+      if (!formData.target?.trim()) {
+        errors.target = "Target is required";
+        isValid = false;
+      }
+      if (!formData.goal || formData.goal <= 0) {
+        errors.goal = "Goal must be a positive number";
+        isValid = false;
+      }
     }
 
     setValidationErrors(errors);
@@ -245,6 +340,167 @@ export default function PostForm({
                     </SelectItem>
                   ))}
                 </Select>
+              </div>
+            </div>
+          )}
+
+          {/* Event Fields */}
+          {formData.type === "event" && (
+            <div className="border p-4 rounded-lg ">
+              <h3 className="text-lg font-semibold mb-4">Event Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Start Date */}
+                <div>
+                  <label
+                    htmlFor="startDate"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Start Date <span className="text-danger">*</span>
+                  </label>
+                  <Input
+                    id="startDate"
+                    name="startDate"
+                    type="datetime-local"
+                    value={formData.startDate || ""}
+                    onChange={handleChange}
+                    isInvalid={!!validationErrors.startDate}
+                    errorMessage={validationErrors.startDate}
+                    fullWidth
+                  />
+                </div>
+
+                {/* End Date */}
+                <div>
+                  <label
+                    htmlFor="endDate"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    End Date <span className="text-danger">*</span>
+                  </label>
+                  <Input
+                    id="endDate"
+                    name="endDate"
+                    type="datetime-local"
+                    value={formData.endDate || ""}
+                    onChange={handleChange}
+                    isInvalid={!!validationErrors.endDate}
+                    errorMessage={validationErrors.endDate}
+                    fullWidth
+                    min={formData.startDate}
+                  />
+                </div>
+
+                {/* Location */}
+                <div>
+                  <label
+                    htmlFor="location"
+                    className="block text-sm font-medium mb-1 col-span-full"
+                  >
+                    Location <span className="text-danger">*</span>
+                  </label>
+                  <Input
+                    id="location"
+                    name="location"
+                    value={formData.location || ""}
+                    onChange={handleChange}
+                    placeholder="Enter event location"
+                    isInvalid={!!validationErrors.location}
+                    errorMessage={validationErrors.location}
+                    fullWidth
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Poll Fields */}
+          {formData.type === "poll" && (
+            <div className="border p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4">Poll Options</h3>
+              {formData.options?.map((option, index) => (
+                <div key={index} className="flex items-center mb-3">
+                  <Input
+                    value={option}
+                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                    placeholder={`Option ${index + 1}`}
+                    className="mr-2"
+                    fullWidth
+                  />
+                  {index > 1 && (
+                    <Button
+                      type="button"
+                      color="danger"
+                      variant="flat"
+                      size="sm"
+                      onClick={() => removePollOption(index)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                color="primary"
+                variant="flat"
+                onClick={addPollOption}
+                className="mt-2"
+              >
+                Add Option
+              </Button>
+              {validationErrors.options && (
+                <p className="text-danger text-xs mt-1">
+                  {validationErrors.options}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Petition Fields */}
+          {formData.type === "petition" && (
+            <div className="border p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4">Petition Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Target */}
+                <div>
+                  <label
+                    htmlFor="target"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Target <span className="text-danger">*</span>
+                  </label>
+                  <Input
+                    id="target"
+                    name="target"
+                    value={formData.target || ""}
+                    onChange={handleChange}
+                    placeholder="Who is this petition targeting?"
+                    isInvalid={!!validationErrors.target}
+                    errorMessage={validationErrors.target}
+                    fullWidth
+                  />
+                </div>
+
+                {/* Goal */}
+                <div>
+                  <label
+                    htmlFor="goal"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Signature Goal <span className="text-danger">*</span>
+                  </label>
+                  <Input
+                    id="goal"
+                    name="goal"
+                    type="number"
+                    value={formData.goal?.toString() || ""}
+                    onChange={handleChange}
+                    placeholder="Number of signatures needed"
+                    isInvalid={!!validationErrors.goal}
+                    errorMessage={validationErrors.goal}
+                    fullWidth
+                  />
+                </div>
               </div>
             </div>
           )}

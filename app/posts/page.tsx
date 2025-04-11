@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@heroui/button";
@@ -14,10 +14,9 @@ export default function PostsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [posts, setPosts] = useState([]);
-  const [myPosts, setMyPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchTerm = useRef("");
   const [selectedType, setSelectedType] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
   const [pagination, setPagination] = useState({
@@ -38,11 +37,11 @@ export default function PostsPage() {
 
     fetchPosts();
     if (session?.user) {
-      fetchMyPosts();
+      fetchPosts(true);
     }
-  }, [status, pagination.page, selectedType, searchTerm, activeTab]);
+  }, [status, pagination.page, selectedType, searchTerm.current, activeTab]);
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (self = false) => {
     try {
       setLoading(true);
 
@@ -51,12 +50,16 @@ export default function PostsPage() {
       params.append("page", pagination.page.toString());
       params.append("limit", pagination.limit.toString());
 
+      if (self) {
+        params.append("self", "true");
+      }
+
       if (selectedType !== "all") {
         params.append("type", selectedType);
       }
 
-      if (searchTerm) {
-        params.append("search", searchTerm);
+      if (searchTerm.current) {
+        params.append("search", searchTerm.current);
       }
 
       const response = await fetch(`/api/posts?${params.toString()}`);
@@ -73,20 +76,9 @@ export default function PostsPage() {
       console.error("Error fetching posts:", err);
       setError(err.message || "Failed to load posts");
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchMyPosts = async () => {
-    try {
-      const response = await fetch("/api/posts/my");
-      if (!response.ok) {
-        throw new Error("Failed to fetch my posts");
-      }
-      const data = await response.json();
-      setMyPosts(data.posts);
-    } catch (err: any) {
-      console.error("Error fetching my posts:", err);
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
   };
 
@@ -100,7 +92,7 @@ export default function PostsPage() {
   };
 
   const handleClearFilters = () => {
-    setSearchTerm("");
+    searchTerm.current = "";
     setSelectedType("all");
     setPagination({ ...pagination, page: 1 });
   };
@@ -144,9 +136,9 @@ export default function PostsPage() {
       </Tabs>
 
       <PostFilters
-        searchTerm={searchTerm}
+        searchTerm={searchTerm.current}
         selectedType={selectedType}
-        onSearchChange={setSearchTerm}
+        onSearchChange={(value: string) => (searchTerm.current = value)}
         onTypeChange={setSelectedType}
         onSubmit={handleSearch}
         onClear={handleClearFilters}
@@ -192,9 +184,9 @@ export default function PostsPage() {
         </>
       ) : (
         <>
-          {myPosts.length > 0 ? (
+          {posts.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 mt-8">
-              {myPosts.map((post: any) => (
+              {posts.map((post: any) => (
                 <PostCard
                   key={post._id}
                   post={post}

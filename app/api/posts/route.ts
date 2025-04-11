@@ -8,7 +8,7 @@ import UserModel from "@/models/User";
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
-    const category = url.searchParams.get("category");
+    const self = url.searchParams.get("self");
     const type = url.searchParams.get("type");
     const search = url.searchParams.get("search");
     const limit = parseInt(url.searchParams.get("limit") || "10");
@@ -33,8 +33,8 @@ export async function GET(req: NextRequest) {
     // Build query
     const query: any = { locality: userLocality };
 
-    if (category) {
-      query.category = category;
+    if (self) {
+      query.createdBy = token.id;
     }
 
     if (type) {
