@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
     const contextString = generateContextString(contextData);
 
     // Use gemini-pro model for more complex contextualized responses
-    const model = genAI.getGenerativeModel({ model: "gemini-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `You are an AI assistant for a community engagement platform called LocalVoice. 
 Users can create and participate in events, polls, petitions, and discussions with others in their locality.
