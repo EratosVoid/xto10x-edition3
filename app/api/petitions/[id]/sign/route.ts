@@ -3,8 +3,8 @@ import { getToken } from "next-auth/jwt";
 
 import connectDB from "@/lib/db/connect";
 import PetitionModel from "@/models/Petition";
-import PollModel from "@/models/Poll";
 import UserModel from "@/models/User";
+import PollModel from "@/models/Poll";
 
 // POST /api/petitions/[id]/sign - Sign a petition
 export async function POST(req: NextRequest, { params }: any) {
@@ -19,33 +19,32 @@ export async function POST(req: NextRequest, { params }: any) {
     const user = await UserModel.findById(token.id);
     const petition = await PetitionModel.findById(petitionId)
       .populate("postId")
-      .populate("pollId");
+      .populate("supporters");
 
     if (!petition)
       return NextResponse.json(
         { error: "Petition not found" },
-        { status: 404 },
-      );
-    if (!petition.pollId)
-      return NextResponse.json(
-        { error: "Associated poll not found" },
-        { status: 400 },
+        { status: 404 }
       );
 
-    const poll = await PollModel.findById(petition.pollId);
-
-    if (poll.votedUsers.includes(token.id as any)) {
+    // Check if user has already signed
+    if (
+      petition.supporters.some(
+        (supporter: any) => supporter._id.toString() === token.id
+      )
+    ) {
       return NextResponse.json({ error: "Already signed" }, { status: 409 });
     }
 
-    const currentCount = poll.options.get("Yes") || 0;
-    const updateObj: any = { $addToSet: { votedUsers: token.id } };
-
-    updateObj["options.Yes"] = currentCount + 1;
-
-    await PollModel.findByIdAndUpdate(petition.pollId._id, updateObj, {
-      new: true,
-    });
+    // Update the petition with the new signature
+    await PetitionModel.findByIdAndUpdate(
+      petitionId,
+      {
+        $inc: { signatures: 1 },
+        $addToSet: { supporters: token.id },
+      },
+      { new: true }
+    );
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -63,29 +62,32 @@ export async function DELETE(req: NextRequest, { params }: any) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectDB();
-    const petition =
-      await PetitionModel.findById(petitionId).populate("pollId");
+    const petition = await PetitionModel.findById(petitionId);
 
-    if (!petition || !petition.pollId)
+    if (!petition)
       return NextResponse.json(
-        { error: "Petition or poll not found" },
-        { status: 404 },
+        { error: "Petition not found" },
+        { status: 404 }
       );
 
-    const poll = await PollModel.findById(petition.pollId);
+    // Check if user has signed the petition
+    const isSupporter = petition.supporters.some(
+      (id: any) => id.toString() === token.id
+    );
 
-    if (!poll.votedUsers.includes(token.id as any)) {
+    if (!isSupporter) {
       return NextResponse.json({ error: "Not signed" }, { status: 400 });
     }
 
-    const currentCount = poll.options.get("Yes") || 0;
-    const updateObj: any = { $pull: { votedUsers: token.id } };
-
-    updateObj["options.Yes"] = Math.max(0, currentCount - 1);
-
-    await PollModel.findByIdAndUpdate(petition.pollId._id, updateObj, {
-      new: true,
-    });
+    // Remove the signature
+    await PetitionModel.findByIdAndUpdate(
+      petitionId,
+      {
+        $inc: { signatures: -1 },
+        $pull: { supporters: token.id },
+      },
+      { new: true }
+    );
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

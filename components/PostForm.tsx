@@ -63,9 +63,17 @@ export default function PostForm({
   error,
 }: PostFormProps) {
   const router = useRouter();
-
   // Form state
   const [formData, setFormData] = useState<PostFormData>(initialData);
+
+  //based on ?type in url add it to the form data
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get("type");
+    if (type) {
+      setFormData((prev) => ({ ...prev, type }));
+    }
+  }, []);
 
   // Form validation errors
   const [validationErrors, setValidationErrors] = useState({
@@ -92,7 +100,7 @@ export default function PostForm({
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    >
   ) => {
     const { name, value } = e.target;
 
@@ -180,10 +188,6 @@ export default function PostForm({
         errors.endDate = "End date is required";
         isValid = false;
       }
-      if (!formData.duration) {
-        errors.duration = "Duration is required";
-        isValid = false;
-      }
       if (!formData.location?.trim()) {
         errors.location = "Location is required";
         isValid = false;
@@ -221,6 +225,8 @@ export default function PostForm({
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    console.log(validateForm());
 
     if (!validateForm()) {
       return;
@@ -311,8 +317,8 @@ export default function PostForm({
                   name="type"
                   placeholder="Select post type"
                   size="lg"
-                  value={formData.type}
                   onChange={handleChange}
+                  selectedKeys={new Set([formData.type])}
                 >
                   {postTypes.map((type) => (
                     <SelectItem key={type.value} textValue={type.value}>

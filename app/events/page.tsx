@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
@@ -8,73 +8,9 @@ import { Input } from "@heroui/input";
 import { Chip } from "@heroui/chip";
 import { Pagination } from "@heroui/pagination";
 import { Select, SelectItem } from "@heroui/select";
+import { useSession } from "next-auth/react";
 
-// Simulated event data
-const dummyEvents = [
-  {
-    id: "1",
-    title: "Community Clean-up Day",
-    description: "Join us for a day of cleaning up our local park and streets.",
-    date: "2023-06-15T10:00:00",
-    location: "Central Park",
-    organizer: "Green Initiative Group",
-    locality: "Downtown",
-    category: "environment",
-  },
-  {
-    id: "2",
-    title: "Local Business Networking",
-    description: "Network with local business owners and entrepreneurs.",
-    date: "2023-06-18T18:30:00",
-    location: "Community Center",
-    organizer: "Chamber of Commerce",
-    locality: "Downtown",
-    category: "business",
-  },
-  {
-    id: "3",
-    title: "Summer Reading Program Kickoff",
-    description:
-      "Launch of the annual summer reading program for children and adults.",
-    date: "2023-06-20T14:00:00",
-    location: "Public Library",
-    organizer: "Library Staff",
-    locality: "Eastside",
-    category: "education",
-  },
-  {
-    id: "4",
-    title: "Neighborhood Watch Meeting",
-    description:
-      "Monthly meeting to discuss community safety and crime prevention.",
-    date: "2023-06-22T19:00:00",
-    location: "Police Station Community Room",
-    organizer: "Neighborhood Watch Committee",
-    locality: "Westside",
-    category: "safety",
-  },
-  {
-    id: "5",
-    title: "Farmers Market",
-    description: "Weekly farmers market featuring local produce and goods.",
-    date: "2023-06-17T08:00:00",
-    location: "Town Square",
-    organizer: "Local Farmers Association",
-    locality: "Downtown",
-    category: "food",
-  },
-  {
-    id: "6",
-    title: "Town Hall Meeting",
-    description:
-      "Discussion of upcoming infrastructure projects and community improvements.",
-    date: "2023-06-25T18:00:00",
-    location: "City Hall",
-    organizer: "Mayor's Office",
-    locality: "Downtown",
-    category: "government",
-  },
-];
+// Remove dummy events data
 
 // Category options with color mapping
 const categories = [
@@ -109,19 +45,49 @@ const formatDate = (dateString: string) => {
 
 export default function EventsPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [page, setPage] = useState(1);
   const itemsPerPage = 4;
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch events from API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        if (status !== "authenticated") {
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch("/api/events");
+
+        if (!res.ok) throw new Error("Failed to load events");
+        const data = await res.json();
+
+        setEvents(data.events);
+      } catch (err: any) {
+        setError(err.message || "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [status]);
 
   // Filter events based on search and category
-  const filteredEvents = dummyEvents.filter((event) => {
+  const filteredEvents = events.filter((event) => {
     const matchesSearch =
-      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.description.toLowerCase().includes(searchTerm.toLowerCase());
+      event.postId.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.postId.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory =
-      selectedCategory === "all" || event.category === selectedCategory;
+    // For now, we're not filtering by category as it's not in the model
+    // Once category is added, we can implement this filtering
+    const matchesCategory = true; // selectedCategory === "all" || event.category === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -129,8 +95,24 @@ export default function EventsPage() {
   // Paginate the results
   const displayedEvents = filteredEvents.slice(
     (page - 1) * itemsPerPage,
-    page * itemsPerPage,
+    page * itemsPerPage
   );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p>Loading events...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-danger">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
@@ -144,7 +126,7 @@ export default function EventsPage() {
         <Button
           className="mt-4 md:mt-0"
           color="primary"
-          onClick={() => router.push("/events/create")}
+          onClick={() => router.push("/posts/create?type=event")}
         >
           Create Event
         </Button>
@@ -158,6 +140,7 @@ export default function EventsPage() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        {/* Commenting out category filter for now since it's not in the model
         <Select
           className="max-w-xs"
           placeholder="Filter by category"
@@ -170,28 +153,29 @@ export default function EventsPage() {
             </SelectItem>
           ))}
         </Select>
+        */}
       </div>
 
       {/* Event Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         {displayedEvents.length > 0 ? (
           displayedEvents.map((event) => (
-            <Card key={event.id} className="hover:shadow-lg transition-shadow">
+            <Card key={event._id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="flex gap-3">
                 <div className="flex flex-col">
-                  <p className="text-lg font-bold">{event.title}</p>
+                  <p className="text-lg font-bold">{event.postId.title}</p>
                   <p className="text-small text-default-500">
-                    Organized by {event.organizer}
+                    Organized by {event.organizer.name || "Anonymous"}
                   </p>
                 </div>
               </CardHeader>
               <CardBody>
-                <p className="mb-3">{event.description}</p>
+                <p className="mb-3">{event.postId.description}</p>
                 <div className="grid grid-cols-2 gap-2 mt-4">
                   <div>
                     <p className="text-small font-bold">Date & Time</p>
                     <p className="text-small text-default-500">
-                      {formatDate(event.date)}
+                      {formatDate(event.startDate)}
                     </p>
                   </div>
                   <div>
@@ -203,17 +187,13 @@ export default function EventsPage() {
                 </div>
               </CardBody>
               <CardFooter className="flex justify-between items-center">
-                <Chip
-                  color={getCategoryColor(event.category) as any}
-                  variant="flat"
-                >
-                  {event.category.charAt(0).toUpperCase() +
-                    event.category.slice(1)}
+                <Chip color="primary" variant="flat">
+                  {event.postId.locality}
                 </Chip>
                 <Button
                   color="primary"
                   variant="light"
-                  onClick={() => router.push(`/events/${event.id}`)}
+                  onClick={() => router.push(`/posts/${event.postId._id}`)}
                 >
                   View Details
                 </Button>
@@ -224,17 +204,25 @@ export default function EventsPage() {
           <div className="col-span-2 flex flex-col items-center justify-center p-12 bg-default-50 rounded-lg">
             <p className="text-xl font-semibold mb-2">No events found</p>
             <p className="text-default-500 text-center mb-6">
-              We couldn&apos;t find any events matching your criteria.
+              {status === "authenticated"
+                ? "We couldn't find any events matching your criteria."
+                : "Please log in to view events in your community."}
             </p>
-            <Button
-              color="primary"
-              onClick={() => {
-                setSearchTerm("");
-                setSelectedCategory("all");
-              }}
-            >
-              Clear Filters
-            </Button>
+            {status === "authenticated" ? (
+              <Button
+                color="primary"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("all");
+                }}
+              >
+                Clear Filters
+              </Button>
+            ) : (
+              <Button color="primary" onClick={() => router.push("/login")}>
+                Log In
+              </Button>
+            )}
           </div>
         )}
       </div>

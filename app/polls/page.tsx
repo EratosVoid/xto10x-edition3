@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
@@ -11,76 +11,7 @@ import { Radio, RadioGroup } from "@heroui/radio";
 import { Divider } from "@heroui/divider";
 import { useSession } from "next-auth/react";
 
-// Simulated poll data
-const dummyPolls = [
-  {
-    id: "1",
-    title: "Park Improvements",
-    description: "What improvement would you like to see in Central Park?",
-    options: [
-      { id: "1a", text: "New playground equipment", votes: 45 },
-      { id: "1b", text: "More benches and picnic tables", votes: 30 },
-      { id: "1c", text: "Better lighting", votes: 25 },
-      { id: "1d", text: "Water fountain", votes: 15 },
-    ],
-    totalVotes: 115,
-    createdBy: "Parks Department",
-    expiration: "2026-07-15",
-    locality: "Downtown",
-    category: "parks",
-  },
-  {
-    id: "2",
-    title: "Community Center Programs",
-    description:
-      "Which new program would you like to see at the community center?",
-    options: [
-      { id: "2a", text: "Cooking classes", votes: 38 },
-      { id: "2b", text: "Computer skills workshop", votes: 42 },
-      { id: "2c", text: "Fitness classes", votes: 67 },
-      { id: "2d", text: "Arts and crafts", votes: 29 },
-    ],
-    totalVotes: 176,
-    createdBy: "Community Center Board",
-    expiration: "2023-07-10",
-    locality: "Downtown",
-    category: "education",
-  },
-  {
-    id: "3",
-    title: "Traffic Calming Measures",
-    description:
-      "Which traffic calming measure do you support for Main Street?",
-    options: [
-      { id: "3a", text: "Speed bumps", votes: 56 },
-      { id: "3b", text: "Reduced speed limit", votes: 32 },
-      { id: "3c", text: "Traffic circles", votes: 48 },
-      { id: "3d", text: "More stop signs", votes: 27 },
-    ],
-    totalVotes: 163,
-    createdBy: "Traffic Safety Commission",
-    expiration: "2023-07-20",
-    locality: "Eastside",
-    category: "traffic",
-  },
-  {
-    id: "4",
-    title: "Farmers Market Timing",
-    description:
-      "What day and time would you prefer for the weekly farmers market?",
-    options: [
-      { id: "4a", text: "Saturday morning", votes: 89 },
-      { id: "4b", text: "Saturday afternoon", votes: 45 },
-      { id: "4c", text: "Sunday morning", votes: 67 },
-      { id: "4d", text: "Wednesday evening", votes: 34 },
-    ],
-    totalVotes: 235,
-    createdBy: "Farmers Market Association",
-    expiration: "2023-07-05",
-    locality: "Downtown",
-    category: "events",
-  },
-];
+// Removed dummy polls data
 
 export default function PollsPage() {
   const router = useRouter();
@@ -88,12 +19,40 @@ export default function PollsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   const [votedPolls, setVotedPolls] = useState<Record<string, boolean>>({});
+  const [polls, setPolls] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch polls from API
+  useEffect(() => {
+    const fetchPolls = async () => {
+      try {
+        if (status !== "authenticated") {
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch("/api/polls");
+
+        if (!res.ok) throw new Error("Failed to load polls");
+        const data = await res.json();
+
+        setPolls(data.polls);
+      } catch (err: any) {
+        setError(err.message || "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPolls();
+  }, [status]);
 
   // Filter polls based on search
-  const filteredPolls = dummyPolls.filter((poll) => {
+  const filteredPolls = polls.filter((poll) => {
     return (
-      poll.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      poll.description.toLowerCase().includes(searchTerm.toLowerCase())
+      poll.postId.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      poll.postId.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -103,20 +62,35 @@ export default function PollsPage() {
   };
 
   // Handle vote submission
-  const handleVote = (pollId: string) => {
-    if (!userVotes[pollId]) return;
+  const handleVote = async (pollId: string, optionKey: string) => {
+    if (!optionKey) return;
 
-    // In a real app, we would call an API to save the vote
-    console.log(
-      `Voted for poll ${pollId}, option ${userVotes[pollId]}`,
-      session,
-    );
+    try {
+      const res = await fetch(`/api/polls/${pollId}/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ option: optionKey }),
+      });
 
-    // Mark poll as voted
-    setVotedPolls({
-      ...votedPolls,
-      [pollId]: true,
-    });
+      if (!res.ok) throw new Error("Failed to submit vote");
+
+      // Mark poll as voted and refresh the polls
+      setVotedPolls({
+        ...votedPolls,
+        [pollId]: true,
+      });
+
+      // Refresh the polls list to update vote counts
+      const updatedPollsRes = await fetch("/api/polls");
+      if (updatedPollsRes.ok) {
+        const updatedData = await updatedPollsRes.json();
+        setPolls(updatedData.polls);
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to submit vote");
+    }
   };
 
   // Format expiration date
@@ -130,13 +104,35 @@ export default function PollsPage() {
     });
   };
 
-  // Check if poll is expired
-  const isPollExpired = (expirationDate: string) => {
-    const expiration = new Date(expirationDate);
-    const now = new Date();
+  // Check if user has already voted on this poll
+  const hasUserVoted = (poll: any) => {
+    if (!session || !poll.votedUsers) return false;
+    const userEmail = session.user?.email;
+    if (!userEmail) return false;
 
-    return expiration < now;
+    return poll.votedUsers.some((user: any) => user.email === userEmail);
   };
+
+  // Get total votes for a poll
+  const getTotalVotes = (options: Record<string, number>) => {
+    return Object.values(options).reduce((sum, count) => sum + count, 0);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p>Loading polls...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-danger">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
@@ -150,7 +146,7 @@ export default function PollsPage() {
         <Button
           className="mt-4 md:mt-0"
           color="primary"
-          onClick={() => router.push("/polls/create")}
+          onClick={() => router.push("/posts/create?type=poll")}
         >
           Create Poll
         </Button>
@@ -170,81 +166,72 @@ export default function PollsPage() {
       <div className="grid grid-cols-1 gap-6 mt-8">
         {filteredPolls.length > 0 ? (
           filteredPolls.map((poll) => {
-            const isExpired = isPollExpired(poll.expiration);
-            const hasVoted = votedPolls[poll.id];
-            const showResults =
-              hasVoted || isExpired || status !== "authenticated";
+            const totalVotes = getTotalVotes(poll.options);
+            const userHasVoted = hasUserVoted(poll);
+            const showResults = userHasVoted || status !== "authenticated";
 
             return (
-              <Card key={poll.id} className="w-full">
+              <Card key={poll._id} className="w-full">
                 <CardHeader className="flex flex-col">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-xl font-bold">{poll.title}</h3>
+                      <h3 className="text-xl font-bold">{poll.postId.title}</h3>
                       <p className="text-small text-default-500">
-                        By {poll.createdBy} • Expires{" "}
-                        {formatDate(poll.expiration)}
+                        Created {formatDate(poll.createdAt)}
                       </p>
                     </div>
-                    {isExpired && (
-                      <Chip color="danger" variant="flat">
-                        Expired
-                      </Chip>
-                    )}
-                    {!isExpired && hasVoted && (
+                    {userHasVoted && (
                       <Chip color="success" variant="flat">
                         Voted
                       </Chip>
                     )}
                   </div>
-                  <p className="mt-2">{poll.description}</p>
+                  <p className="mt-2">{poll.postId.description}</p>
                 </CardHeader>
 
                 <CardBody>
                   {showResults ? (
                     <div className="space-y-4">
-                      {poll.options.map((option) => {
-                        const percentage = calculatePercentage(
-                          option.votes,
-                          poll.totalVotes,
-                        );
+                      {Object.entries(poll.options).map(
+                        ([option, votes]: [string, any]) => {
+                          const percentage = calculatePercentage(
+                            votes,
+                            totalVotes
+                          );
 
-                        return (
-                          <div key={option.id} className="space-y-1">
-                            <div className="flex justify-between items-center">
-                              <p>{option.text}</p>
-                              <p className="text-small font-medium">
-                                {percentage}% ({option.votes} votes)
-                              </p>
+                          return (
+                            <div key={option} className="space-y-1">
+                              <div className="flex justify-between items-center">
+                                <p>{option}</p>
+                                <p className="text-small font-medium">
+                                  {percentage}% ({votes} votes)
+                                </p>
+                              </div>
+                              <Progress
+                                aria-label={`${option} - ${percentage}%`}
+                                className="h-3"
+                                color="primary"
+                                value={percentage}
+                              />
                             </div>
-                            <Progress
-                              aria-label={`${option.text} - ${percentage}%`}
-                              className="h-3"
-                              color={
-                                userVotes[poll.id] === option.id
-                                  ? "primary"
-                                  : "default"
-                              }
-                              value={percentage}
-                            />
-                          </div>
-                        );
-                      })}
+                          );
+                        }
+                      )}
                       <p className="text-small text-center mt-4 text-default-500">
-                        Total votes: {poll.totalVotes}
+                        Total votes: {totalVotes}
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       <RadioGroup
-                        value={userVotes[poll.id] || ""}
+                        value={userVotes[poll._id] || ""}
                         onValueChange={(value) =>
-                          setUserVotes({ ...userVotes, [poll.id]: value })
+                          setUserVotes({ ...userVotes, [poll._id]: value })
                         }
                       >
-                        {poll.options.map((option) => (
-                          <Radio key={option.id} value={option.id}>
-                            {option.text}
+                        {Object.keys(poll.options).map((option) => (
+                          <Radio key={option} value={option}>
+                            {option}
                           </Radio>
                         ))}
                       </RadioGroup>
@@ -256,42 +243,28 @@ export default function PollsPage() {
 
                 <CardFooter className="flex justify-between">
                   <div>
-                    <Chip variant="flat">{poll.locality}</Chip>
-                    <Chip className="ml-2" variant="flat">
-                      {poll.category}
-                    </Chip>
+                    <Chip variant="flat">{poll.postId.locality}</Chip>
                   </div>
                   {!showResults && (
                     <Button
                       color="primary"
-                      isDisabled={!userVotes[poll.id]}
-                      onClick={() => handleVote(poll.id)}
+                      isDisabled={!userVotes[poll._id]}
+                      onClick={() => handleVote(poll._id, userVotes[poll._id])}
                     >
                       Submit Vote
                     </Button>
                   )}
                   {showResults &&
-                    !hasVoted &&
-                    status === "authenticated" &&
-                    !isExpired && (
+                    !userHasVoted &&
+                    status === "authenticated" && (
                       <Button
                         color="primary"
                         variant="flat"
-                        onClick={() =>
-                          setVotedPolls({ ...votedPolls, [poll.id]: false })
-                        }
+                        onClick={() => router.push(`/posts/${poll.postId._id}`)}
                       >
-                        Vote Now
+                        View Details
                       </Button>
                     )}
-                  {(hasVoted || isExpired || status !== "authenticated") && (
-                    <Button
-                      variant="flat"
-                      onClick={() => router.push(`/polls/${poll.id}`)}
-                    >
-                      View Details
-                    </Button>
-                  )}
                 </CardFooter>
               </Card>
             );
@@ -300,11 +273,19 @@ export default function PollsPage() {
           <div className="flex flex-col items-center justify-center p-12 bg-default-50 rounded-lg">
             <p className="text-xl font-semibold mb-2">No polls found</p>
             <p className="text-default-500 text-center mb-6">
-              We couldn&apos;t find any polls matching your search.
+              {status === "authenticated"
+                ? "We couldn't find any polls matching your search."
+                : "Please log in to view polls in your community."}
             </p>
-            <Button color="primary" onClick={() => setSearchTerm("")}>
-              Clear Search
-            </Button>
+            {status === "authenticated" ? (
+              <Button color="primary" onClick={() => setSearchTerm("")}>
+                Clear Search
+              </Button>
+            ) : (
+              <Button color="primary" onClick={() => router.push("/login")}>
+                Log In
+              </Button>
+            )}
           </div>
         )}
       </div>

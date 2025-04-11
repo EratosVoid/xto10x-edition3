@@ -4,6 +4,9 @@ import { getToken } from "next-auth/jwt";
 import connectDB from "@/lib/db/connect";
 import PostModel from "@/models/Post";
 import UserModel from "@/models/User";
+import EventModel from "@/models/Event";
+import PollModel from "@/models/Poll";
+import PetitionModel from "@/models/Petition";
 
 // GET /api/posts - Get locality-filtered posts
 export async function GET(req: NextRequest) {
@@ -75,7 +78,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       { error: error.message || "Failed to fetch posts" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -92,13 +95,49 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const body = await req.json();
-    const { title, description, type, priority = "medium" } = body;
+    const {
+      title,
+      description,
+      type,
+      priority = "medium",
+      // Event fields
+      startDate,
+      endDate,
+      location,
+      // Poll fields
+      options,
+      // Petition fields
+      target,
+      goal,
+    } = body;
 
     // Validate required fields
     if (!title || !description || !type) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 },
+        { status: 400 }
+      );
+    }
+
+    // Additional validation based on type
+    if (type === "event" && (!startDate || !endDate || !location)) {
+      return NextResponse.json(
+        { error: "Missing required event fields" },
+        { status: 400 }
+      );
+    }
+
+    if (type === "poll" && (!options || options.length < 2)) {
+      return NextResponse.json(
+        { error: "At least two poll options are required" },
+        { status: 400 }
+      );
+    }
+
+    if (type === "petition" && (!target || !goal || goal <= 0)) {
+      return NextResponse.json(
+        { error: "Missing or invalid petition fields" },
+        { status: 400 }
       );
     }
 
@@ -119,10 +158,65 @@ export async function POST(req: NextRequest) {
       createdBy: token.id,
     });
 
+    // Create corresponding records based on post type
+    if (type === "event") {
+      const duration =
+        new Date(endDate).getTime() - new Date(startDate).getTime();
+
+      const event = await EventModel.create({
+        postId: post._id,
+        startDate,
+        endDate,
+        duration,
+        location,
+        organizer: token.id,
+        attendees: [token.id], // Creator is automatically attending
+      });
+
+      // Update post with eventId reference
+      await PostModel.findByIdAndUpdate(post._id, {
+        eventId: event._id,
+      });
+    }
+
+    if (type === "poll") {
+      // Convert options array to Map for storage
+      const optionsMap = new Map();
+      options.forEach((option: string) => {
+        optionsMap.set(option, 0);
+      });
+
+      const poll = await PollModel.create({
+        postId: post._id,
+        options: optionsMap,
+      });
+
+      // Update post with pollId reference
+      await PostModel.findByIdAndUpdate(post._id, {
+        pollId: poll._id,
+      });
+    }
+
+    if (type === "petition") {
+      // Create petition record
+      const petition = await PetitionModel.create({
+        postId: post._id,
+        target,
+        goal,
+        signatures: 0,
+        supporters: [],
+      });
+
+      // Update post with petitionId reference
+      await PostModel.findByIdAndUpdate(post._id, {
+        petitionId: petition._id,
+      });
+    }
+
     // Populate the creator info
     const populatedPost = await PostModel.findById(post._id).populate(
       "createdBy",
-      "name image",
+      "name image"
     );
 
     return NextResponse.json(populatedPost, { status: 201 });
@@ -131,7 +225,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { error: error.message || "Failed to create post" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

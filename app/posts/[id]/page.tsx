@@ -229,7 +229,7 @@ export default function PostDetailPage({ params }: PageProps) {
                       <span>{option}</span>
                       <span className="font-medium">{votes} votes</span>
                     </div>
-                  ),
+                  )
                 )}
               {(!post.pollDetails?.options ||
                 Object.keys(post.pollDetails.options).length === 0) && (
@@ -247,19 +247,19 @@ export default function PostDetailPage({ params }: PageProps) {
             <h3 className="text-lg font-semibold mb-2">Petition</h3>
             <div className="mb-4">
               <p className="font-medium">Target:</p>
-              <p>{post.petitionDetails?.target || "N/A"}</p>
+              <p>{post.petitionId?.target || "N/A"}</p>
             </div>
             <div className="mb-4">
               <div className="flex justify-between mb-1">
                 <span>
-                  Progress: {post.petitionDetails?.supporters || 0} /{" "}
-                  {post.petitionDetails?.goal || 100}
+                  Progress: {post.petitionId?.signatures || 0} /{" "}
+                  {post.petitionId?.goal || 100}
                 </span>
                 <span>
                   {Math.floor(
-                    ((post.petitionDetails?.supporters || 0) /
-                      (post.petitionDetails?.goal || 100)) *
-                      100,
+                    ((post.petitionId?.signatures || 0) /
+                      (post.petitionId?.goal || 100)) *
+                      100
                   )}
                   %
                 </span>
@@ -268,12 +268,48 @@ export default function PostDetailPage({ params }: PageProps) {
                 <div
                   className="bg-primary h-2.5 rounded-full"
                   style={{
-                    width: `${Math.min(((post.petitionDetails?.supporters || 0) / (post.petitionDetails?.goal || 100)) * 100, 100)}%`,
+                    width: `${Math.min(((post.petitionId?.signatures || 0) / (post.petitionId?.goal || 100)) * 100, 100)}%`,
                   }}
                 />
               </div>
             </div>
-            <Button color="primary">Sign Petition</Button>
+            <Button
+              color="primary"
+              isDisabled={post.petitionId?.supporters?.some(
+                (supporter: any) => supporter._id === (session?.user as any)?.id
+              )}
+              onClick={async () => {
+                if (!session) {
+                  router.push("/login");
+                  return;
+                }
+
+                try {
+                  const res = await fetch(
+                    `/api/petitions/${post.petitionId?._id}/sign`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                    }
+                  );
+
+                  if (res.ok) {
+                    // Refresh the page to show updated signatures
+                    router.refresh();
+                  }
+                } catch (error) {
+                  console.error("Failed to sign petition:", error);
+                }
+              }}
+            >
+              {post.petitionId?.supporters?.some(
+                (supporter: any) => supporter._id === (session?.user as any)?.id
+              )
+                ? "Already Signed"
+                : "Sign Petition"}
+            </Button>
           </div>
         );
       default:
@@ -345,8 +381,8 @@ export default function PostDetailPage({ params }: PageProps) {
                 <p className="whitespace-pre-line">{post.description}</p>
               </div>
 
-                  {/* here if post type is poll, open the /polls page */}
-                  {/* similar for event, petition and announcement */}
+              {/* here if post type is poll, open the /polls page */}
+              {/* similar for event, petition and announcement */}
 
               {renderPostTypeDetails()}
 

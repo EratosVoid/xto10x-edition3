@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 
 import connectDB from "@/lib/db/connect";
 import PetitionModel from "@/models/Petition";
-import PollModel from "@/models/Poll";
 import UserModel from "@/models/User";
 import PostModel from "@/models/Post";
 
@@ -37,7 +36,7 @@ export async function GET(req: NextRequest) {
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("postId")
-      .populate("pollId");
+      .populate("supporters", "name email image");
 
     // Filter petitions by user's locality
     const accessiblePetitions = [];
@@ -65,7 +64,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       { error: error.message || "Failed to fetch petitions" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -97,7 +96,7 @@ export async function POST(req: NextRequest) {
     if (!postId || !target || !goal) {
       return NextResponse.json(
         { error: "Missing required petition details" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -116,7 +115,7 @@ export async function POST(req: NextRequest) {
     if (post.type !== "petition") {
       return NextResponse.json(
         { error: "Post is not of type 'petition'" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -124,7 +123,7 @@ export async function POST(req: NextRequest) {
     if (post.createdBy.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only create petitions for your own posts" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -134,30 +133,17 @@ export async function POST(req: NextRequest) {
     if (existingPetition) {
       return NextResponse.json(
         { error: "A petition already exists for this post" },
-        { status: 409 },
+        { status: 409 }
       );
     }
 
-    // Create a companion poll for signatures (Yes/No options)
-    const pollOptions = new Map();
-
-    pollOptions.set("Yes", 0);
-    pollOptions.set("No", 0);
-
-    const newPoll = new PollModel({
-      postId,
-      options: pollOptions,
-      votedUsers: [],
-    });
-
-    await newPoll.save();
-
-    // Create new petition
+    // Create new petition with default values
     const newPetition = new PetitionModel({
       postId,
-      pollId: newPoll._id,
       target,
       goal,
+      signatures: 0,
+      supporters: [],
     });
 
     await newPetition.save();
@@ -165,18 +151,12 @@ export async function POST(req: NextRequest) {
     // Update post with petition ID
     await PostModel.findByIdAndUpdate(postId, {
       petitionId: newPetition._id,
-      pollId: newPoll._id,
-    });
-
-    // Update poll with petition ID
-    await PollModel.findByIdAndUpdate(newPoll._id, {
-      petitionId: newPetition._id,
     });
 
     // Return populated petition
     const populatedPetition = await PetitionModel.findById(newPetition._id)
       .populate("postId")
-      .populate("pollId");
+      .populate("supporters");
 
     return NextResponse.json(populatedPetition, { status: 201 });
   } catch (error: any) {
@@ -184,7 +164,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { error: error.message || "Failed to create petition" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

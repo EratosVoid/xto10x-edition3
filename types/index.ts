@@ -75,9 +75,10 @@ export interface Poll {
 export interface Petition {
   _id?: string;
   postId: ObjectId;
-  pollId?: ObjectId;
   target: string;
   goal: number;
+  signatures?: number;
+  supporters?: ObjectId[]; // Array of User IDs
   createdAt?: Date;
   updatedAt?: Date;
 }

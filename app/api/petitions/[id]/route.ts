@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 
 import connectDB from "@/lib/db/connect";
 import PetitionModel from "@/models/Petition";
-import PollModel from "@/models/Poll";
 import UserModel from "@/models/User";
 import PostModel from "@/models/Post";
 
@@ -17,7 +16,7 @@ export async function GET(req: NextRequest, { params }: any) {
     if (!mongoose.Types.ObjectId.isValid(petitionId)) {
       return NextResponse.json(
         { error: "Invalid petition ID" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -40,13 +39,13 @@ export async function GET(req: NextRequest, { params }: any) {
     // Find petition by ID and populate related fields
     const petition = await PetitionModel.findById(petitionId)
       .populate("postId")
-      .populate("pollId");
+      .populate("supporters", "name email image");
 
     // Check if petition exists
     if (!petition) {
       return NextResponse.json(
         { error: "Petition not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -54,34 +53,17 @@ export async function GET(req: NextRequest, { params }: any) {
     if (petition.postId.locality !== user.locality) {
       return NextResponse.json(
         { error: "You don't have access to this petition" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
-    // Get signature count from poll (if it exists)
-    let supporters = 0;
-
-    if (petition.pollId) {
-      const poll = await PollModel.findById(petition.pollId);
-
-      if (poll && poll.options.has("Yes")) {
-        supporters = poll.options.get("Yes") || 0;
-      }
-    }
-
-    // Add supporters count to the response
-    const petitionWithSupporters = {
-      ...petition.toObject(),
-      supporters,
-    };
-
-    return NextResponse.json(petitionWithSupporters);
+    return NextResponse.json(petition);
   } catch (error: any) {
     console.error("Error fetching petition:", error);
 
     return NextResponse.json(
       { error: error.message || "Failed to fetch petition" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -95,7 +77,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (!mongoose.Types.ObjectId.isValid(petitionId)) {
       return NextResponse.json(
         { error: "Invalid petition ID" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -115,7 +97,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (!petition) {
       return NextResponse.json(
         { error: "Petition not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -123,7 +105,7 @@ export async function PUT(req: NextRequest, { params }: any) {
     if (petition.postId.createdBy.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only edit petitions for your own posts" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -138,10 +120,10 @@ export async function PUT(req: NextRequest, { params }: any) {
         ...(target && { target }),
         ...(goal && { goal }),
       },
-      { new: true, runValidators: true },
+      { new: true, runValidators: true }
     )
       .populate("postId")
-      .populate("pollId");
+      .populate("supporters", "name email image");
 
     return NextResponse.json(updatedPetition);
   } catch (error: any) {
@@ -149,7 +131,7 @@ export async function PUT(req: NextRequest, { params }: any) {
 
     return NextResponse.json(
       { error: error.message || "Failed to update petition" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -163,7 +145,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!mongoose.Types.ObjectId.isValid(petitionId)) {
       return NextResponse.json(
         { error: "Invalid petition ID" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -183,7 +165,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!petition) {
       return NextResponse.json(
         { error: "Petition not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -202,11 +184,11 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!isAuthorized) {
       return NextResponse.json(
         { error: "You don't have permission to delete this petition" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
-    // Find the associated post and poll
+    // Find the associated post
     if (petition.postId) {
       // Remove petition reference from post
       await PostModel.findByIdAndUpdate(petition.postId._id, {
@@ -214,28 +196,16 @@ export async function DELETE(req: NextRequest, { params }: any) {
       });
     }
 
-    // Delete associated poll if exists
-    if (petition.pollId) {
-      await PollModel.findByIdAndDelete(petition.pollId);
-
-      // Remove poll reference from post if it exists
-      if (petition.postId) {
-        await PostModel.findByIdAndUpdate(petition.postId._id, {
-          $unset: { pollId: 1 },
-        });
-      }
-    }
-
     // Delete petition
     await PetitionModel.findByIdAndDelete(petitionId);
 
-    return NextResponse.json({ message: "Petition deleted successfully" });
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Error deleting petition:", error);
 
     return NextResponse.json(
       { error: error.message || "Failed to delete petition" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

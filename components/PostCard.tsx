@@ -57,7 +57,6 @@ interface PostCardProps {
     createdAt: string;
     createdBy: {
       name: string;
-      image?: string;
     };
   };
   showEdit?: boolean;
@@ -86,7 +85,6 @@ export default function PostCard({
               showFallback
               fallback={getInitials(post.createdBy?.name || "User")}
               size="sm"
-              src={post.createdBy?.image || "https://i.pravatar.cc/150?img=1"}
             />
             <div>
               <h3 className="text-xl font-bold text-foreground">
