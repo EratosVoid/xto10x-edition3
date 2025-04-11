@@ -35,7 +35,23 @@ export const Navbar = () => {
   const isAuthenticated = status === "authenticated";
 
   const handleSignOut = async () => {
-    await signOut({ redirect: false });
+    // Clear session storage
+    sessionStorage.clear();
+
+    // Clear local storage
+    localStorage.clear();
+
+    // Optionally, clear cookies if needed
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+
+    // Sign out the user (assuming signOut is a function from your auth library)
+    await signOut({ redirect: true });
+
+    // Redirect to the homepage or another page
     router.push("/");
   };
 
