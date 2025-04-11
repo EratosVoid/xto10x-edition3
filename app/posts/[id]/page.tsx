@@ -336,6 +336,9 @@ export default function PostDetailPage({ params }: PageProps) {
                 <p className="whitespace-pre-line">{post.description}</p>
               </div>
 
+                  {/* here if post type is poll, open the /polls page */}
+                  {/* similar for event, petition and announcement */}
+
               {renderPostTypeDetails()}
 
               <div className="mt-6 text-small text-default-500">
