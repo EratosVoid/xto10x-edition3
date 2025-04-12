@@ -6,12 +6,8 @@ import { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
-import { Tabs, Tab } from "@heroui/tabs";
 import { Chip } from "@heroui/chip";
-import { Input } from "@heroui/input";
-import { Avatar } from "@heroui/avatar";
 import { Badge } from "@heroui/badge";
-import { Divider } from "@heroui/divider";
 
 // Calendar Icon
 const CalendarIcon = () => (
@@ -94,128 +90,6 @@ const SparklesIcon = () => (
   </svg>
 );
 
-const fetchEvents = async (): Promise<Event[]> => {
-  const res = await fetch("/api/events");
-  const data = await res.json();
-
-  return data.events.map(
-    (e: any): Event => ({
-      ...e,
-      date: new Date(e.date),
-    })
-  );
-};
-
-(async () => {
-  const upcomingEvents = await fetchEvents();
-  console.log(upcomingEvents);
-})();
-
-// Mock upcoming events
-// const upcomingEvents = [
-//   {
-//     id: 1,
-//     title: "Community Cleanup",
-//     date: new Date(2023, 6, 15, 10, 0), // July 15, 10:00 AM
-//     location: "Central Park",
-//     participants: 12,
-//   },
-//   {
-//     id: 2,
-//     title: "Local Business Meetup",
-//     date: new Date(2023, 6, 20, 18, 30), // July 20, 6:30 PM
-//     location: "Community Center",
-//     participants: 24,
-//   },
-//   {
-//     id: 3,
-//     title: "Neighborhood Watch Meeting",
-//     date: new Date(2023, 6, 25, 19, 0), // July 25, 7:00 PM
-//     location: "Town Hall",
-//     participants: 8,
-//   },
-// ];
-
-// Mock notifications
-const notifications = [
-  {
-    id: 1,
-    type: "reply",
-    message: "Emily Garcia replied to your post",
-    time: "2 hours ago",
-    read: false,
-  },
-  {
-    id: 2,
-    type: "like",
-    message: "John Smith liked your event",
-    time: "5 hours ago",
-    read: false,
-  },
-  {
-    id: 3,
-    type: "mention",
-    message: "You were mentioned in a discussion",
-    time: "1 day ago",
-    read: true,
-  },
-  {
-    id: 4,
-    type: "event",
-    message: "Reminder: Community Cleanup tomorrow",
-    time: "1 day ago",
-    read: true,
-  },
-];
-
-// Mock petitions
-const petitions = [
-  {
-    id: 1,
-    title: "Improve Park Facilities",
-    content:
-      "Petition to upgrade playground equipment and add more benches in Central Park.",
-    date: new Date(2023, 6, 10),
-    signatures: 128,
-  },
-  {
-    id: 2,
-    title: "Weekend Farmers Market",
-    content:
-      "Support establishing a weekend farmers market in the town square.",
-    date: new Date(2023, 6, 12),
-    signatures: 89,
-  },
-  {
-    id: 3,
-    title: "Extended Library Hours",
-    content:
-      "Requesting the local library to extend evening hours on weekdays.",
-    date: new Date(2023, 6, 8),
-    signatures: 64,
-  },
-];
-
-// Mock announcements
-const announcements = [
-  {
-    id: 1,
-    title: "New Community Center Opening",
-    content:
-      "The new community center will open on August 1st with free activities for all residents.",
-    date: "2 days ago",
-    author: "Community Admin",
-  },
-  {
-    id: 2,
-    title: "Road Maintenance Schedule",
-    content:
-      "Main Street will be closed for repairs from July 18-22. Please use alternate routes.",
-    date: "3 days ago",
-    author: "Public Works Department",
-  },
-];
-
 // Format date
 const formatDate = (date: Date) => {
   return date.toLocaleDateString("en-US", {
@@ -245,22 +119,139 @@ export default function DashboardPage() {
     points: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [aiInput, setAiInput] = useState("");
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [petitions, setPetitions] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [error, setError] = useState("");
+
+  // Fetch all data needed for the dashboard
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      // Fetch events data
+      const eventsResponse = await fetch("/api/events?upcoming=true&limit=5");
+      if (!eventsResponse.ok) {
+        throw new Error(`Failed to fetch events: ${eventsResponse.statusText}`);
+      }
+      const eventsData = await eventsResponse.json();
+      setUpcomingEvents(
+        eventsData.events.map((event: any) => ({
+          ...event,
+          date: new Date(event.startDate),
+          participants: event.attendees?.length || 0,
+        }))
+      );
+
+      // Fetch notifications
+      const notificationsResponse = await fetch("/api/notifications");
+      if (!notificationsResponse.ok) {
+        throw new Error(
+          `Failed to fetch notifications: ${notificationsResponse.statusText}`
+        );
+      }
+      const notificationsData = await notificationsResponse.json();
+      setNotifications(
+        notificationsData.notifications.map((notification: any) => ({
+          id: notification._id,
+          message: notification.message,
+          read: notification.isRead,
+          time: formatTimeAgo(new Date(notification.createdAt)),
+          type: notification.type || "general",
+        }))
+      );
+
+      // Fetch petitions
+      const petitionsResponse = await fetch("/api/posts?type=petition&limit=3");
+      if (!petitionsResponse.ok) {
+        throw new Error(
+          `Failed to fetch petitions: ${petitionsResponse.statusText}`
+        );
+      }
+      const petitionsData = await petitionsResponse.json();
+      const petitionsWithDetails = petitionsData.posts.map((post: any) => ({
+        id: post._id,
+        title: post.title,
+        content: post.description,
+        date: new Date(post.createdAt),
+        signatures: post.petitionId?.signatures || 0,
+        goal: post.petitionId?.goal || 100,
+      }));
+      setPetitions(petitionsWithDetails);
+
+      // Fetch announcements
+      const announcementsResponse = await fetch(
+        "/api/posts?type=announcement&limit=3"
+      );
+      if (!announcementsResponse.ok) {
+        throw new Error(
+          `Failed to fetch announcements: ${announcementsResponse.statusText}`
+        );
+      }
+      const announcementsData = await announcementsResponse.json();
+      const formattedAnnouncements = announcementsData.posts.map(
+        (post: any) => ({
+          id: post._id,
+          title: post.title,
+          content: post.description,
+          date: formatTimeAgo(new Date(post.createdAt)),
+          author: post.createdBy?.name || "Community Admin",
+        })
+      );
+      setAnnouncements(formattedAnnouncements);
+
+      // Fetch user stats
+      const statsResponse = await fetch("/api/user/stats");
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setStats({
+          posts: statsData.posts || 0,
+          events: statsData.events || 0,
+          discussions: statsData.discussions || 0,
+          points: statsData.points || 0,
+        });
+      }
+    } catch (err: any) {
+      console.error("Error fetching dashboard data:", err);
+      setError(err.message || "Failed to load dashboard data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Format time ago (e.g., "2 hours ago", "3 days ago")
+  const formatTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60)
+      return `${diffInSeconds} second${diffInSeconds === 1 ? "" : "s"} ago`;
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60)
+      return `${diffInMinutes} minute${diffInMinutes === 1 ? "" : "s"} ago`;
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24)
+      return `${diffInHours} hour${diffInHours === 1 ? "" : "s"} ago`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 30)
+      return `${diffInDays} day${diffInDays === 1 ? "" : "s"} ago`;
+
+    const diffInMonths = Math.floor(diffInDays / 30);
+    return `${diffInMonths} month${diffInMonths === 1 ? "" : "s"} ago`;
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     } else if (status === "authenticated") {
       setLocality((session?.user as any).locality || "Your Community");
-      // In a real app, fetch user stats here
-      setStats({
-        posts: 5,
-        events: 2,
-        discussions: 10,
-        points: 120,
-      });
-      setIsLoading(false);
+      // Fetch all dashboard data
+      fetchDashboardData();
     }
   }, [status, router, session]);
 
@@ -341,6 +332,22 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Error Message - Show if there's an error */}
+      {error && (
+        <div className="md:col-span-3 bg-danger-50 text-danger border border-danger-200 p-4 rounded-lg">
+          <p className="font-medium">{error}</p>
+          <Button
+            variant="flat"
+            color="danger"
+            size="sm"
+            className="mt-2"
+            onPress={() => fetchDashboardData()}
+          >
+            Try Again
+          </Button>
+        </div>
+      )}
+
       {/* Main Content */}
       {/* Calendar Events (Spans 2 columns on md screens) */}
       <Card className="row-span-2 row-start-2">
@@ -353,7 +360,7 @@ export default function DashboardPage() {
             {upcomingEvents.length > 0 ? (
               upcomingEvents.map((event) => (
                 <div
-                  key={event.id}
+                  key={event.id || event._id}
                   className="flex items-start gap-4 pb-4 border-b last:border-0"
                 >
                   <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex flex-col items-center justify-center text-primary-600">
@@ -381,7 +388,14 @@ export default function DashboardPage() {
                       >
                         {event.participants} going
                       </Chip>
-                      <Button size="sm" variant="flat" color="primary">
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        color="primary"
+                        onPress={() =>
+                          router.push(`/events/${event.id || event._id}`)
+                        }
+                      >
                         View Details
                       </Button>
                     </div>
@@ -414,31 +428,44 @@ export default function DashboardPage() {
           <Badge color="danger" size="sm" className="ml-auto">
             {notifications.filter((n) => !n.read).length}
           </Badge>
-          <Button variant="light" size="sm" className="w-fit ml-auto">
-            View All Notifications
+          <Button
+            variant="light"
+            size="sm"
+            className="w-fit ml-auto"
+            onPress={() => router.push("/notifications")}
+          >
+            View All
           </Button>
         </CardHeader>
         <CardBody className="p-0 scrollbar-hide">
-          {notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`p-4 border-b last:border-0 ${
-                notification.read ? "" : "bg-primary-50 dark:bg-primary-900/10"
-              }`}
-            >
-              <div className="flex gap-2 items-start">
-                <div
-                  className={`w-2 h-2 rounded-full mt-2 ${notification.read ? "bg-default-200" : "bg-danger-500"}`}
-                ></div>
-                <div className="flex-1">
-                  <p className="text-sm mb-1">{notification.message}</p>
-                  <p className="text-xs text-default-400">
-                    {notification.time}
-                  </p>
+          {notifications.length > 0 ? (
+            notifications.map((notification) => (
+              <div
+                key={notification.id || notification._id}
+                className={`p-4 border-b last:border-0 ${
+                  notification.read
+                    ? ""
+                    : "bg-primary-50 dark:bg-primary-900/10"
+                }`}
+              >
+                <div className="flex gap-2 items-start">
+                  <div
+                    className={`w-2 h-2 rounded-full mt-2 ${notification.read ? "bg-default-200" : "bg-danger-500"}`}
+                  ></div>
+                  <div className="flex-1">
+                    <p className="text-sm mb-1">{notification.message}</p>
+                    <p className="text-xs text-default-400">
+                      {notification.time}
+                    </p>
+                  </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div className="p-4 text-center text-default-500">
+              No notifications yet
             </div>
-          ))}
+          )}
         </CardBody>
       </Card>
 
@@ -450,27 +477,59 @@ export default function DashboardPage() {
         </CardHeader>
         <CardBody className="scrollbar-hide">
           <div className="space-y-4">
-            {petitions.map((petition) => (
-              <div
-                key={petition.id}
-                className="flex items-start gap-4 pb-4 border-b last:border-0"
-              >
-                <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex flex-col items-center justify-center text-primary-600">
-                  <span className="text-xs font-medium">
-                    {formatDate(petition.date).split(",")[0]}
-                  </span>
-                  <span className="text-lg font-bold">
-                    {petition.date.getDate()}
-                  </span>
+            {petitions.length > 0 ? (
+              petitions.map((petition) => (
+                <div
+                  key={petition.id || petition._id}
+                  className="flex items-start gap-4 pb-4 border-b last:border-0"
+                >
+                  <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex flex-col items-center justify-center text-primary-600">
+                    <span className="text-xs font-medium">
+                      {formatDate(petition.date).split(",")[0]}
+                    </span>
+                    <span className="text-lg font-bold">
+                      {petition.date.getDate()}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{petition.title}</h3>
+                    <p className="text-sm text-default-600 mb-2 line-clamp-2">
+                      {petition.content}
+                    </p>
+                    <div className="flex items-center">
+                      <div className="flex-1">
+                        <div className="h-1.5 w-full bg-gray-200 rounded-full">
+                          <div
+                            className="h-1.5 bg-primary rounded-full"
+                            style={{
+                              width: `${Math.min(Math.round((petition.signatures / petition.goal) * 100), 100)}%`,
+                            }}
+                          ></div>
+                        </div>
+                        <p className="text-xs mt-1 text-default-500">
+                          {petition.signatures} of {petition.goal} signatures
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        color="primary"
+                        className="ml-2"
+                        onPress={() =>
+                          router.push(`/posts/${petition.id || petition._id}`)
+                        }
+                      >
+                        View
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg">{petition.title}</h3>
-                  <p className="text-sm text-default-600 mb-2">
-                    {petition.content}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-center text-default-500 py-6">
+                No active petitions at the moment
+              </p>
+            )}
           </div>
         </CardBody>
       </Card>
@@ -480,29 +539,41 @@ export default function DashboardPage() {
         <CardHeader className="flex items-center gap-2">
           <AnnouncementIcon />
           <h2 className="text-xl font-semibold">Recent Announcements</h2>
-          <Button color="primary" variant="flat" size="sm" className="ml-auto">
-            View All Announcements
+          <Button
+            color="primary"
+            variant="flat"
+            size="sm"
+            className="ml-auto"
+            onPress={() => router.push("/posts?type=announcement")}
+          >
+            View All
           </Button>
         </CardHeader>
         <CardBody className="scrollbar-hide">
-          {announcements.map((announcement) => (
-            <div
-              key={announcement.id}
-              className="mb-4 pb-4 border-b last:border-0 last:pb-0 last:mb-0"
-            >
-              <h3 className="text-lg font-semibold mb-1">
-                {announcement.title}
-              </h3>
-              <p className="text-sm text-default-600 mb-2">
-                {announcement.content}
-              </p>
-              <div className="flex items-center text-xs text-default-400">
-                <span>By {announcement.author}</span>
-                <span className="mx-2">•</span>
-                <span>{announcement.date}</span>
+          {announcements.length > 0 ? (
+            announcements.map((announcement) => (
+              <div
+                key={announcement.id || announcement._id}
+                className="mb-4 pb-4 border-b last:border-0 last:pb-0 last:mb-0"
+              >
+                <h3 className="text-lg font-semibold mb-1">
+                  {announcement.title}
+                </h3>
+                <p className="text-sm text-default-600 mb-2 line-clamp-3">
+                  {announcement.content}
+                </p>
+                <div className="flex items-center text-xs text-default-400">
+                  <span>By {announcement.author}</span>
+                  <span className="mx-2">•</span>
+                  <span>{announcement.date}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center text-default-500 py-6">
+              No announcements yet
+            </p>
+          )}
         </CardBody>
       </Card>
     </div>
