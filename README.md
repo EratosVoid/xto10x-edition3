@@ -60,7 +60,7 @@ The comprehensive project report includes detailed information about the design,
   - Indexes for performance optimization
   - Map types for dynamic data structures
 - **NextAuth.js**: For authentication and session management
-- **Socket.io**: For real-time bidirectional communication ( Planned )
+- **Socket.io**: For real-time bidirectional communication (Planned)
 - **API middleware**: For request validation and authorization
 
 ### AI Features
