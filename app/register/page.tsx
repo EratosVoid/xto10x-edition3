@@ -8,6 +8,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Icon } from "@iconify/react";
+import { Logo } from "@/components/icons";
 
 // List of localities for the select input
 const localities = [
@@ -102,11 +103,11 @@ function RegisterForm() {
       {/* Navigation */}
       <nav className="absolute top-0 left-0 right-0 p-4">
         <div className="container mx-auto px-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-              LN
-            </div>
-            <span className="font-bold text-lg">LokNiti</span>
+          <Link href="/" className="flex items-center gap-3">
+            <Logo size={40} />
+            <span className="font-bold text-lg text-primary-700 dark:text-primary-300">
+              LokNiti
+            </span>
           </Link>
         </div>
       </nav>

@@ -210,9 +210,11 @@ export const Sidebar = () => {
     <div className="flex flex-col h-fit md:h-screen">
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between p-4 border-b ">
-        <NextLink href="/" className="flex items-center gap-2">
-          <Logo />
-          <span className="font-bold">LokNiti</span>
+        <NextLink href="/" className="flex items-center gap-3 ">
+          <Logo size={40} />
+          <span className="font-bold text-lg text-primary-700 dark:text-primary-300">
+            LokNiti
+          </span>
         </NextLink>
         <button
           onClick={() => setExpanded(!expanded)}
@@ -247,9 +249,11 @@ export const Sidebar = () => {
       >
         {/* Logo */}
         <div className="p-4 border-b flex items-center justify-between">
-          <NextLink href="/" className="flex items-center gap-2">
-            <Logo />
-            <span className="font-bold">LokNiti</span>
+          <NextLink href="/" className="flex items-center gap-3">
+            <Logo size={40} />
+            <span className="font-bold text-lg text-primary-700 dark:text-primary-300">
+              LokNiti
+            </span>
           </NextLink>
           <ThemeSwitch />
         </div>

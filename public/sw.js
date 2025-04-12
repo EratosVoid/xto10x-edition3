@@ -3,8 +3,11 @@ const urlsToCache = [
   "/",
   "/offline.html",
   "/favicon.ico",
+  "/apple-touch-icon.png",
+  "/favicon-16x16.png",
   "/images/icon-192x192.png",
   "/images/icon-512x512.png",
+  "/manifest.json",
 ];
 
 // Install a service worker

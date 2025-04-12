@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Spinner } from "@heroui/spinner";
@@ -10,7 +10,8 @@ import { Divider } from "@heroui/divider";
 
 import PostForm, { PostFormData } from "@/components/PostForm";
 
-export default function CreatePostPage() {
+// Create a separate component for the main content
+function CreatePostContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -134,5 +135,25 @@ export default function CreatePostPage() {
         </CardBody>
       </Card>
     </div>
+  );
+}
+
+// Loading fallback component
+function CreatePostFallback() {
+  return (
+    <div className="w-full md:px-32 py-8 px-4">
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Spinner size="lg" />
+        <p className="mt-4 text-default-500">Loading form...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function CreatePostPage() {
+  return (
+    <Suspense fallback={<CreatePostFallback />}>
+      <CreatePostContent />
+    </Suspense>
   );
 }

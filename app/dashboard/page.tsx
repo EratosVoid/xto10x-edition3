@@ -8,6 +8,7 @@ import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { Chip } from "@heroui/chip";
 import { Badge } from "@heroui/badge";
+import InstallPWA from "@/components/InstallPWA";
 
 // Calendar Icon
 const CalendarIcon = () => (
@@ -301,6 +302,7 @@ export default function DashboardPage() {
               >
                 Ask AI
               </Button>
+              <InstallPWA />
             </div>
           </div>
           <div className="mt-8 md:mt-0 grid grid-cols-2 gap-4">
