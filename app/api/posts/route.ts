@@ -7,6 +7,7 @@ import UserModel from "@/models/User";
 import EventModel from "@/models/Event";
 import PollModel from "@/models/Poll";
 import PetitionModel from "@/models/Petition";
+import { createLocalityNotification } from "@/lib/notification";
 
 // GET /api/posts - Get locality-filtered posts
 export async function GET(req: NextRequest) {
@@ -217,6 +218,13 @@ export async function POST(req: NextRequest) {
     const populatedPost = await PostModel.findById(post._id).populate(
       "createdBy",
       "name image"
+    );
+
+    //create notification
+    await createLocalityNotification(
+      `New ${type} created by ${user.name}`,
+      user.locality,
+      post._id
     );
 
     return NextResponse.json(populatedPost, { status: 201 });

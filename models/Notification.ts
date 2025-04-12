@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import { Notification } from "@/types";
+import User from "./User";
 
 const NotificationSchema = new mongoose.Schema<Notification>(
   {
@@ -15,8 +16,9 @@ const NotificationSchema = new mongoose.Schema<Notification>(
     },
     message: { type: String, required: true },
     locality: { type: String, required: true },
+    isRead: { type: Boolean, default: false },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Create indexes for better performance
@@ -24,5 +26,8 @@ NotificationSchema.index({ userId: 1 });
 NotificationSchema.index({ locality: 1 });
 NotificationSchema.index({ isRead: 1, userId: 1 });
 
-export default mongoose.models.Notification ||
+const NotificationModel =
+  mongoose.models.Notification ||
   mongoose.model<Notification>("Notification", NotificationSchema);
+
+export default NotificationModel;
