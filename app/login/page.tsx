@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
+import { Icon } from '@iconify/react';
 
 // Create a client component to use useSearchParams
 function LoginForm() {
@@ -16,6 +17,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const isRegistered = searchParams.get("registered") === "true";
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,15 +25,15 @@ function LoginForm() {
     setError("");
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
+    const voterId = formData.get("voterId") as string;
     const password = formData.get("password") as string;
 
     try {
       console.log("Attempting sign in with credentials");
       const result = await signIn("credentials", {
         redirect: false,
-        email,
-        password,
+        voterId: voterId,
+        password: password,
         callbackUrl,
       });
 
@@ -42,7 +44,11 @@ function LoginForm() {
       });
 
       if (result?.error) {
-        setError(result.error);
+        if (result.error === 'CredentialsSignin') {
+          setError('Invalid Voter ID or password.');
+        } else {
+          setError(result.error);
+        }
       } else if (result?.ok) {
         router.push(callbackUrl);
       } else {
@@ -91,20 +97,19 @@ function LoginForm() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-                <label
-                  className="block text-sm font-medium mb-1"
-                  htmlFor="email"
-                >
-                  Email address
-                </label>
+              <label
+                className="block text-sm font-medium mb-1"
+                htmlFor="voterId"
+              >
+                Voter ID
+              </label>
                 <Input
                   fullWidth
                   required
-                  autoComplete="email"
-                  id="email"
-                  name="email"
-                  placeholder="Email address"
-                  type="email"
+                  id="voterId"
+                  name="voterId"
+                  placeholder="Voter ID"
+                  type="text"
                   className="border-gray-300 focus:border-primary"
                 />
               </div>
@@ -115,6 +120,7 @@ function LoginForm() {
                 >
                   Password
                 </label>
+               <div className="relative">
                 <Input
                   fullWidth
                   required
@@ -122,9 +128,17 @@ function LoginForm() {
                   id="password"
                   name="password"
                   placeholder="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className="border-gray-300 focus:border-primary"
                 />
+                 <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+                  </button>
+                  </div>
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-sm">
@@ -153,7 +167,7 @@ function LoginForm() {
 
         <CardFooter className="flex justify-center p-6 bg-gray-50 dark:bg-gray-800/40 rounded-b-xl border-t dark:border-gray-700">
           <div className="text-sm text-center">
-            Don&apos;t have an account?{" "}
+            Don't have an account?{" "}
             <Link
               className="font-medium text-primary hover:text-primary-400"
               href="/register"

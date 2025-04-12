@@ -15,6 +15,9 @@ const API_KEY =
   process.env.GEMINI_API_KEY || "AIzaSyCjBAPDM5-55Vg8TvvUsVkk-ZkdVFepkn0";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
+// Import RAG context file
+import ragContext from "@/lib/RAGContext.md.json";
+
 export async function POST(req: NextRequest) {
   try {
     // Check authentication
@@ -118,30 +121,36 @@ export async function POST(req: NextRequest) {
       })),
     };
 
-    // Format context data as string for the prompt
-    const contextString = generateContextString(contextData);
+    // Format context
+    let contextString = generateContextString(contextData);
 
-    // Use gemini-pro model for more complex contextualized responses
+    const ragContextString = ragContext.content
+      .map((section) => `${section.heading}: ${section.text}`)
+      .join("\n");
+
+    contextString += "\n" + ragContextString;
+
+    // Use Gemini model
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `You are an AI assistant for a community engagement platform called LocalVoice. 
-Users can create and participate in events, polls, petitions, and discussions with others in their locality.
-
-The user asking this question is from the locality of ${locality}.
-
-Here is contextual data about the community for reference:
-${contextString}
-
-Answer the following question clearly and concisely, providing specific information relevant to community engagement:
-
-${question}
-
-When answering:
-- Focus on practical advice about community engagement
-- If the question is about events, petitions, polls, or discussions, provide specific information from the context when relevant
-- Mention specific events, posts, petitions, or discussions from the context when they directly relate to the question
-- Don't overwhelm with unnecessary details from the context
-- Keep your tone helpful and encouraging`;
+  Users can create and participate in events, polls, petitions, and discussions with others in their locality.
+  
+  The user asking this question is from the locality of ${locality}.
+  
+  Here is contextual data about the community for reference:
+  ${contextString}
+  
+  Answer the following question clearly and concisely, providing specific information relevant to community engagement:
+  
+  ${question}
+  
+  When answering:
+  - Focus on practical advice about community engagement
+  - If the question is about events, petitions, polls, or discussions, provide specific information from the context when relevant
+  - Mention specific events, posts, petitions, or discussions from the context when they directly relate to the question
+  - Don't overwhelm with unnecessary details from the context
+  - Keep your tone helpful and encouraging`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;

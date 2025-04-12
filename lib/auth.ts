@@ -17,27 +17,27 @@ export const authOptions: NextAuthOptions = {
       id: "credentials",
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        voterId: { label: "Voter ID", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         try {
           await connectDB();
 
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error("Email and password are required");
+          if (!credentials?.voterId || !credentials?.password) {
+            throw new Error("Voter ID and password are required");
           }
 
-          const user = await UserModel.findOne({ email: credentials.email });
+          const user = await UserModel.findOne({ voterId: credentials.voterId });
 
           if (!user) {
-            throw new Error("No user found with this email");
+            throw new Error("No user found with this Voter ID");
           }
 
           const isPasswordValid = await compare(
             credentials.password,
             user.password!,
-          );
+          );          
 
           if (!isPasswordValid) {
             throw new Error("Invalid password");
@@ -46,8 +46,8 @@ export const authOptions: NextAuthOptions = {
           // Return user data without sensitive information
           return {
             id: user._id.toString(),
-            name: user.name,
-            email: user.email,
+            voterId: user.voterId,
+            email: user.email || "",
             image: user.image || "",
             role: user.role || "user",
             locality: user.locality || "",

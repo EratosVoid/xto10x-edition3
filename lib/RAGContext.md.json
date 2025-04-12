@@ -1,0 +1,250 @@
+{
+  "title": "LocalVoice Documentation",
+  "content": [
+    {
+      "heading": "Overview",
+      "text": "LocalVoice is a neighborhood-focused platform that enables communities to organize, discuss, vote, and create positive change locally. It aims to make local government accessible and impactful, addressing declining civic engagement by making local democracy tangible."
+    },
+    {
+      "heading": "Key Features",
+      "list": [
+        "User Authentication: Secure login using NextAuth.js with JWT",
+        "Locality-Based Content: All content filtered by user's neighborhood",
+        "Real-time Updates: Using Socket.io for instant notifications",
+        "Community Tools: Events planning and management, Polls and voting, Petitions, Discussions, Resource sharing",
+        "AI Integration: Post summarization using Google's Gemini API, AI-powered insights and visualizations",
+        "Gamification: Points system for community contributions",
+        "Accessible Local Democracy: Tangible and accessible platform for local civic engagement"
+      ]
+    },
+    {
+      "heading": "Tech Stack",
+      "list": [
+        "Frontend: Next.js (App Router), TypeScript, TailwindCSS, Framer Motion",
+        "Backend: Next.js API Routes",
+        "Database: MongoDB with Mongoose",
+        "Authentication: NextAuth.js",
+        "Real-time: Socket.io",
+        "AI: Google Gemini API"
+      ]
+    },
+    {
+      "heading": "Project Structure",
+      "list": [
+        "/app - Next.js App Router pages and API routes",
+        "/components - Reusable UI components",
+        "/features - Feature-based code organization",
+        "/lib - Utilities and libraries",
+        "/models - Mongoose schema definitions",
+        "/types - TypeScript type definitions"
+      ]
+    },
+    {
+      "heading": "API Routes",
+      "list": [
+        "Authentication: /api/auth/[...nextauth]",
+        "Users: /api/user/*",
+        "Posts: /api/post/*",
+        "Events: /api/event/*",
+        "Polls: /api/poll/*",
+        "Petitions: /api/petition/*",
+        "Discussions: /api/discussion/*",
+        "Socket: /api/socket",
+        "AI: /api/ai/*"
+      ]
+    },
+    {
+      "heading": "Site Features",
+      "sections": [
+        {
+          "title": "Core Features",
+          "description": "LocalVoice offers a comprehensive suite of tools designed to empower local communities and foster civic engagement.",
+          "features": [
+            "**Locality-Based Network:** Connect with neighbors and participate in discussions relevant to your local area.",
+            "**Real-Time Engagement:** Stay informed with instant notifications and updates.",
+            "**Integrated Communication:** Seamlessly share information, coordinate events, and collaborate on projects.",
+            "**Gamified Participation:** Earn points for contributing to the community, encouraging active involvement."
+          ]
+        },
+        {
+          "title": "Community Action Tools",
+          "description": "Take collective action and drive positive change in your community.",
+          "features": [
+            "**Events:** Organize and promote local gatherings, meetings, and initiatives.",
+            "**Polls:** Conduct community surveys to gauge opinions and inform decision-making.",
+            "**Petitions:** Mobilize support for local causes and advocate for policy changes.",
+            "**Discussions:** Facilitate open dialogue and address important community issues.",
+             "**Posts:** Allows users to share updates, news, and information with their neighbors."
+          ]
+        },
+        {
+          "title": "AI-Powered Assistance",
+          "description": "Leverage the power of AI to gain insights and make informed decisions, enhancing community understanding and action.",
+          "features": [
+            "**Ask AI:** Get quick answers to community-related questions, suggested questions for various topics, and AI-driven insights on local issues.",
+            "**Visualize AI:** Transform community data into easy-to-understand visualizations, helping identify trends, challenges, and opportunities for improvement."
+          ]
+        },
+        {
+          "title": "Accessible Local Democracy",
+          "description": "LocalVoice makes local democracy tangible and accessible, creating a system that makes local government accessible and impactful while addressing declining civic engagement.",
+          "features": [
+             "**Direct Engagement:** Connect directly with local representatives and government officials.",
+             "**Informed Participation:** Access reliable information on local issues, policies, and initiatives.",
+             "**Transparent Governance:** Promote transparency and accountability in local government.",
+             "**Impactful Action:** Empower citizens to take meaningful action and shape the future of their communities."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "User Journeys",
+      "sections": [
+        {
+          "title": "1. Registration and Login",
+          "steps": [
+            "User navigates to the registration page (`/register`).",
+            "User fills in the registration form with their Voter ID and other required information.",
+            "The system validates the input data.",
+            "If the data is valid, the user account is created.",
+            "The user is redirected to the login page (`/login`) with a success message.",
+            "The user logs in with their credentials.",
+            "The user is redirected to the dashboard (`/dashboard`)."
+          ]
+        },
+        {
+          "title": "2. Creating a Post",
+          "steps": [
+            "User navigates to the create post page (`/posts/create`).",
+            "User fills in the post form with a title, type, description, priority, and location.",
+            "User submits the form.",
+            "The system validates the input data.",
+            "If the data is valid, the post is created and saved to the database.",
+            "The user is redirected to the post details page (`/posts/[id]`)."
+          ]
+        },
+        {
+          "title": "3. Asking AI",
+          "steps": [
+            "User navigates to the Ask AI page (`/ask-ai`).",
+            "User can chose between a set of suggested questions related to posts, polls, petitions and discussions.",
+            "AI provides an answer"
+          ]
+        },
+        {
+          "title": "4. Visualizing AI",
+          "steps": [
+            "The visualize AI function helps provide structured data that could be visualized by a frontend component.",
+            "Post details are used to generate a JSON data structure showing the potential impact on various demographic groups in the community, identifies benefits and challenges, creates a timeline, and provides actionable recommendations."
+          ]
+        },
+        {
+          "title": "5. Creating an Event",
+          "steps": [
+            "User navigates to the create event page (`/events/create`).",
+            "User fills in the event form with details such as title, date, time, location, description, and relevant categories.",
+            "User submits the form.",
+            "The system validates the input data.",
+            "If the data is valid, the event is created and saved to the database.",
+            "The user is redirected to the event details page (`/events/[id]`)."
+          ]
+        },
+        {
+          "title": "6. Creating a Petition",
+          "steps": [
+            "User navigates to the create petition page (`/petitions/create`).",
+            "User fills in the petition form with details such as a title, description, target audience, and required signatures.",
+            "User submits the form.",
+            "The system validates the input data.",
+            "If the data is valid, the petition is created and saved to the database.",
+            "The user is redirected to the petition details page (`/petitions/[id]`)."
+          ]
+        },
+        {
+          "title": "7. Participating in a Poll",
+          "steps": [
+            "User navigates to the polls page (`/polls`).",
+            "User browses the available polls and selects one to participate in.",
+            "User reviews the poll question and available options.",
+            "User selects their preferred option and submits their vote.",
+            "The system records the user's vote.",
+            "The user is shown the poll results."
+          ]
+        },
+        {
+          "title": "8. Joining a Discussion",
+          "steps": [
+            "User navigates to the discussions page (`/discussions`).",
+            "User browses the available discussion threads and selects one to join.",
+            "User reads the existing comments and contributions.",
+            "User adds their own comment or contribution to the discussion.",
+            "The system saves the user's contribution."
+          ]
+        },
+        {
+          "title": "9. Exploring the Dashboard",
+          "steps": [
+            "User navigates to the dashboard page (`/dashboard`).",
+            "User views a summary of their community activity, including recent posts, upcoming events, active discussions, and earned points.",
+            "User can access quick links to create new content, participate in discussions, and explore local resources.",
+            "User can view stats such as number of posts, events, discussions and points."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "AI Features Details",
+      "sections": [
+        {
+          "title": "Ask AI",
+          "text": "The ask-ai page has a list of suggested questions",
+          "questions": {
+            "posts": [
+              "What are the most pressing local issues being discussed?",
+              "What upcoming events should I know about?",
+              "What are the current community opinions on key issues?",
+              "Can you summarize the latest community news?",
+              "Suggest some popular post categories.",
+              "Who are the top contributors in our community?",
+              "How can I create a post that gets noticed?"
+            ],
+            "polls": [
+              "How can I create a fair and engaging poll?",
+              "What's the best way to get more people to vote?",
+              "Can you suggest topics for a new community poll?"
+            ],
+            "petitions": [
+              "How many signatures do I need for my petition?",
+              "How can I promote my petition effectively?",
+              "What makes a petition successful?",
+              "What's the most supported petition in our area currently?",
+              "How do I get local officials to notice my petition?",
+              "What types of petitions have been successful historically?"
+            ],
+            "discussions": [
+              "How do I moderate community discussions?",
+              "What topics generate the most engagement?",
+              "How can I resolve conflicts in discussions?",
+              "What's the most active discussion thread right now?",
+              "How do I start a productive discussion on local issues?",
+              "What community concerns are trending in discussions?"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "heading": "Models",
+      "list": [
+        "Award",
+        "Discussion",
+        "Event",
+        "Notification",
+        "Petition",
+        "Poll",
+        "Post",
+        "User"
+      ]
+    }
+  ]
+}

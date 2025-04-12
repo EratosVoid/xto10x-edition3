@@ -94,30 +94,45 @@ const SparklesIcon = () => (
   </svg>
 );
 
+const fetchEvents = async (): Promise<Event[]> => {
+  const res = await fetch("/api/events");
+  const data = await res.json();
+
+  return data.events.map((e: any): Event => ({
+    ...e,
+    date: new Date(e.date),
+  }));
+};
+
+(async () => {
+  const upcomingEvents = await fetchEvents();
+  console.log(upcomingEvents);
+})();
+
 // Mock upcoming events
-const upcomingEvents = [
-  {
-    id: 1,
-    title: "Community Cleanup",
-    date: new Date(2023, 6, 15, 10, 0), // July 15, 10:00 AM
-    location: "Central Park",
-    participants: 12,
-  },
-  {
-    id: 2,
-    title: "Local Business Meetup",
-    date: new Date(2023, 6, 20, 18, 30), // July 20, 6:30 PM
-    location: "Community Center",
-    participants: 24,
-  },
-  {
-    id: 3,
-    title: "Neighborhood Watch Meeting",
-    date: new Date(2023, 6, 25, 19, 0), // July 25, 7:00 PM
-    location: "Town Hall",
-    participants: 8,
-  },
-];
+// const upcomingEvents = [
+//   {
+//     id: 1,
+//     title: "Community Cleanup",
+//     date: new Date(2023, 6, 15, 10, 0), // July 15, 10:00 AM
+//     location: "Central Park",
+//     participants: 12,
+//   },
+//   {
+//     id: 2,
+//     title: "Local Business Meetup",
+//     date: new Date(2023, 6, 20, 18, 30), // July 20, 6:30 PM
+//     location: "Community Center",
+//     participants: 24,
+//   },
+//   {
+//     id: 3,
+//     title: "Neighborhood Watch Meeting",
+//     date: new Date(2023, 6, 25, 19, 0), // July 25, 7:00 PM
+//     location: "Town Hall",
+//     participants: 8,
+//   },
+// ];
 
 // Mock notifications
 const notifications = [

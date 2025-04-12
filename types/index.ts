@@ -21,6 +21,8 @@ export interface User {
   createdAt?: Date;
   updatedAt?: Date;
   notifications: ObjectId[];
+  voterId: string;
+  phoneNumber?: string;
 }
 
 export interface Post {
