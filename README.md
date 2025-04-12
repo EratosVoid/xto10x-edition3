@@ -6,6 +6,12 @@ LokNiti is a neighborhood-focused platform that enables communities to organize,
 
 **Deployment URL:** [https://localvoice-three.vercel.app](https://localvoice-three.vercel.app)
 
+## Project Demo Video
+
+**Watch the Demo:** [LokNiti Platform Demonstration](https://youtu.be/te30iGywT40)
+
+Check out our video walkthrough to see LokNiti in action and get a better understanding of the platform's features and functionality.
+
 ## Project Documentation
 
 **Project Report:** [View Detailed Project Report](https://misty-seashore-84e.notion.site/Project-Report-1d3682e8fb8b8042af12cf55bbd04825)
