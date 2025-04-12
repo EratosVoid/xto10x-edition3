@@ -98,10 +98,12 @@ const fetchEvents = async (): Promise<Event[]> => {
   const res = await fetch("/api/events");
   const data = await res.json();
 
-  return data.events.map((e: any): Event => ({
-    ...e,
-    date: new Date(e.date),
-  }));
+  return data.events.map(
+    (e: any): Event => ({
+      ...e,
+      date: new Date(e.date),
+    })
+  );
 };
 
 (async () => {
@@ -244,6 +246,7 @@ export default function DashboardPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [aiInput, setAiInput] = useState("");
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {

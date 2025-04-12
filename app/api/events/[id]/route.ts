@@ -21,7 +21,7 @@ export async function GET(req: NextRequest, { params }: any) {
     const token = await getToken({ req });
 
     if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unuthorized" }, { status: 401 });
     }
 
     await connectDB();

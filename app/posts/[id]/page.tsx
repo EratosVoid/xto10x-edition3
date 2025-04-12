@@ -1218,8 +1218,9 @@ export default function PostDetailPage({ params }: PageProps) {
               </p>
             </div>
             <p className="text-sm text-default-500">
-              Are you sure you want to delete "
-              <span className="font-medium">{post?.title}</span>"?
+              Are you sure you want to delete &quot;
+              <span className="font-medium">{post?.title}</span>
+              &quot;?
             </p>
           </ModalBody>
           <ModalFooter>

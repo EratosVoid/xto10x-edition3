@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { Icon } from '@iconify/react';
+import { Icon } from "@iconify/react";
 
 // Create a client component to use useSearchParams
 function LoginForm() {
@@ -44,8 +44,8 @@ function LoginForm() {
       });
 
       if (result?.error) {
-        if (result.error === 'CredentialsSignin') {
-          setError('Invalid Voter ID or password.');
+        if (result.error === "CredentialsSignin") {
+          setError("Invalid Voter ID or password.");
         } else {
           setError(result.error);
         }
@@ -97,12 +97,12 @@ function LoginForm() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-              <label
-                className="block text-sm font-medium mb-1"
-                htmlFor="voterId"
-              >
-                Voter ID
-              </label>
+                <label
+                  className="block text-sm font-medium mb-1"
+                  htmlFor="voterId"
+                >
+                  Voter ID
+                </label>
                 <Input
                   fullWidth
                   required
@@ -120,25 +120,25 @@ function LoginForm() {
                 >
                   Password
                 </label>
-               <div className="relative">
-                <Input
-                  fullWidth
-                  required
-                  autoComplete="current-password"
-                  id="password"
-                  name="password"
-                  placeholder="Password"
-                  type={showPassword ? "text" : "password"}
-                  className="border-gray-300 focus:border-primary"
-                />
-                 <button
+                <div className="relative">
+                  <Input
+                    fullWidth
+                    required
+                    autoComplete="current-password"
+                    id="password"
+                    name="password"
+                    placeholder="Password"
+                    type={showPassword ? "text" : "password"}
+                    className="border-gray-300 focus:border-primary"
+                  />
+                  <button
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    <Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+                    <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} />
                   </button>
-                  </div>
+                </div>
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-sm">
@@ -167,7 +167,7 @@ function LoginForm() {
 
         <CardFooter className="flex justify-center p-6 bg-gray-50 dark:bg-gray-800/40 rounded-b-xl border-t dark:border-gray-700">
           <div className="text-sm text-center">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               className="font-medium text-primary hover:text-primary-400"
               href="/register"
