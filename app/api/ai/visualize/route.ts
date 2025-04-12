@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     }
 
     // Create a prompt for the AI
-    const prompt = `You are an AI assistant for a community engagement platform called LocalVoice.
+    const prompt = `You are an AI assistant for a community engagement platform called LokNiti.
 I need you to analyze and visualize how a community post will impact different demographic groups in the community.
 
 Post details:

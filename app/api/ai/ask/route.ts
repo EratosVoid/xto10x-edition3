@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
     // Use Gemini model
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = `You are an AI assistant for a community engagement platform called LocalVoice. 
+    const prompt = `You are an AI assistant for a community engagement platform called LokNiti. 
   Users can create and participate in events, polls, petitions, and discussions with others in their locality.
   
   The user asking this question is from the locality of ${locality}.

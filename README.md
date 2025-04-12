@@ -1,6 +1,6 @@
-# LocalVoice - Neighborhood Community Platform
+# LokNiti - Neighborhood Community Platform
 
-LocalVoice is a neighborhood-focused platform that enables communities to organize, discuss, vote, and create positive change locally.
+LokNiti is a neighborhood-focused platform that enables communities to organize, discuss, vote, and create positive change locally.
 
 ## Features
 
@@ -102,4 +102,5 @@ This project is open source and available under the [MIT License](LICENSE).
 - Next.js Team for the amazing framework
 - MongoDB for the database platform
 - The community for inspiration and feedback
+
 # xto10x-edition3

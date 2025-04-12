@@ -71,7 +71,7 @@ export default function AskAiPage() {
       id: "1",
       role: "ai",
       content:
-        "Hello! I'm your LocalVoice AI assistant. Ask me anything about community initiatives, events, polls, petitions, or discussions in your area. I have access to data from your locality to provide more relevant answers.",
+        "Hello! I'm your LokNiti AI assistant. Ask me anything about community initiatives, events, polls, petitions, or discussions in your area. I have access to data from your locality to provide more relevant answers.",
       timestamp: new Date(),
     },
   ]);
@@ -190,7 +190,7 @@ export default function AskAiPage() {
                 fallback="AI"
               />
               <div>
-                <h3 className="text-lg font-semibold">LocalVoice AI</h3>
+                <h3 className="text-lg font-semibold">LokNiti AI</h3>
                 <p className="text-small text-default-500">
                   {status === "authenticated"
                     ? `Providing insights for ${(session?.user as any)?.locality}`

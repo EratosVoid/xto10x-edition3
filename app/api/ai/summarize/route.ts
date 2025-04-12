@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     }
 
     // Create a prompt for the AI
-    const prompt = `You are an AI assistant for a community engagement platform called LocalVoice.
+    const prompt = `You are an AI assistant for a community engagement platform called LokNiti.
 Your task is to summarize community posts in a concise, informative way.
 
 Please provide a concise summary (3-5 sentences) of the following community post:

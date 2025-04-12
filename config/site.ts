@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "LocalVoice",
+  name: "LokNiti",
   description: "Building stronger communities together.",
   navItems: [
     {

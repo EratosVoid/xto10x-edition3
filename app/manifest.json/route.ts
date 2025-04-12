@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 export async function GET() {
   // Return the manifest.json content directly as a response
   const manifest = {
-    name: "LocalVoice",
-    short_name: "LocalVoice",
-    id: "LocalVoice",
+    name: "LokNiti",
+    short_name: "LokNiti",
+    id: "LokNiti",
     description: "A platform for community discussions and local engagement",
     start_url: "/",
     display: "standalone",

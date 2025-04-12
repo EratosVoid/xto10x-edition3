@@ -43,7 +43,7 @@ const features = [
 const testimonials = [
   {
     quote:
-      "LocalVoice helped us organize a successful park cleanup that brought our community together.",
+      "LokNiti helped us organize a successful park cleanup that brought our community together.",
     author: "Sarah Johnson",
     role: "Community Organizer",
   },
@@ -90,12 +90,12 @@ export default function Home() {
           <div className="container mx-auto px-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-                LV
+                LN
               </div>
               <span
                 className={`font-bold text-xl ${scrolled ? "text-foreground" : "text-white"}`}
               >
-                LocalVoice
+                LokNiti
               </span>
             </Link>
 
@@ -172,7 +172,7 @@ export default function Home() {
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              Welcome to <span className="text-yellow-300">LocalVoice</span>
+              Welcome to <span className="text-yellow-300">LokNiti</span>
             </h1>
             <h2 className="text-xl md:text-2xl mt-4 opacity-90">
               Building stronger communities together
@@ -352,7 +352,7 @@ export default function Home() {
               </h2>
               <div className="mt-4 h-1 w-20 bg-primary rounded-full"></div>
               <p className="mt-6 text-default-600">
-                LocalVoice was founded on the belief that strong communities are
+                LokNiti was founded on the belief that strong communities are
                 built on effective communication, shared goals, and collective
                 action. Our platform provides the digital infrastructure for
                 local residents to connect, share ideas, organize events, and
@@ -361,8 +361,8 @@ export default function Home() {
               <p className="mt-4 text-default-600">
                 Whether you&apos;re looking to organize a neighborhood cleanup,
                 survey opinions on a local issue, or simply connect with
-                like-minded individuals in your area, LocalVoice provides the
-                tools you need to make a difference.
+                like-minded individuals in your area, LokNiti provides the tools
+                you need to make a difference.
               </p>
               <div className="mt-8">
                 <Link
@@ -385,14 +385,14 @@ export default function Home() {
           </h2>
           <p className="max-w-2xl mx-auto mb-10 text-white/80">
             Start making a difference in your neighborhood today. Sign up for
-            LocalVoice and connect with like-minded individuals.
+            LokNiti and connect with like-minded individuals.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href={isAuthenticated ? "/dashboard" : "/register"}
               className="inline-block bg-white text-primary px-8 py-4 rounded-lg font-bold text-lg hover:bg-opacity-90 transition shadow-lg"
             >
-              {isAuthenticated ? "Go to Dashboard" : "Join LocalVoice Today"}
+              {isAuthenticated ? "Go to Dashboard" : "Join LokNiti Today"}
             </Link>
             {!isAuthenticated && (
               <Link

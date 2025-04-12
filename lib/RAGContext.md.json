@@ -1,9 +1,9 @@
 {
-  "title": "LocalVoice Documentation",
+  "title": "LokNiti Documentation",
   "content": [
     {
       "heading": "Overview",
-      "text": "LocalVoice is a neighborhood-focused platform that enables communities to organize, discuss, vote, and create positive change locally. It aims to make local government accessible and impactful, addressing declining civic engagement by making local democracy tangible."
+      "text": "LokNiti is a neighborhood-focused platform that enables communities to organize, discuss, vote, and create positive change locally. It aims to make local government accessible and impactful, addressing declining civic engagement by making local democracy tangible."
     },
     {
       "heading": "Key Features",
@@ -58,7 +58,7 @@
       "sections": [
         {
           "title": "Core Features",
-          "description": "LocalVoice offers a comprehensive suite of tools designed to empower local communities and foster civic engagement.",
+          "description": "LokNiti offers a comprehensive suite of tools designed to empower local communities and foster civic engagement.",
           "features": [
             "**Locality-Based Network:** Connect with neighbors and participate in discussions relevant to your local area.",
             "**Real-Time Engagement:** Stay informed with instant notifications and updates.",
@@ -74,7 +74,7 @@
             "**Polls:** Conduct community surveys to gauge opinions and inform decision-making.",
             "**Petitions:** Mobilize support for local causes and advocate for policy changes.",
             "**Discussions:** Facilitate open dialogue and address important community issues.",
-             "**Posts:** Allows users to share updates, news, and information with their neighbors."
+            "**Posts:** Allows users to share updates, news, and information with their neighbors."
           ]
         },
         {
@@ -87,12 +87,12 @@
         },
         {
           "title": "Accessible Local Democracy",
-          "description": "LocalVoice makes local democracy tangible and accessible, creating a system that makes local government accessible and impactful while addressing declining civic engagement.",
+          "description": "LokNiti makes local democracy tangible and accessible, creating a system that makes local government accessible and impactful while addressing declining civic engagement.",
           "features": [
-             "**Direct Engagement:** Connect directly with local representatives and government officials.",
-             "**Informed Participation:** Access reliable information on local issues, policies, and initiatives.",
-             "**Transparent Governance:** Promote transparency and accountability in local government.",
-             "**Impactful Action:** Empower citizens to take meaningful action and shape the future of their communities."
+            "**Direct Engagement:** Connect directly with local representatives and government officials.",
+            "**Informed Participation:** Access reliable information on local issues, policies, and initiatives.",
+            "**Transparent Governance:** Promote transparency and accountability in local government.",
+            "**Impactful Action:** Empower citizens to take meaningful action and shape the future of their communities."
           ]
         }
       ]

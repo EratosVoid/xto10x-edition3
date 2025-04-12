@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="flex flex-col gap-2">
-            <h3 className="font-bold text-lg">LocalVoice</h3>
+            <h3 className="font-bold text-lg">LokNiti</h3>
             <p className="text-default-500">
               Building stronger communities together, one voice at a time.
             </p>
@@ -43,7 +43,7 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-default-500 text-sm">
-            © {new Date().getFullYear()} LocalVoice. All rights reserved.
+            © {new Date().getFullYear()} LokNiti. All rights reserved.
           </p>
           <div className="flex gap-4 mt-4 md:mt-0">
             {Object.entries(siteConfig.links).map(([key, url]) => (

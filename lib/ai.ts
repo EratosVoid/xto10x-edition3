@@ -13,7 +13,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
  */
 export async function summarizeText(
   description: string,
-  maxLength: number = 150,
+  maxLength: number = 150
 ): Promise<string> {
   try {
     // For text-only input, use the gemini-flash model
@@ -56,7 +56,7 @@ export async function answerFAQ(
     // Use gemini-flash model for FAQ answering as well
     const model = genAI.getGenerativeModel({ model: "gemini-flash" });
 
-    let prompt = `You are an AI assistant for a community engagement platform called LocalVoice. 
+    let prompt = `You are an AI assistant for a community engagement platform called LokNiti. 
 Users can create and participate in events, polls, petitions, and discussions with others in their locality.
 
 ${locality ? `The user asking this question is from the locality of ${locality}.` : ""}

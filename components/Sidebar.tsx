@@ -212,7 +212,7 @@ export const Sidebar = () => {
       <div className="md:hidden flex items-center justify-between p-4 border-b ">
         <NextLink href="/" className="flex items-center gap-2">
           <Logo />
-          <span className="font-bold">LocalVoice</span>
+          <span className="font-bold">LokNiti</span>
         </NextLink>
         <button
           onClick={() => setExpanded(!expanded)}
@@ -249,7 +249,7 @@ export const Sidebar = () => {
         <div className="p-4 border-b flex items-center justify-between">
           <NextLink href="/" className="flex items-center gap-2">
             <Logo />
-            <span className="font-bold">LocalVoice</span>
+            <span className="font-bold">LokNiti</span>
           </NextLink>
           <ThemeSwitch />
         </div>

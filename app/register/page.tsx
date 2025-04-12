@@ -7,7 +7,7 @@ import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
-import { Icon } from '@iconify/react';
+import { Icon } from "@iconify/react";
 
 // List of localities for the select input
 const localities = [
@@ -55,7 +55,6 @@ function RegisterForm() {
       password: "[REDACTED]",
     });
 
-
     try {
       console.log("Sending registration request to API");
       const response = await fetch("/api/user/register", {
@@ -74,8 +73,10 @@ function RegisterForm() {
       if (!response.ok) {
         if (Array.isArray(data.error)) {
           // Validation errors from Zod
-          setError(data.error.map((e: { message: any; }) => e.message).join(", "));
-        } else if (typeof data.error === 'string') {
+          setError(
+            data.error.map((e: { message: any }) => e.message).join(", ")
+          );
+        } else if (typeof data.error === "string") {
           // Single error message
           setError(data.error);
         } else {
@@ -103,9 +104,9 @@ function RegisterForm() {
         <div className="container mx-auto px-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-              LV
+              LN
             </div>
-            <span className="font-bold text-lg">LocalVoice</span>
+            <span className="font-bold text-lg">LokNiti</span>
           </Link>
         </div>
       </nav>
@@ -113,7 +114,7 @@ function RegisterForm() {
       <Card className="w-full max-w-md shadow-lg border dark:border-gray-700">
         <CardHeader className="flex flex-col items-center bg-primary/5 rounded-t-xl p-6">
           <h2 className="text-3xl font-bold">Create your account</h2>
-          <p className="text-default-500 mt-1">Join the LocalVoice community</p>
+          <p className="text-default-500 mt-1">Join the LokNiti community</p>
         </CardHeader>
 
         <CardBody className="p-6">
@@ -126,7 +127,10 @@ function RegisterForm() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="voterId" className="block text-sm font-medium mb-1">
+                <label
+                  htmlFor="voterId"
+                  className="block text-sm font-medium mb-1"
+                >
                   Voter ID
                 </label>
                 <Input
@@ -135,14 +139,19 @@ function RegisterForm() {
                   name="voterId"
                   placeholder="Enter your Voter ID"
                   value={formData.voterId}
-                  onChange={(e) => setFormData({ ...formData, voterId: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, voterId: e.target.value })
+                  }
                   required
                   fullWidth
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-1">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium mb-1"
+                >
                   Email address
                 </label>
                 <Input
@@ -151,14 +160,19 @@ function RegisterForm() {
                   placeholder="john@example.com"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   fullWidth
                 />
                 <p className="text-xs text-gray-500 mt-1">Optional</p>
               </div>
 
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1">
+                <label
+                  htmlFor="phoneNumber"
+                  className="block text-sm font-medium mb-1"
+                >
                   Phone Number
                 </label>
                 <div className="mt-1 flex rounded-md shadow-sm">
@@ -172,7 +186,9 @@ function RegisterForm() {
                     className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
                     placeholder="Enter your phone number"
                     value={formData.phoneNumber}
-                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phoneNumber: e.target.value })
+                    }
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Optional</p>
@@ -232,30 +248,30 @@ function RegisterForm() {
                 >
                   Password
                 </label>
-                 <div className="relative">
-                <Input
-                  fullWidth
-                  required
-                  autoComplete="new-password"
-                  id="password"
-                  minLength={6}
-                  name="password"
-                  placeholder="••••••••"
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="border-gray-300 focus:border-primary"
-                />
-                 <button
+                <div className="relative">
+                  <Input
+                    fullWidth
+                    required
+                    autoComplete="new-password"
+                    id="password"
+                    minLength={6}
+                    name="password"
+                    placeholder="••••••••"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    className="border-gray-300 focus:border-primary"
+                  />
+                  <button
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    <Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+                    <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} />
                   </button>
-                  </div>
+                </div>
               </div>
 
               <div>
@@ -265,30 +281,35 @@ function RegisterForm() {
                 >
                   Confirm Password
                 </label>
-                 <div className="relative">
-                <Input
-                  fullWidth
-                  required
-                  autoComplete="new-password"
-                  id="confirmPassword"
-                  minLength={6}
-                  name="confirmPassword"
-                  placeholder="••••••••"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={formData.confirmPassword}
-                  onChange={(e) =>
-                    setFormData({ ...formData, confirmPassword: e.target.value })
-                  }
-                  className="border-gray-300 focus:border-primary"
-                />
-                 <button
+                <div className="relative">
+                  <Input
+                    fullWidth
+                    required
+                    autoComplete="new-password"
+                    id="confirmPassword"
+                    minLength={6}
+                    name="confirmPassword"
+                    placeholder="••••••••"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    className="border-gray-300 focus:border-primary"
+                  />
+                  <button
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
-                    <Icon icon={showConfirmPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+                    <Icon
+                      icon={showConfirmPassword ? "mdi:eye-off" : "mdi:eye"}
+                    />
                   </button>
-                  </div>
+                </div>
               </div>
             </div>
 
