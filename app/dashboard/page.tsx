@@ -13,15 +13,6 @@ import { Avatar } from "@heroui/avatar";
 import { Badge } from "@heroui/badge";
 import { Divider } from "@heroui/divider";
 
-type Event = {
-  title: string;
-  id: number;
-  name: string;
-  date: Date; // changed from string to Date
-  location?: string;
-  participants?: number;
-};
-
 // Calendar Icon
 const CalendarIcon = () => (
   <svg
@@ -103,13 +94,134 @@ const SparklesIcon = () => (
   </svg>
 );
 
-// Date format helpers
-const formatDate = (date: Date) =>
-  new Date(date).toLocaleDateString("en-US", {
+const fetchEvents = async (): Promise<Event[]> => {
+  const res = await fetch("/api/events");
+  const data = await res.json();
+
+  return data.events.map((e: any): Event => ({
+    ...e,
+    date: new Date(e.date),
+  }));
+};
+
+(async () => {
+  const upcomingEvents = await fetchEvents();
+  console.log(upcomingEvents);
+})();
+
+// Mock upcoming events
+// const upcomingEvents = [
+//   {
+//     id: 1,
+//     title: "Community Cleanup",
+//     date: new Date(2023, 6, 15, 10, 0), // July 15, 10:00 AM
+//     location: "Central Park",
+//     participants: 12,
+//   },
+//   {
+//     id: 2,
+//     title: "Local Business Meetup",
+//     date: new Date(2023, 6, 20, 18, 30), // July 20, 6:30 PM
+//     location: "Community Center",
+//     participants: 24,
+//   },
+//   {
+//     id: 3,
+//     title: "Neighborhood Watch Meeting",
+//     date: new Date(2023, 6, 25, 19, 0), // July 25, 7:00 PM
+//     location: "Town Hall",
+//     participants: 8,
+//   },
+// ];
+
+// Mock notifications
+const notifications = [
+  {
+    id: 1,
+    type: "reply",
+    message: "Emily Garcia replied to your post",
+    time: "2 hours ago",
+    read: false,
+  },
+  {
+    id: 2,
+    type: "like",
+    message: "John Smith liked your event",
+    time: "5 hours ago",
+    read: false,
+  },
+  {
+    id: 3,
+    type: "mention",
+    message: "You were mentioned in a discussion",
+    time: "1 day ago",
+    read: true,
+  },
+  {
+    id: 4,
+    type: "event",
+    message: "Reminder: Community Cleanup tomorrow",
+    time: "1 day ago",
+    read: true,
+  },
+];
+
+// Mock petitions
+const petitions = [
+  {
+    id: 1,
+    title: "Improve Park Facilities",
+    content:
+      "Petition to upgrade playground equipment and add more benches in Central Park.",
+    date: new Date(2023, 6, 10),
+    signatures: 128,
+  },
+  {
+    id: 2,
+    title: "Weekend Farmers Market",
+    content:
+      "Support establishing a weekend farmers market in the town square.",
+    date: new Date(2023, 6, 12),
+    signatures: 89,
+  },
+  {
+    id: 3,
+    title: "Extended Library Hours",
+    content:
+      "Requesting the local library to extend evening hours on weekdays.",
+    date: new Date(2023, 6, 8),
+    signatures: 64,
+  },
+];
+
+// Mock announcements
+const announcements = [
+  {
+    id: 1,
+    title: "New Community Center Opening",
+    content:
+      "The new community center will open on August 1st with free activities for all residents.",
+    date: "2 days ago",
+    author: "Community Admin",
+  },
+  {
+    id: 2,
+    title: "Road Maintenance Schedule",
+    content:
+      "Main Street will be closed for repairs from July 18-22. Please use alternate routes.",
+    date: "3 days ago",
+    author: "Public Works Department",
+  },
+];
+
+// Format date
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
   });
+};
 
 // Format time
 const formatTime = (date: Date) => {
@@ -124,63 +236,28 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [locality, setLocality] = useState("");
-  const [stats, setStats] = useState({ posts: 0, events: 0, discussions: 0, points: 0 });
+  const [stats, setStats] = useState({
+    posts: 0,
+    events: 0,
+    discussions: 0,
+    points: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [aiInput, setAiInput] = useState("");
-  const [events, setEvents] = useState<Event[]>([]);
-  const [notifications, setNotifications] = useState([]);
-  const [petitions, setPetitions] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
-
-  const fetchEvents = async () => {
-    const res = await fetch("/api/events");
-    const data: Event[] = await res.json();
-    setEvents(
-      data.map((e) => ({
-        ...e,
-        date: new Date(e.date), // if you need a Date object
-      }))
-    );
-  };
-
-  const fetchNotifications = async () => {
-    const res = await fetch("/api/notifications");
-    if (!res.ok) throw new Error("Failed to fetch notifications");
-    setNotifications(await res.json());
-  };
-
-  const fetchPetitions = async () => {
-    const res = await fetch("/api/petitions");
-    if (!res.ok) throw new Error("Failed to fetch petitions");
-    setPetitions(await res.json());
-  };
-
-  const fetchAnnouncements = async () => {
-    const res = await fetch("/api/announcements");
-    if (!res.ok) throw new Error("Failed to fetch announcements");
-    setAnnouncements(await res.json());
-  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     } else if (status === "authenticated") {
       setLocality((session?.user as any).locality || "Your Community");
+      // In a real app, fetch user stats here
       setStats({
-        posts: 0,
-        events: 0,
-        discussions: 0,
-        points: 0,
+        posts: 5,
+        events: 2,
+        discussions: 10,
+        points: 120,
       });
-
-      Promise.all([
-        fetchEvents(),
-        fetchAnnouncements(),
-        fetchPetitions(),
-        fetchNotifications(),
-      ])
-        .catch((err) => console.error("Error fetching dashboard data:", err))
-        .finally(() => setIsLoading(false));
+      setIsLoading(false);
     }
   }, [status, router, session]);
 
@@ -255,8 +332,8 @@ export default function DashboardPage() {
               <CardBody className="p-4">
                 <p className="text-4xl font-bold">{stats.points}</p>
                 <p className="text-sm">Points</p>
-          </CardBody>
-        </Card>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </div>
@@ -264,14 +341,14 @@ export default function DashboardPage() {
       {/* Main Content */}
       {/* Calendar Events (Spans 2 columns on md screens) */}
       <Card className="row-span-2 row-start-2">
-          <CardHeader className="flex items-center gap-2">
-            <CalendarIcon />
+        <CardHeader className="flex items-center gap-2">
+          <CalendarIcon />
           <h2 className="text-xl font-semibold">Upcoming Events</h2>
-          </CardHeader>
+        </CardHeader>
         <CardBody>
           <div className="space-y-4">
-            {events.length > 0 ? (
-              events.map((event) => (
+            {upcomingEvents.length > 0 ? (
+              upcomingEvents.map((event) => (
                 <div
                   key={event.id}
                   className="flex items-start gap-4 pb-4 border-b last:border-0"
@@ -283,7 +360,7 @@ export default function DashboardPage() {
                     <span className="text-lg font-bold">
                       {event.date.getDate()}
                     </span>
-              </div>
+                  </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{event.title}</h3>
                     <div className="flex items-center gap-4 text-sm mt-1">
@@ -314,7 +391,7 @@ export default function DashboardPage() {
               </p>
             )}
           </div>
-          </CardBody>
+        </CardBody>
         <CardFooter>
           <Button
             color="primary"
@@ -324,12 +401,12 @@ export default function DashboardPage() {
             Create Event
           </Button>
         </CardFooter>
-        </Card>
+      </Card>
 
       {/* Notifications */}
-        <Card>
-          <CardHeader className="flex items-center gap-2">
-            <NotificationIcon />
+      <Card>
+        <CardHeader className="flex items-center gap-2">
+          <NotificationIcon />
           <h2 className="text-xl font-semibold">Notifications</h2>
           <Badge color="danger" size="sm" className="ml-auto">
             {notifications.filter((n) => !n.read).length}
@@ -337,7 +414,7 @@ export default function DashboardPage() {
           <Button variant="light" size="sm" className="w-fit ml-auto">
             View All Notifications
           </Button>
-          </CardHeader>
+        </CardHeader>
         <CardBody className="p-0 scrollbar-hide">
           {notifications.map((notification) => (
             <div
@@ -357,17 +434,17 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              </div>
-            ))}
-          </CardBody>
-        </Card>
+            </div>
+          ))}
+        </CardBody>
+      </Card>
 
       {/* Trending Petitions */}
-        <Card>
-          <CardHeader className="flex items-center gap-2">
-            <PetitionIcon />
+      <Card>
+        <CardHeader className="flex items-center gap-2">
+          <PetitionIcon />
           <h2 className="text-xl font-semibold">Trending Petitions</h2>
-          </CardHeader>
+        </CardHeader>
         <CardBody className="scrollbar-hide">
           <div className="space-y-4">
             {petitions.map((petition) => (
@@ -392,18 +469,18 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-          </CardBody>
-        </Card>
+        </CardBody>
+      </Card>
 
       {/* Recent Announcements */}
       <Card className="md:col-span-2">
-          <CardHeader className="flex items-center gap-2">
-            <AnnouncementIcon />
+        <CardHeader className="flex items-center gap-2">
+          <AnnouncementIcon />
           <h2 className="text-xl font-semibold">Recent Announcements</h2>
           <Button color="primary" variant="flat" size="sm" className="ml-auto">
             View All Announcements
           </Button>
-          </CardHeader>
+        </CardHeader>
         <CardBody className="scrollbar-hide">
           {announcements.map((announcement) => (
             <div
@@ -421,10 +498,10 @@ export default function DashboardPage() {
                 <span className="mx-2">•</span>
                 <span>{announcement.date}</span>
               </div>
-              </div>
-            ))}
-          </CardBody>
-        </Card>
+            </div>
+          ))}
+        </CardBody>
+      </Card>
     </div>
   );
 }

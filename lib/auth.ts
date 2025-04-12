@@ -50,6 +50,7 @@ export const authOptions: NextAuthOptions = {
             email: user.email || "",
             image: user.image || "",
             role: user.role || "user",
+            locality: user.locality || "",
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -84,6 +85,7 @@ export const authOptions: NextAuthOptions = {
         // Initialize token with user data on first sign in
         token.id = user.id;
         token.role = user.role;
+        token.locality = user.locality;
       }
 
       return token;
@@ -93,6 +95,7 @@ export const authOptions: NextAuthOptions = {
         // Add properties to session from token
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.locality = token.locality as string;
       }
 
       return session;
