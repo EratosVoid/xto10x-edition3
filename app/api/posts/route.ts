@@ -63,7 +63,10 @@ export async function GET(req: NextRequest) {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("createdBy", "name image");
+      .populate("createdBy", "name image")
+      .populate("pollId", "options")
+      .populate("petitionId", "target goal signatures supporters")
+      .populate("eventId", "startDate endDate location");
 
     return NextResponse.json({
       posts,

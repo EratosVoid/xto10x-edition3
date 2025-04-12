@@ -32,12 +32,19 @@ export default function PollsPage() {
           return;
         }
 
-        const res = await fetch("/api/polls");
+        const res = await fetch("/api/polls?includeUserVotes=true");
 
         if (!res.ok) throw new Error("Failed to load polls");
         const data = await res.json();
 
         setPolls(data.polls);
+
+        // Set initial voted polls state based on API response
+        const initialVotedPolls: Record<string, boolean> = {};
+        data.polls.forEach((poll: any) => {
+          initialVotedPolls[poll._id] = poll.userHasVoted || false;
+        });
+        setVotedPolls(initialVotedPolls);
       } catch (err: any) {
         setError(err.message || "An error occurred");
       } finally {
@@ -76,18 +83,19 @@ export default function PollsPage() {
 
       if (!res.ok) throw new Error("Failed to submit vote");
 
-      // Mark poll as voted and refresh the polls
+      // Get updated poll from response
+      const updatedPoll = await res.json();
+
+      // Update the specific poll in our state with the new data
+      setPolls((currentPolls) =>
+        currentPolls.map((poll) => (poll._id === pollId ? updatedPoll : poll))
+      );
+
+      // Mark poll as voted
       setVotedPolls({
         ...votedPolls,
         [pollId]: true,
       });
-
-      // Refresh the polls list to update vote counts
-      const updatedPollsRes = await fetch("/api/polls");
-      if (updatedPollsRes.ok) {
-        const updatedData = await updatedPollsRes.json();
-        setPolls(updatedData.polls);
-      }
     } catch (err: any) {
       setError(err.message || "Failed to submit vote");
     }
@@ -106,6 +114,12 @@ export default function PollsPage() {
 
   // Check if user has already voted on this poll
   const hasUserVoted = (poll: any) => {
+    // First check if we have this info directly from the API
+    if (poll.userHasVoted !== undefined) {
+      return poll.userHasVoted;
+    }
+
+    // Fallback to checking the votedUsers array
     if (!session || !poll.votedUsers) return false;
     const userEmail = session.user?.email;
     if (!userEmail) return false;
@@ -114,7 +128,13 @@ export default function PollsPage() {
   };
 
   // Get total votes for a poll
-  const getTotalVotes = (options: Record<string, number>) => {
+  const getTotalVotes = (options: Record<string, number>, poll: any) => {
+    // Use totalVotes from API if available
+    if (poll.totalVotes !== undefined) {
+      return poll.totalVotes;
+    }
+
+    // Otherwise calculate from options
     return Object.values(options).reduce((sum, count) => sum + count, 0);
   };
 
@@ -166,16 +186,25 @@ export default function PollsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         {filteredPolls.length > 0 ? (
           filteredPolls.map((poll) => {
-            const totalVotes = getTotalVotes(poll.options);
+            const totalVotes = getTotalVotes(poll.options, poll);
             const userHasVoted = hasUserVoted(poll);
-            const showResults = userHasVoted || status !== "authenticated";
+            const showResults = userHasVoted;
+            console.log(showResults);
 
             return (
-              <Card key={poll._id} className="w-full">
+              <Card
+                key={poll._id}
+                className="w-full transition-all duration-200 hover:shadow-lg hover:border-primary/30"
+              >
                 <CardHeader className="flex flex-col">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-xl font-bold">{poll.postId.title}</h3>
+                      <h3
+                        className="text-xl font-bold hover:text-primary cursor-pointer transition-colors"
+                        onClick={() => router.push(`/posts/${poll.postId._id}`)}
+                      >
+                        {poll.postId.title}
+                      </h3>
                       <p className="text-small text-default-500">
                         Created {formatDate(poll.createdAt)}
                       </p>
@@ -186,7 +215,12 @@ export default function PollsPage() {
                       </Chip>
                     )}
                   </div>
-                  <p className="mt-2">{poll.postId.description}</p>
+                  <p
+                    className="mt-2 hover:text-default-700 cursor-pointer transition-colors"
+                    onClick={() => router.push(`/posts/${poll.postId._id}`)}
+                  >
+                    {poll.postId.description}
+                  </p>
                 </CardHeader>
 
                 <CardBody>
@@ -254,17 +288,15 @@ export default function PollsPage() {
                       Submit Vote
                     </Button>
                   )}
-                  {showResults &&
-                    !userHasVoted &&
-                    status === "authenticated" && (
-                      <Button
-                        color="primary"
-                        variant="flat"
-                        onClick={() => router.push(`/posts/${poll.postId._id}`)}
-                      >
-                        View Details
-                      </Button>
-                    )}
+                  {showResults && (
+                    <Button
+                      color="primary"
+                      variant="flat"
+                      onPress={() => router.push(`/posts/${poll.postId._id}`)}
+                    >
+                      View Details
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             );

@@ -25,7 +25,7 @@ const PollSchema = new mongoose.Schema<Poll>(
       },
     ],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Create indexes for better performance

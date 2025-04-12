@@ -155,12 +155,6 @@ export default function PostsPage() {
     );
   }
 
-  // Get color for the current post type
-  const getPostTypeColor = (type: string) => {
-    const postType = POST_TYPES.find((t) => t.key === type);
-    return postType?.color || "default";
-  };
-
   return (
     <div className="w-full mx-auto py-8 px-4 sm:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">

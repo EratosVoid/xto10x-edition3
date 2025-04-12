@@ -518,7 +518,7 @@ export default function PostDetailPage({ params }: PageProps) {
                 variant="flat"
                 fullWidth
                 className="mt-2"
-                onClick={() => router.push(`/polls/${post.pollId?._id}`)}
+                onClick={() => router.push(`/polls`)}
                 endContent={
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

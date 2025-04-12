@@ -44,7 +44,7 @@ export async function POST(req: NextRequest, { params }: any) {
     if (poll.postId.locality !== user.locality) {
       return NextResponse.json(
         { error: "You don't have access to this poll" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest, { params }: any) {
     if (poll.votedUsers.includes(token.id as any)) {
       return NextResponse.json(
         { error: "You have already voted in this poll" },
-        { status: 409 },
+        { status: 409 }
       );
     }
 
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest, { params }: any) {
     if (!option) {
       return NextResponse.json(
         { error: "You must specify an option to vote for" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest, { params }: any) {
     if (!poll.options.has(option)) {
       return NextResponse.json(
         { error: "The selected option doesn't exist" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -92,15 +92,46 @@ export async function POST(req: NextRequest, { params }: any) {
       runValidators: true,
     })
       .populate("postId")
-      .populate("votedUsers", "name image");
+      .populate("votedUsers", "name image email");
 
-    return NextResponse.json(updatedPoll);
+    // Calculate total votes based on poll options
+    let totalVotes = 0;
+
+    // Poll options could be stored either as a Map or as a plain object
+    if (updatedPoll.options) {
+      // For mongoose Map objects
+      if (
+        typeof updatedPoll.options.get === "function" &&
+        typeof updatedPoll.options.forEach === "function"
+      ) {
+        updatedPoll.options.forEach((value: any) => {
+          if (typeof value === "number") {
+            totalVotes += value;
+          }
+        });
+      }
+      // For plain objects
+      else if (typeof updatedPoll.options === "object") {
+        Object.values(updatedPoll.options).forEach((value: any) => {
+          if (typeof value === "number") {
+            totalVotes += value;
+          }
+        });
+      }
+    }
+
+    // Convert to a plain object and add userHasVoted flag and totalVotes
+    const pollResponse = updatedPoll.toObject();
+    pollResponse.userHasVoted = true;
+    pollResponse.totalVotes = totalVotes;
+
+    return NextResponse.json(pollResponse);
   } catch (error: any) {
     console.error("Error voting in poll:", error);
 
     return NextResponse.json(
       { error: error.message || "Failed to submit vote" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -136,7 +167,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!poll.votedUsers.includes(token.id as any)) {
       return NextResponse.json(
         { error: "You haven't voted in this poll" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -147,7 +178,7 @@ export async function DELETE(req: NextRequest, { params }: any) {
     if (!votedOption || !poll.options.has(votedOption)) {
       return NextResponse.json(
         { error: "You must specify which option you voted for" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -170,15 +201,46 @@ export async function DELETE(req: NextRequest, { params }: any) {
       runValidators: true,
     })
       .populate("postId")
-      .populate("votedUsers", "name image");
+      .populate("votedUsers", "name image email");
 
-    return NextResponse.json(updatedPoll);
+    // Calculate total votes based on poll options
+    let totalVotes = 0;
+
+    // Poll options could be stored either as a Map or as a plain object
+    if (updatedPoll.options) {
+      // For mongoose Map objects
+      if (
+        typeof updatedPoll.options.get === "function" &&
+        typeof updatedPoll.options.forEach === "function"
+      ) {
+        updatedPoll.options.forEach((value: any) => {
+          if (typeof value === "number") {
+            totalVotes += value;
+          }
+        });
+      }
+      // For plain objects
+      else if (typeof updatedPoll.options === "object") {
+        Object.values(updatedPoll.options).forEach((value: any) => {
+          if (typeof value === "number") {
+            totalVotes += value;
+          }
+        });
+      }
+    }
+
+    // Convert to a plain object and add userHasVoted flag and totalVotes
+    const pollResponse = updatedPoll.toObject();
+    pollResponse.userHasVoted = false;
+    pollResponse.totalVotes = totalVotes;
+
+    return NextResponse.json(pollResponse);
   } catch (error: any) {
     console.error("Error removing vote from poll:", error);
 
     return NextResponse.json(
       { error: error.message || "Failed to remove vote" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

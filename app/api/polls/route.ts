@@ -29,6 +29,8 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url);
     const limit = parseInt(url.searchParams.get("limit") || "10");
     const page = parseInt(url.searchParams.get("page") || "1");
+    const includeUserVotes =
+      url.searchParams.get("includeUserVotes") === "true";
 
     // Find all polls
     const polls = await PollModel.find()
@@ -36,14 +38,59 @@ export async function GET(req: NextRequest) {
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("postId")
-      .populate("votedUsers", "name image");
+      .populate("votedUsers", "name image email");
 
-    // Filter polls by user's locality
+    // Filter polls by user's locality and add userHasVoted flag
     const accessiblePolls = [];
 
     for (const poll of polls) {
       if (poll.postId && poll.postId.locality === user.locality) {
-        accessiblePolls.push(poll);
+        // Convert poll to a plain object so we can add properties
+        const pollObj = poll.toObject();
+
+        //convert poll.options to a plain object
+        pollObj.options = Object.fromEntries(pollObj.options);
+
+        console.log(pollObj);
+        // Add userHasVoted field if requested
+        if (includeUserVotes) {
+          // Check if user ID exists in votedUsers array by comparing string IDs
+          pollObj.userHasVoted = poll.votedUsers.some(
+            (votedUser: any) => votedUser._id.toString() === user._id.toString()
+          );
+        }
+
+        // Calculate total votes based on poll options
+        let totalVotes = 0;
+
+        // Poll options could be stored either as a Map or as a plain object
+        // Inspect it to decide the right approach
+        if (poll.options) {
+          // For mongoose Map objects
+          if (
+            typeof poll.options.get === "function" &&
+            typeof poll.options.forEach === "function"
+          ) {
+            // mongoose Maps have both get and forEach methods
+            poll.options.forEach((value: any) => {
+              if (typeof value === "number") {
+                totalVotes += value;
+              }
+            });
+          }
+          // For plain objects
+          else if (typeof poll.options === "object") {
+            Object.values(poll.options).forEach((value: any) => {
+              if (typeof value === "number") {
+                totalVotes += value;
+              }
+            });
+          }
+        }
+
+        pollObj.totalVotes = totalVotes;
+
+        accessiblePolls.push(pollObj);
       }
     }
 
@@ -64,7 +111,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       { error: error.message || "Failed to fetch polls" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -96,7 +143,7 @@ export async function POST(req: NextRequest) {
     if (!postId || !options || !Object.keys(options).length) {
       return NextResponse.json(
         { error: "Missing required poll details" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -115,7 +162,7 @@ export async function POST(req: NextRequest) {
     if (post.type !== "poll") {
       return NextResponse.json(
         { error: "Post is not of type 'poll'" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -123,7 +170,7 @@ export async function POST(req: NextRequest) {
     if (post.createdBy.toString() !== token.id) {
       return NextResponse.json(
         { error: "You can only create polls for your own posts" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -133,7 +180,7 @@ export async function POST(req: NextRequest) {
     if (existingPoll) {
       return NextResponse.json(
         { error: "A poll already exists for this post" },
-        { status: 409 },
+        { status: 409 }
       );
     }
 
@@ -162,7 +209,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { error: error.message || "Failed to create poll" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
