@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
+import { Icon } from '@iconify/react';
 
 // Create a client component to use useSearchParams
 function LoginForm() {
@@ -16,6 +17,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const isRegistered = searchParams.get("registered") === "true";
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -114,6 +116,7 @@ function LoginForm() {
                 >
                   Password
                 </label>
+               <div className="relative">
                 <Input
                   fullWidth
                   required
@@ -121,9 +124,17 @@ function LoginForm() {
                   id="password"
                   name="password"
                   placeholder="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className="border-gray-300 focus:border-primary"
                 />
+                 <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} />
+                  </button>
+                  </div>
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-sm">
