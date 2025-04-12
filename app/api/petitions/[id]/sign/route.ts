@@ -5,6 +5,20 @@ import connectDB from "@/lib/db/connect";
 import PetitionModel from "@/models/Petition";
 import UserModel from "@/models/User";
 import PollModel from "@/models/Poll";
+import { createLocalityNotification } from "@/lib/notification";
+
+function notifier(current: number, goal: number): string {
+  const percentage = (current / goal) * 100;
+
+  if (percentage == 100) {
+    return "Goal reached";
+  } else if (percentage == 75) {
+    return "75% goal reached";
+  } else if (percentage == 50) {
+    return "50% goal reached";
+  }
+  return ''; // No milestone reached yet
+}
 
 // POST /api/petitions/[id]/sign - Sign a petition
 export async function POST(req: NextRequest, { params }: any) {
@@ -37,7 +51,7 @@ export async function POST(req: NextRequest, { params }: any) {
     }
 
     // Update the petition with the new signature
-    await PetitionModel.findByIdAndUpdate(
+    const updatedPetition = await PetitionModel.findByIdAndUpdate(
       petitionId,
       {
         $inc: { signatures: 1 },
@@ -45,6 +59,20 @@ export async function POST(req: NextRequest, { params }: any) {
       },
       { new: true }
     );
+
+    let notificationMessage = notifier(updatedPetition.signatures, updatedPetition.goal)
+    if (notificationMessage != '') {
+      createLocalityNotification(
+        notificationMessage,
+        user.locality,
+        petition._id
+      )
+    }
+
+    // Check if this specific petition has met its goal
+    if (updatedPetition.signatures >= updatedPetition.goal) {
+      console.log("Petition goal reached!", updatedPetition.signatures);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
