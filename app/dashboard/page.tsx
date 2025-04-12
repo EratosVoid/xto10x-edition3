@@ -380,20 +380,12 @@ export default function DashboardPage() {
                       <span className="text-default-600">{event.location}</span>
                     </div>
                     <div className="flex items-center mt-2">
-                      <Chip
-                        size="sm"
-                        color="primary"
-                        variant="flat"
-                        className="mr-2"
-                      >
-                        {event.participants} going
-                      </Chip>
                       <Button
                         size="sm"
                         variant="flat"
                         color="primary"
                         onPress={() =>
-                          router.push(`/events/${event.id || event._id}`)
+                          router.push(`/posts/${event?.postId?._id}`)
                         }
                       >
                         View Details

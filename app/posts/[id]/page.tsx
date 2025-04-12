@@ -111,6 +111,49 @@ const formatDate = (dateString: string) => {
   });
 };
 
+// Add this formatting function for duration
+const formatDuration = (startDate: string, endDate: string) => {
+  if (!startDate || !endDate) return "Not specified";
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // Check if dates are valid
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return "Not specified";
+
+  // Calculate the difference in minutes
+  const diffInMinutes = Math.floor(
+    (end.getTime() - start.getTime()) / (1000 * 60)
+  );
+
+  if (diffInMinutes <= 0) return "Not specified";
+
+  // Convert to appropriate units
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes !== 1 ? "s" : ""}`;
+  } else if (diffInMinutes < 1440) {
+    // Less than a day
+    const hours = Math.floor(diffInMinutes / 60);
+    const remainingMinutes = diffInMinutes % 60;
+
+    if (remainingMinutes === 0) {
+      return `${hours} hour${hours !== 1 ? "s" : ""}`;
+    } else {
+      return `${hours} hour${hours !== 1 ? "s" : ""} ${remainingMinutes} minute${remainingMinutes !== 1 ? "s" : ""}`;
+    }
+  } else {
+    // Days or more
+    const days = Math.floor(diffInMinutes / 1440);
+    const remainingHours = Math.floor((diffInMinutes % 1440) / 60);
+
+    if (remainingHours === 0) {
+      return `${days} day${days !== 1 ? "s" : ""}`;
+    } else {
+      return `${days} day${days !== 1 ? "s" : ""} ${remainingHours} hour${remainingHours !== 1 ? "s" : ""}`;
+    }
+  }
+};
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -418,8 +461,11 @@ export default function PostDetailPage({ params }: PageProps) {
                       clipRule="evenodd"
                     />
                   </svg>
-                  {post.eventId?.duration
-                    ? `${post.eventId.duration} minutes`
+                  {post.eventId?.startDate && post.eventId?.endDate
+                    ? formatDuration(
+                        post.eventId.startDate,
+                        post.eventId.endDate
+                      )
                     : "Not specified"}
                 </p>
               </div>
@@ -718,7 +764,7 @@ export default function PostDetailPage({ params }: PageProps) {
                   </Button>
                   {(isAuthor || isModeratorOrAdmin) && (
                     <>
-                      {isAuthor && (
+                      {/* {isAuthor && (
                         <Button
                           color="primary"
                           onPress={() => router.push(`/posts/${post._id}/edit`)}
@@ -726,7 +772,7 @@ export default function PostDetailPage({ params }: PageProps) {
                         >
                           Edit
                         </Button>
-                      )}
+                      )} */}
                       <Button
                         variant="flat"
                         color="danger"

@@ -115,7 +115,7 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
+    <div className="!w-full py-8 px-4 sm:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">Community Events</h1>
@@ -126,7 +126,7 @@ export default function EventsPage() {
         <Button
           className="mt-4 md:mt-0"
           color="primary"
-          onClick={() => router.push("/posts/create?type=event")}
+          onPress={() => router.push("/posts/create?type=event")}
         >
           Create Event
         </Button>

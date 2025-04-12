@@ -133,7 +133,7 @@ export default function PostCard({
         >
           View Details
         </Button>
-        {showEdit && (
+        {/* {showEdit && (
           <Button
             className="flex-1"
             color="secondary"
@@ -142,7 +142,7 @@ export default function PostCard({
           >
             Edit
           </Button>
-        )}
+        )} */}
       </CardFooter>
     </Card>
   );
