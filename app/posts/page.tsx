@@ -39,6 +39,7 @@ const POST_TYPES = [
   { key: "event", label: "Events", color: "primary" },
   { key: "poll", label: "Polls", color: "secondary" },
   { key: "petition", label: "Petitions", color: "success" },
+  { key: "announcement", label: "Announcements", color: "warning" },
 ];
 
 export default function PostsPage() {
@@ -57,6 +58,16 @@ export default function PostsPage() {
     pages: 0,
   });
   const [searchInput, setSearchInput] = useState("");
+
+  // Check for type parameter in URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const typeParam = searchParams.get("type");
+
+    if (typeParam && POST_TYPES.some((type) => type.key === typeParam)) {
+      setSelectedType(typeParam);
+    }
+  }, []);
 
   // Fetch posts when filters change
   useEffect(() => {
