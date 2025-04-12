@@ -33,9 +33,10 @@ const features = [
     icon: "🏘️",
   },
   {
-    title: "Resource Sharing",
-    description: "Share and find resources within your community.",
-    icon: "🤝",
+    title: "AI-Powered Insights",
+    description:
+      "Get content summarization, community analysis, and personalized news updates through our intelligent assistant.",
+    icon: "✨",
   },
 ];
 
@@ -81,84 +82,87 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navigation Bar */}
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/95 backdrop-blur-md shadow-md py-4" : "bg-transparent py-6"}`}
-      >
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-              LV
-            </div>
-            <span
-              className={`font-bold text-xl ${scrolled ? "text-foreground" : "text-white"}`}
-            >
-              LocalVoice
-            </span>
-          </Link>
+      {/* hide if logged in */}
+      {!isAuthenticated && (
+        <nav
+          className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/95 backdrop-blur-md shadow-md py-4" : "bg-transparent py-6"}`}
+        >
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
+                LV
+              </div>
+              <span
+                className={`font-bold text-xl ${scrolled ? "text-foreground" : "text-white"}`}
+              >
+                LocalVoice
+              </span>
+            </Link>
 
-          <div className="flex items-center gap-6">
-            <div className="hidden md:flex gap-8">
-              <a
-                href="#features"
-                className={`font-medium hover:text-primary transition ${scrolled ? "text-foreground" : "text-white"}`}
-              >
-                Features
-              </a>
-              <a
-                href="#testimonials"
-                className={`font-medium hover:text-primary transition ${scrolled ? "text-foreground" : "text-white"}`}
-              >
-                Testimonials
-              </a>
-              <a
-                href="#about"
-                className={`font-medium hover:text-primary transition ${scrolled ? "text-foreground" : "text-white"}`}
-              >
-                About
-              </a>
-            </div>
-
-            {isAuthenticated ? (
-              <Link
-                href="/dashboard"
-                className={`px-5 py-2 rounded-lg font-medium transition-all ${
-                  scrolled
-                    ? "bg-primary text-white hover:bg-primary/90"
-                    : "bg-white text-primary hover:bg-white/90"
-                }`}
-              >
-                Dashboard
-              </Link>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/login"
-                  className={`px-5 py-2 rounded-lg font-medium transition-all ${
-                    scrolled
-                      ? "text-foreground hover:bg-gray-100"
-                      : "text-white hover:bg-white/10"
-                  }`}
+            <div className="flex items-center gap-6">
+              <div className="hidden md:flex gap-8">
+                <a
+                  href="#features"
+                  className={`font-medium hover:text-primary transition ${scrolled ? "text-foreground" : "text-white"}`}
                 >
-                  Sign In
-                </Link>
+                  Features
+                </a>
+                <a
+                  href="#testimonials"
+                  className={`font-medium hover:text-primary transition ${scrolled ? "text-foreground" : "text-white"}`}
+                >
+                  Testimonials
+                </a>
+                <a
+                  href="#about"
+                  className={`font-medium hover:text-primary transition ${scrolled ? "text-foreground" : "text-white"}`}
+                >
+                  About
+                </a>
+              </div>
+
+              {isAuthenticated ? (
                 <Link
-                  href="/register"
+                  href="/dashboard"
                   className={`px-5 py-2 rounded-lg font-medium transition-all ${
                     scrolled
                       ? "bg-primary text-white hover:bg-primary/90"
                       : "bg-white text-primary hover:bg-white/90"
                   }`}
                 >
-                  Sign Up
+                  Dashboard
                 </Link>
-              </div>
-            )}
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/login"
+                    className={`px-5 py-2 rounded-lg font-medium transition-all ${
+                      scrolled
+                        ? "text-foreground hover:bg-gray-100"
+                        : "text-white hover:bg-white/10"
+                    }`}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    className={`px-5 py-2 rounded-lg font-medium transition-all ${
+                      scrolled
+                        ? "bg-primary text-white hover:bg-primary/90"
+                        : "bg-white text-primary hover:bg-white/90"
+                    }`}
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-screen bg-gradient-to-br from-primary/90 via-primary to-purple-700 pt-[28vh] pb-[40vh]">
+      <section className="relative overflow-hidden min-h-screen bg-gradient-to-br from-primary/90 via-primary to-purple-700 py-[10vh] md:pt-[28vh] md:pb-[40vh]">
         <div className="relative container mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 text-white">
             <div className="flex items-center gap-2 mb-6">
@@ -211,7 +215,7 @@ export default function Home() {
               )}
             </div>
           </div>
-          <div className="md:w-1/2 mt-16 md:mt-0 flex justify-center">
+          <div className="hidden md:flex md:w-1/2 mt-16 md:mt-0 justify-center">
             <div className="relative w-full max-w-md h-80 md:h-96">
               <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl"></div>
               <div className="absolute -top-6 -right-6 w-32 h-32 bg-yellow-300 rounded-full opacity-70 animate-pulse"></div>

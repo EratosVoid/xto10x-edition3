@@ -270,9 +270,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="w-full h-screen grid grid-rows-3 grid-cols-3 py-8 px-4 sm:px-6 gap-6">
+    <div className="w-full md:h-screen grid grid-cols-1 md:grid-rows-3 md:grid-cols-3 py-8 px-4 sm:px-6 gap-6">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary to-purple-600 rounded-xl p-8 text-white col-span-3">
+      <div className="bg-gradient-to-r from-primary to-purple-600 rounded-xl p-8 text-white md:col-span-3">
         <div className="flex flex-col md:flex-row justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
@@ -404,7 +404,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Notifications */}
-      <Card>
+      <Card className="col-span-1">
         <CardHeader className="flex items-center gap-2">
           <NotificationIcon />
           <h2 className="text-xl font-semibold">Notifications</h2>
