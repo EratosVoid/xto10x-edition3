@@ -103,8 +103,8 @@ The comprehensive project report includes detailed information about the design,
 3. Create a `.env.local` file in the root directory with the following variables:
 
    ```
-   MONGODB_URI=mongodb+srv://test:2q1oOhqgEyctMSir@cluster0.hajz5ka.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-   GEMINI_API_KEY=AIzaSyCjBAPDM5-55Vg8TvvUsVkk-ZkdVFepkn0
+   MONGODB_URI=your-mongodb-uri
+   GEMINI_API_KEY=your-gemini-api-key
    NEXTAUTH_SECRET=your-nextauth-secret
    NEXTAUTH_URL=http://localhost:3000
    ```
