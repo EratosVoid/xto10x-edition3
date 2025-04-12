@@ -6,12 +6,21 @@ import connectDB from "@/lib/db/connect";
 import UserModel from "@/models/User";
 
 // Define validation schema
+
+const emailSchema = z.union([
+  z.string().email(), // valid email
+  z.literal("")       // empty string
+]);
+
+const phoneNumberSchema = z.union([
+  z.string().regex(/^\d{10}$/, "Phone number must be 10 digits"),
+  z.literal("")
+]);
+
 const userSchema = z.object({
   voterId: z.string().regex(/^[a-zA-Z0-9]+$/, "Voter ID must be alphanumeric"),
-  email: z.string().email("Invalid email address").optional(),
-  phoneNumber: z
-    .string()
-    .regex(/^\d{10}$/, "Invalid phone number").optional(),
+  email: emailSchema.optional().nullable(),
+  phoneNumber: phoneNumberSchema.optional().nullable(),
   password: z
     .string().min(6, "Password must be at least 6 characters long"),
   name: z.string().min(1, "Name is required"),

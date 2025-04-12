@@ -72,7 +72,17 @@ function RegisterForm() {
       console.log("Registration API response:", data);
 
       if (!response.ok) {
-        throw new Error(data.error || "Registration failed");
+        if (Array.isArray(data.error)) {
+          // Validation errors from Zod
+          setError(data.error.map((e: { message: any; }) => e.message).join(", "));
+        } else if (typeof data.error === 'string') {
+          // Single error message
+          setError(data.error);
+        } else {
+          // Generic error
+          setError("Registration failed");
+        }
+        return;
       }
 
       console.log("Registration successful, redirecting to login");
