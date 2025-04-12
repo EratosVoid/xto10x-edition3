@@ -17,27 +17,34 @@ export const authOptions: NextAuthOptions = {
       id: "credentials",
       name: "Credentials",
       credentials: {
-        voterId: { label: "Voter ID", type: "text" },
+        identifier: { label: "ID/Email/Phone", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         try {
           await connectDB();
 
-          if (!credentials?.voterId || !credentials?.password) {
-            throw new Error("Voter ID and password are required");
+          if (!credentials?.identifier || !credentials?.password) {
+            throw new Error("Identifier and password are required");
           }
 
-          const user = await UserModel.findOne({ voterId: credentials.voterId });
+          const identifier = credentials.identifier;
+          const password = credentials.password;
+
+          // Try to find user by voterId, email, or phoneNumber
+          const user = await UserModel.findOne({
+            $or: [
+              { voterId: identifier },
+              { email: identifier },
+              { phoneNumber: identifier },
+            ],
+          });
 
           if (!user) {
-            throw new Error("No user found with this Voter ID");
+            throw new Error("No user found with the provided credentials");
           }
 
-          const isPasswordValid = await compare(
-            credentials.password,
-            user.password!,
-          );          
+          const isPasswordValid = await compare(password, user.password!);
 
           if (!isPasswordValid) {
             throw new Error("Invalid password");
@@ -48,6 +55,8 @@ export const authOptions: NextAuthOptions = {
             id: user._id.toString(),
             voterId: user.voterId,
             email: user.email || "",
+            phoneNumber: user.phoneNumber || "",
+            name: user.name,
             image: user.image || "",
             role: user.role || "user",
             locality: user.locality || "",

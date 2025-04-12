@@ -25,14 +25,14 @@ function LoginForm() {
     setError("");
 
     const formData = new FormData(e.currentTarget);
-    const voterId = formData.get("voterId") as string;
+    const identifier = formData.get("identifier") as string;
     const password = formData.get("password") as string;
 
     try {
       console.log("Attempting sign in with credentials");
       const result = await signIn("credentials", {
         redirect: false,
-        voterId: voterId,
+        identifier: identifier,
         password: password,
         callbackUrl,
       });
@@ -45,7 +45,7 @@ function LoginForm() {
 
       if (result?.error) {
         if (result.error === "CredentialsSignin") {
-          setError("Invalid Voter ID or password.");
+          setError("Invalid login credentials. Please try again.");
         } else {
           setError(result.error);
         }
@@ -99,19 +99,22 @@ function LoginForm() {
               <div>
                 <label
                   className="block text-sm font-medium mb-1"
-                  htmlFor="voterId"
+                  htmlFor="identifier"
                 >
-                  Voter ID
+                  Login ID
                 </label>
                 <Input
                   fullWidth
                   required
-                  id="voterId"
-                  name="voterId"
-                  placeholder="Voter ID"
+                  id="identifier"
+                  name="identifier"
+                  placeholder="Voter ID, Email or Phone Number"
                   type="text"
                   className="border-gray-300 focus:border-primary"
                 />
+                <p className="mt-1 text-xs text-default-500">
+                  You can use your voter ID, email address, or phone number
+                </p>
               </div>
               <div>
                 <label
