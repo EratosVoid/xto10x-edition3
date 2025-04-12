@@ -44,7 +44,11 @@ function LoginForm() {
       });
 
       if (result?.error) {
-        setError(result.error);
+        if (result.error === 'CredentialsSignin') {
+          setError('Invalid Voter ID or password.');
+        } else {
+          setError(result.error);
+        }
       } else if (result?.ok) {
         router.push(callbackUrl);
       } else {
@@ -163,7 +167,7 @@ function LoginForm() {
 
         <CardFooter className="flex justify-center p-6 bg-gray-50 dark:bg-gray-800/40 rounded-b-xl border-t dark:border-gray-700">
           <div className="text-sm text-center">
-            Don&apos;t have an account?{" "}
+            Don't have an account?{" "}
             <Link
               className="font-medium text-primary hover:text-primary-400"
               href="/register"
