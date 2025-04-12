@@ -4,18 +4,20 @@ import { User } from "@/types";
 
 const UserSchema = new mongoose.Schema<User>(
   {
+    voterId: { type: String, required: true, unique: true },
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    email: { type: String, required: false, unique: true },
+    password: { type: String, required: true },    
     role: {
       type: String,
       enum: ["user", "moderator", "officials"],
       default: "user",
     },
     locality: { type: String, required: true },
+    phoneNumber: { type: String, required: false },    
     points: { type: Number, default: 0 },
     eventsHosted: { type: Number, default: 0 },
-    pollsVoted: { type: Number, default: 0 },
+    pollsVoted: { type: Number, default: 0 },    
     discussionsStarted: { type: Number, default: 0 },
     petitionsCreated: { type: Number, default: 0 },
     notifications: [

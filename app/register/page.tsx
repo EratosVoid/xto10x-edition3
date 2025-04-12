@@ -22,38 +22,36 @@ function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    voterId: "",
+    email: "", // Optional
+    phoneNumber: "", // Optional
     password: "",
     confirmPassword: "",
+    name: "",
     locality: "",
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     console.log("Registration form submission initiated");
     e.preventDefault();
+
     setIsLoading(true);
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       setIsLoading(false);
-
       return;
     }
 
     // Create a copy without confirmPassword which shouldn't be sent to the API
-    const apiData = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      locality: formData.locality,
-    };
+    const { confirmPassword, ...apiData } = formData;
 
     console.log("Registration data prepared:", {
       ...apiData,
       password: "[REDACTED]",
     });
+
 
     try {
       console.log("Sending registration request to API");
@@ -115,17 +113,68 @@ function RegisterForm() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
+                <label htmlFor="voterId" className="block text-sm font-medium mb-1">
+                  Voter ID
+                </label>
+                <Input
+                  type="text"
+                  id="voterId"
+                  name="voterId"
+                  placeholder="Enter your Voter ID"
+                  value={formData.voterId}
+                  onChange={(e) => setFormData({ ...formData, voterId: e.target.value })}
+                  required
+                  fullWidth
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium mb-1">
+                  Email address
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  placeholder="john@example.com"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  fullWidth
+                />
+                <p className="text-xs text-gray-500 mt-1">Optional</p>
+              </div>
+
+              <div>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1">
+                  Phone Number
+                </label>
+                <div className="mt-1 flex rounded-md shadow-sm">
+                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                    +91 {/* Assuming India for now */}
+                  </span>
+                  <Input
+                    type="tel"
+                    name="phoneNumber"
+                    id="phoneNumber"
+                    className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
+                    placeholder="Enter your phone number"
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Optional</p>
+              </div>
+
+              <div>
                 <label
                   className="block text-sm font-medium mb-1"
                   htmlFor="name"
-                  id="label-name"
                 >
                   Full Name
                 </label>
                 <Input
                   fullWidth
                   required
-                  aria-labelledby="label-name"
                   id="name"
                   name="name"
                   placeholder="John Doe"
@@ -141,24 +190,26 @@ function RegisterForm() {
               <div>
                 <label
                   className="block text-sm font-medium mb-1"
-                  htmlFor="email"
+                  htmlFor="locality"
                 >
-                  Email address
+                  Locality
                 </label>
-                <Input
-                  fullWidth
+                <Select
                   required
-                  autoComplete="email"
-                  id="email"
-                  name="email"
-                  placeholder="john@example.com"
-                  type="email"
-                  value={formData.email}
+                  id="locality"
+                  name="locality"
+                  placeholder="Select your locality"
+                  value={formData.locality}
                   onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
+                    setFormData({ ...formData, locality: e.target.value })
                   }
-                  className="border-gray-300 focus:border-primary"
-                />
+                >
+                  {localities.map((loc) => (
+                    <SelectItem key={loc.value} textValue={loc.value}>
+                      {loc.label}
+                    </SelectItem>
+                  ))}
+                </Select>
               </div>
 
               <div>
@@ -203,39 +254,10 @@ function RegisterForm() {
                   type="password"
                   value={formData.confirmPassword}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      confirmPassword: e.target.value,
-                    })
+                    setFormData({ ...formData, confirmPassword: e.target.value })
                   }
                   className="border-gray-300 focus:border-primary"
                 />
-              </div>
-
-              <div>
-                <label
-                  className="block text-sm font-medium mb-1"
-                  htmlFor="locality"
-                >
-                  Locality
-                </label>
-                <Select
-                  required
-                  id="locality"
-                  name="locality"
-                  placeholder="Select your locality"
-                  value={formData.locality}
-                  onChange={(e) =>
-                    setFormData({ ...formData, locality: e.target.value })
-                  }
-                  className="border-gray-300 focus:border-primary"
-                >
-                  {localities.map((loc) => (
-                    <SelectItem key={loc.value} textValue={loc.value}>
-                      {loc.label}
-                    </SelectItem>
-                  ))}
-                </Select>
               </div>
             </div>
 

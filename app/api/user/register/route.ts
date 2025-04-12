@@ -7,9 +7,14 @@ import UserModel from "@/models/User";
 
 // Define validation schema
 const userSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  voterId: z.string().regex(/^[a-zA-Z0-9]+$/, "Voter ID must be alphanumeric"),
+  email: z.string().email("Invalid email address").optional(),
+  phoneNumber: z
+    .string()
+    .regex(/^\d{10}$/, "Invalid phone number").optional(),
+  password: z
+    .string().min(6, "Password must be at least 6 characters long"),
+  name: z.string().min(1, "Name is required"),
   locality: z.string().min(1, "Locality is required"),
 });
 
@@ -34,46 +39,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.error.errors }, { status: 400 });
     }
 
-    const { name, email, password, locality } = result.data;
+    const { voterId, email, phoneNumber, password, name, locality } = result.data;
 
     // Check if user already exists
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ voterId });
 
     if (existingUser) {
-      console.log("User already exists:", email);
+      console.log("User already exists:", voterId);
 
       return NextResponse.json(
-        { error: "User with this email already exists" },
+        { error: "User with this voter ID already exists" },
         { status: 409 },
       );
     }
 
-    // Hash password
+    // Hash the password
     const hashedPassword = await hash(password, 10);
 
-    console.log("Password hashed successfully");
-
     // Create new user
-    const user = await UserModel.create({
-      name,
+    const newUser = new UserModel({
+      voterId,
       email,
+      phoneNumber,
       password: hashedPassword,
-      role: "user",
-      locality,
-      points: 0,
-      eventsHosted: 0,
-      pollsVoted: 0,
-      discussionsStarted: 0,
-      petitionsCreated: 0,
+      name, locality,
     });
+
+    // Save the new user to the database
+    const user = await newUser.save();
+
 
     console.log("User created successfully:", user._id);
 
-    // Return the user without password
-    const { password: _, ...userWithoutPassword } = user.toObject();
-
     return NextResponse.json(
-      { message: "User created successfully", user: userWithoutPassword },
+      { message: "User created successfully", user },
       { status: 201 },
     );
   } catch (error: any) {

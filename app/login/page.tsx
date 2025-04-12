@@ -23,15 +23,15 @@ function LoginForm() {
     setError("");
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
+    const voterId = formData.get("voterId") as string;
     const password = formData.get("password") as string;
 
     try {
       console.log("Attempting sign in with credentials");
       const result = await signIn("credentials", {
         redirect: false,
-        email,
-        password,
+        voterId: voterId,
+        password: password,
         callbackUrl,
       });
 
@@ -91,20 +91,19 @@ function LoginForm() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-                <label
-                  className="block text-sm font-medium mb-1"
-                  htmlFor="email"
-                >
-                  Email address
-                </label>
+              <label
+                className="block text-sm font-medium mb-1"
+                htmlFor="voterId"
+              >
+                Voter ID
+              </label>
                 <Input
                   fullWidth
                   required
-                  autoComplete="email"
-                  id="email"
-                  name="email"
-                  placeholder="Email address"
-                  type="email"
+                  id="voterId"
+                  name="voterId"
+                  placeholder="Voter ID"
+                  type="text"
                   className="border-gray-300 focus:border-primary"
                 />
               </div>
