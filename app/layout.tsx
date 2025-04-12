@@ -1,14 +1,10 @@
 import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
-import clsx from "clsx";
-
-import { Providers } from "./providers";
-
+import { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
-import { Navbar } from "@/components/Navbar";
-import Footer from "@/components/footer";
-import { PWAStatus } from "@/components/pwa-status";
+import { Providers } from "./providers";
+import clsx from "clsx";
+import AuthLayout from "@/components/AuthLayout";
 
 export const metadata: Metadata = {
   title: {
@@ -16,33 +12,15 @@ export const metadata: Metadata = {
     template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
+  ],
   icons: {
     icon: "/favicon.ico",
-    apple: [
-      { url: "/images/icon-192x192.png" },
-      { url: "/images/icon-512x512.png", sizes: "512x512" },
-    ],
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
   },
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: siteConfig.name,
-  },
-  formatDetection: {
-    telephone: false,
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#2563eb" },
-    { media: "(prefers-color-scheme: dark)", color: "#2563eb" },
-  ],
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -51,30 +29,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning lang="en">
-      <head>
-        <script defer src="/register-sw.js" />
-      </head>
+    <html lang="en" suppressHydrationWarning>
+      <head />
       <body
         className={clsx(
           "min-h-screen bg-background font-sans antialiased",
           fontSans.variable
         )}
       >
-        <Providers
-          themeProps={{
-            attribute: "class",
-            enableSystem: true,
-          }}
-        >
-          <div className="relative flex flex-col h-screen">
-            <Navbar />
-            <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
-              {children}
-            </main>
-            <Footer />
-            <PWAStatus />
-          </div>
+        <Providers themeProps={{ attribute: "class", defaultTheme: "system" }}>
+          <AuthLayout>{children}</AuthLayout>
         </Providers>
       </body>
     </html>

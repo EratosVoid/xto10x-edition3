@@ -65,6 +65,26 @@ const AudioIcon = ({ isPlaying = false }) => (
   </svg>
 );
 
+// Chart icon for visualize impact button
+const ChartIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="mr-1"
+  >
+    <path
+      d="M5 21V7M19 21V3M12 21V12"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 // Get initials from name
 const getInitials = (name: string): string => {
   if (!name) return "??";
@@ -107,6 +127,8 @@ export default function PostDetailPage({ params }: PageProps) {
   const [summary, setSummary] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
+  const [visualizing, setVisualizing] = useState(false);
+  const [visualization, setVisualization] = useState<any>(null);
 
   // Cancel speech synthesis when component unmounts
   useEffect(() => {
@@ -264,6 +286,37 @@ export default function PostDetailPage({ params }: PageProps) {
     }
   };
 
+  // Handle visualization creation
+  const handleVisualizeImpact = async () => {
+    if (visualizing) return;
+
+    try {
+      setVisualizing(true);
+      setVisualization(null);
+
+      const response = await fetch(`/api/ai/visualize`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ postId: resolvedParams.id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to visualize impact");
+      }
+
+      const data = await response.json();
+      setVisualization(data.visualization);
+    } catch (err: any) {
+      console.error("Error visualizing impact:", err);
+      setError(err.message || "Failed to visualize impact");
+    } finally {
+      setVisualizing(false);
+    }
+  };
+
   // Show loading or error state
   if (status === "loading" || loading) {
     return (
@@ -327,30 +380,30 @@ export default function PostDetailPage({ params }: PageProps) {
               <div>
                 <p className="font-medium">Start Date:</p>
                 <p>
-                  {post.eventDetails?.startDate
-                    ? formatDate(post.eventDetails.startDate)
+                  {post.eventId?.startDate
+                    ? formatDate(post.eventId.startDate)
                     : "N/A"}
                 </p>
               </div>
               <div>
                 <p className="font-medium">End Date:</p>
                 <p>
-                  {post.eventDetails?.endDate
-                    ? formatDate(post.eventDetails.endDate)
+                  {post.eventId?.endDate
+                    ? formatDate(post.eventId.endDate)
                     : "N/A"}
                 </p>
               </div>
               <div>
                 <p className="font-medium">Duration:</p>
                 <p>
-                  {post.eventDetails?.duration
-                    ? `${post.eventDetails.duration} minutes`
+                  {post.eventId?.duration
+                    ? `${post.eventId.duration} minutes`
                     : "N/A"}
                 </p>
               </div>
               <div>
                 <p className="font-medium">Location:</p>
-                <p>{post.eventDetails?.location || "N/A"}</p>
+                <p>{post.eventId?.location || "N/A"}</p>
               </div>
             </div>
           </div>
@@ -360,8 +413,8 @@ export default function PostDetailPage({ params }: PageProps) {
           <div className="mt-6 bg-primary-50 p-4 rounded-lg">
             <h3 className="text-lg font-semibold mb-2">Poll</h3>
             <div className="space-y-2">
-              {post.pollDetails?.options &&
-                Object.entries(post.pollDetails.options).map(
+              {post.pollId?.options &&
+                Object.entries(post.pollId.options).map(
                   ([option, votes]: [string, any]) => (
                     <div key={option} className="flex justify-between">
                       <span>{option}</span>
@@ -369,14 +422,11 @@ export default function PostDetailPage({ params }: PageProps) {
                     </div>
                   )
                 )}
-              {(!post.pollDetails?.options ||
-                Object.keys(post.pollDetails.options).length === 0) && (
+              {(!post.pollId?.options ||
+                Object.keys(post.pollId.options).length === 0) && (
                 <p className="text-gray-500">No poll options available</p>
               )}
             </div>
-            <Button className="mt-4" color="primary">
-              Vote
-            </Button>
           </div>
         );
       case "petition":
@@ -477,28 +527,38 @@ export default function PostDetailPage({ params }: PageProps) {
                     </Chip>
                   </div>
                 </div>
-                {(isAuthor || isModeratorOrAdmin) && (
-                  <div className="flex gap-2">
-                    <Button
-                      color="secondary"
-                      startContent={<SparkleIcon />}
-                      onPress={() => handleSummarize()}
-                    >
-                      Summarize
-                    </Button>
-                    {isAuthor && (
-                      <Button
-                        color="primary"
-                        onPress={() => router.push(`/posts/${post._id}/edit`)}
-                      >
-                        Edit
+                <div className="flex gap-2">
+                  <Button
+                    color="secondary"
+                    startContent={<SparkleIcon />}
+                    onPress={() => handleSummarize()}
+                  >
+                    Summarize
+                  </Button>
+                  <Button
+                    color="primary"
+                    variant="flat"
+                    startContent={<ChartIcon />}
+                    onPress={handleVisualizeImpact}
+                  >
+                    Visualize Impact
+                  </Button>
+                  {(isAuthor || isModeratorOrAdmin) && (
+                    <>
+                      {isAuthor && (
+                        <Button
+                          color="primary"
+                          onPress={() => router.push(`/posts/${post._id}/edit`)}
+                        >
+                          Edit
+                        </Button>
+                      )}
+                      <Button variant="flat" color="danger" onPress={onOpen}>
+                        Delete
                       </Button>
-                    )}
-                    <Button variant="flat" color="danger" onPress={onOpen}>
-                      Delete
-                    </Button>
-                  </div>
-                )}
+                    </>
+                  )}
+                </div>
               </div>
 
               <Divider className="my-2" />
@@ -561,6 +621,159 @@ export default function PostDetailPage({ params }: PageProps) {
                         </p>
                       )}
                     </>
+                  )}
+                </div>
+              )}
+
+              {/* Visualization section */}
+              {(visualizing || visualization) && (
+                <div className="mt-6 bg-primary-50 dark:bg-primary-950/20 p-4 rounded-lg border border-primary-200 dark:border-primary-800">
+                  <div className="flex items-center mb-3">
+                    <ChartIcon />
+                    <h3 className="text-lg font-semibold">Community Impact</h3>
+                  </div>
+                  {visualizing ? (
+                    <div className="flex items-center gap-2">
+                      <Spinner size="sm" color="primary" />
+                      <span>Generating visualizations...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {visualization && (
+                        <>
+                          {/* Demographics Impact */}
+                          <div>
+                            <h4 className="text-md font-medium mb-2">
+                              Demographics Impact
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                              {visualization.demographics.map(
+                                (item: any, index: number) => (
+                                  <div
+                                    key={index}
+                                    className="bg-background dark:bg-content1 p-3 rounded-lg shadow-sm dark:shadow-md flex flex-col items-center border border-default-200 dark:border-default-100/10"
+                                  >
+                                    <div
+                                      className={`w-16 h-16 rounded-full mb-2 flex items-center justify-center text-white font-bold ${
+                                        item.impact > 75
+                                          ? "bg-success"
+                                          : item.impact > 50
+                                            ? "bg-primary"
+                                            : item.impact > 25
+                                              ? "bg-warning"
+                                              : "bg-danger"
+                                      }`}
+                                    >
+                                      {item.impact}%
+                                    </div>
+                                    <div className="font-medium">
+                                      {item.group}
+                                    </div>
+                                    <div className="text-sm text-default-500">
+                                      {item.sentiment}
+                                    </div>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Benefits vs Challenges */}
+                          <div>
+                            <h4 className="text-md font-medium mb-2">
+                              Benefits & Challenges
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="bg-success-50 dark:bg-success-900/20 p-4 rounded-lg border border-success-200 dark:border-success-800">
+                                <h5 className="text-success mb-2 font-medium">
+                                  Benefits
+                                </h5>
+                                <ul className="list-disc pl-5 space-y-1">
+                                  {visualization.benefits.map(
+                                    (benefit: string, index: number) => (
+                                      <li key={index}>{benefit}</li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+                              <div className="bg-danger-50 dark:bg-danger-900/20 p-4 rounded-lg border border-danger-200 dark:border-danger-800">
+                                <h5 className="text-danger mb-2 font-medium">
+                                  Challenges
+                                </h5>
+                                <ul className="list-disc pl-5 space-y-1">
+                                  {visualization.challenges.map(
+                                    (challenge: string, index: number) => (
+                                      <li key={index}>{challenge}</li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Timeline */}
+                          {visualization.timeline && (
+                            <div>
+                              <h4 className="text-md font-medium mb-2">
+                                Impact Timeline
+                              </h4>
+                              <div className="relative">
+                                <div className="h-2 bg-default-200 dark:bg-default-700 rounded-full w-full absolute top-4"></div>
+                                <div className="flex justify-between relative">
+                                  {visualization.timeline.map(
+                                    (stage: any, index: number) => (
+                                      <div
+                                        key={index}
+                                        className="flex flex-col items-center relative z-10"
+                                      >
+                                        <div
+                                          className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${
+                                            stage.completed
+                                              ? "bg-primary"
+                                              : "bg-default-300 dark:bg-default-600"
+                                          }`}
+                                        >
+                                          {index + 1}
+                                        </div>
+                                        <div className="text-center mt-2 w-24">
+                                          <div className="font-medium text-sm">
+                                            {stage.name}
+                                          </div>
+                                          <div className="text-xs text-default-500">
+                                            {stage.timeframe}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Recommendations */}
+                          {visualization.recommendations && (
+                            <div>
+                              <h4 className="text-md font-medium mb-2">
+                                Recommendations
+                              </h4>
+                              <div className="space-y-2">
+                                {visualization.recommendations.map(
+                                  (rec: string, index: number) => (
+                                    <div
+                                      key={index}
+                                      className="bg-background dark:bg-content1 p-3 rounded-lg shadow-sm dark:shadow-md border border-default-200 dark:border-default-100/10"
+                                    >
+                                      {rec}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
                   )}
                 </div>
               )}

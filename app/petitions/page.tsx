@@ -161,7 +161,7 @@ export default function PetitionsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
+    <div className="w-full mx-auto py-8 px-4 sm:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">Community Petitions</h1>
@@ -210,7 +210,7 @@ export default function PetitionsPage() {
       </div>
 
       {/* Petition Cards */}
-      <div className="grid grid-cols-1 gap-6 mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         {filteredPetitions.length > 0 ? (
           filteredPetitions.map((petition) => {
             const currentSignatures = getCurrentSignatures(petition);

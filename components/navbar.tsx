@@ -12,6 +12,7 @@ import {
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Avatar } from "@heroui/avatar";
+import { Chip } from "@heroui/chip";
 import {
   Dropdown,
   DropdownTrigger,
@@ -90,7 +91,21 @@ export const Navbar = () => {
                 color="foreground"
                 href={item.href}
               >
-                {item.label}
+                {item.label === "Discussions" ? (
+                  <div className="flex flex-col items-center">
+                    <Chip
+                      color="primary"
+                      size="sm"
+                      variant="flat"
+                      className="mb-0.5 py-0 px-1.5 h-auto text-xs font-medium"
+                    >
+                      Preview
+                    </Chip>
+                    {item.label}
+                  </div>
+                ) : (
+                  item.label
+                )}
               </NextLink>
             </NavbarItem>
           ))}
@@ -168,7 +183,21 @@ export const Navbar = () => {
                 className={linkStyles({ color: "foreground" })}
                 href={item.href}
               >
-                {item.label}
+                {item.label === "Discussions" ? (
+                  <div className="flex items-center">
+                    <span>{item.label}</span>
+                    <Chip
+                      color="primary"
+                      size="sm"
+                      variant="flat"
+                      className="ml-2 py-0 px-1.5 h-auto text-xs font-medium"
+                    >
+                      Preview
+                    </Chip>
+                  </div>
+                ) : (
+                  item.label
+                )}
               </NextLink>
             </NavbarMenuItem>
           ))}

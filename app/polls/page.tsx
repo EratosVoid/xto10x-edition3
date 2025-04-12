@@ -135,7 +135,7 @@ export default function PollsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
+    <div className="w-full mx-auto py-8 px-4 sm:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">Community Polls</h1>
@@ -163,7 +163,7 @@ export default function PollsPage() {
       </div>
 
       {/* Poll Cards */}
-      <div className="grid grid-cols-1 gap-6 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         {filteredPolls.length > 0 ? (
           filteredPolls.map((poll) => {
             const totalVotes = getTotalVotes(poll.options);

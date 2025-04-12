@@ -86,13 +86,26 @@ function RegisterForm() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-col items-center">
+    <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900/30">
+      {/* Navigation */}
+      <nav className="absolute top-0 left-0 right-0 p-4">
+        <div className="container mx-auto px-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
+              LV
+            </div>
+            <span className="font-bold text-lg">LocalVoice</span>
+          </Link>
+        </div>
+      </nav>
+
+      <Card className="w-full max-w-md shadow-lg border dark:border-gray-700">
+        <CardHeader className="flex flex-col items-center bg-primary/5 rounded-t-xl p-6">
           <h2 className="text-3xl font-bold">Create your account</h2>
+          <p className="text-default-500 mt-1">Join the LocalVoice community</p>
         </CardHeader>
 
-        <CardBody>
+        <CardBody className="p-6">
           {error && (
             <div className="rounded-md bg-red-50 p-4 mb-4">
               <div className="text-sm text-red-700">{error}</div>
@@ -121,6 +134,7 @@ function RegisterForm() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
+                  className="border-gray-300 focus:border-primary"
                 />
               </div>
 
@@ -143,6 +157,7 @@ function RegisterForm() {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
+                  className="border-gray-300 focus:border-primary"
                 />
               </div>
 
@@ -166,6 +181,7 @@ function RegisterForm() {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
+                  className="border-gray-300 focus:border-primary"
                 />
               </div>
 
@@ -192,6 +208,7 @@ function RegisterForm() {
                       confirmPassword: e.target.value,
                     })
                   }
+                  className="border-gray-300 focus:border-primary"
                 />
               </div>
 
@@ -211,6 +228,7 @@ function RegisterForm() {
                   onChange={(e) =>
                     setFormData({ ...formData, locality: e.target.value })
                   }
+                  className="border-gray-300 focus:border-primary"
                 >
                   {localities.map((loc) => (
                     <SelectItem key={loc.value} textValue={loc.value}>
@@ -227,24 +245,31 @@ function RegisterForm() {
               disabled={isLoading}
               isLoading={isLoading}
               type="submit"
+              className="py-6"
             >
               {isLoading ? "Creating account..." : "Sign up"}
             </Button>
           </form>
         </CardBody>
 
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center p-6 bg-gray-50 dark:bg-gray-800/40 rounded-b-xl border-t dark:border-gray-700">
           <div className="text-sm text-center">
             Already have an account?{" "}
             <Link
               className="font-medium text-primary hover:text-primary-400"
               href="/login"
             >
-              Sign in
+              Sign in instead
             </Link>
           </div>
         </CardFooter>
       </Card>
+
+      <div className="mt-8 text-center">
+        <Link href="/" className="text-sm text-default-500 hover:text-primary">
+          ← Back to homepage
+        </Link>
+      </div>
     </div>
   );
 }
@@ -252,7 +277,7 @@ function RegisterForm() {
 // Fallback component while suspense is loading
 function RegisterFallback() {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900/30">
       <Card className="w-full max-w-md">
         <CardBody className="py-8">
           <div className="text-center">Loading registration page...</div>

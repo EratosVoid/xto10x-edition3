@@ -26,26 +26,40 @@ const suggestedQuestions = {
     "What types of community events can I organize?",
     "How do I start a petition in my neighborhood?",
     "What are the benefits of community engagement?",
+    "What's happening in my community this week?",
+    "Who are the most active contributors in our locality?",
   ],
   events: [
     "How can I create a successful community event?",
     "What permits do I need for a block party?",
     "How can I find volunteers for my event?",
+    "What's the latest event scheduled in our community?",
+    "Which upcoming events have the most participants?",
+    "Are there any environmental cleanup events planned?",
   ],
   polls: [
     "How can I encourage more participation in local polls?",
     "What makes a good poll question?",
     "How do I analyze poll results effectively?",
+    "What's the most popular poll in our community right now?",
+    "How do poll results influence community decisions?",
+    "Can you suggest topics for a new community poll?",
   ],
   petitions: [
     "How many signatures do I need for my petition?",
     "How can I promote my petition effectively?",
     "What makes a petition successful?",
+    "What's the most supported petition in our area currently?",
+    "How do I get local officials to notice my petition?",
+    "What types of petitions have been successful historically?",
   ],
   discussions: [
     "How do I moderate community discussions?",
     "What topics generate the most engagement?",
     "How can I resolve conflicts in discussions?",
+    "What's the most active discussion thread right now?",
+    "How do I start a productive discussion on local issues?",
+    "What community concerns are trending in discussions?",
   ],
 };
 
@@ -152,7 +166,7 @@ export default function AskAiPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6">
+    <div className=" w-full mx-auto py-8 px-4 sm:px-6">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Ask the AI Assistant</h1>
         <p className="text-default-500">
@@ -162,9 +176,9 @@ export default function AskAiPage() {
         </p>
       </div>
 
-      <div className="flex gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
         {/* Chat interface - Takes more space now */}
-        <Card className="md:col-span-3 h-[600px] flex flex-col">
+        <Card className="md:col-span-2 h-[75vh] flex flex-col w-full">
           <CardHeader className="border-b">
             <div className="flex items-center gap-3">
               <Avatar
@@ -255,7 +269,7 @@ export default function AskAiPage() {
           <Divider />
 
           <CardFooter>
-            <div className="flex w-full gap-2">
+            <div className="flex w-full gap-2 py-4">
               <Input
                 placeholder="Ask me anything about your community..."
                 value={input}
@@ -278,7 +292,7 @@ export default function AskAiPage() {
         </Card>
 
         {/* Suggested questions with categories */}
-        <Card className="h-fit">
+        <Card className="h-fit w-full">
           <CardHeader>
             <h3 className="text-lg font-semibold">Suggested Questions</h3>
           </CardHeader>

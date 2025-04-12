@@ -7,9 +7,39 @@ import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { Pagination } from "@heroui/pagination";
 import { Tabs, Tab } from "@heroui/tabs";
+import { Chip } from "@heroui/chip";
+import { Input } from "@heroui/input";
 
-import PostFilters from "@/components/PostFilters";
 import PostCard from "@/components/PostCard";
+
+// Search icon component (since @heroui/icons isn't available)
+const SearchIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="text-default-400"
+  >
+    <path
+      d="M21 21L15.5 15.5M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+// Post types with colors
+const POST_TYPES = [
+  { key: "all", label: "All Types", color: "default" },
+  { key: "general", label: "General", color: "default" },
+  { key: "event", label: "Events", color: "primary" },
+  { key: "poll", label: "Polls", color: "secondary" },
+  { key: "petition", label: "Petitions", color: "success" },
+];
 
 export default function PostsPage() {
   const router = useRouter();
@@ -26,6 +56,7 @@ export default function PostsPage() {
     total: 0,
     pages: 0,
   });
+  const [searchInput, setSearchInput] = useState("");
 
   // Fetch posts when filters change
   useEffect(() => {
@@ -91,13 +122,15 @@ export default function PostsPage() {
     setPagination({ ...pagination, page });
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    searchTerm.current = searchInput;
     setPagination({ ...pagination, page: 1 }); // Reset to first page on new search
   };
 
   const handleClearFilters = () => {
     searchTerm.current = "";
+    setSearchInput("");
     setSelectedType("all");
     setPagination({ ...pagination, page: 1 });
   };
@@ -111,8 +144,14 @@ export default function PostsPage() {
     );
   }
 
+  // Get color for the current post type
+  const getPostTypeColor = (type: string) => {
+    const postType = POST_TYPES.find((t) => t.key === type);
+    return postType?.color || "default";
+  };
+
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
+    <div className="w-full mx-auto py-8 px-4 sm:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">Community Posts</h1>
@@ -140,14 +179,70 @@ export default function PostsPage() {
         <Tab key="my" title="My Posts" />
       </Tabs>
 
-      <PostFilters
-        searchTerm={searchTerm.current}
-        selectedType={selectedType}
-        onClear={handleClearFilters}
-        onSearchChange={(value: string) => (searchTerm.current = value)}
-        onSubmit={handleSearch}
-        onTypeChange={setSelectedType}
-      />
+      {/* Redesigned Filters */}
+      <div className="mb-6 space-y-4">
+        {/* Type Filters as Chips */}
+        <div className="flex flex-wrap gap-2">
+          {POST_TYPES.map((type) => (
+            <Chip
+              key={type.key}
+              color={
+                type.key === selectedType ? (type.color as any) : "default"
+              }
+              variant={type.key === selectedType ? "solid" : "bordered"}
+              size="lg"
+              className={`cursor-pointer transition-all ${
+                type.key === selectedType ? "font-medium" : ""
+              }`}
+              onClick={() => setSelectedType(type.key)}
+            >
+              {type.label}
+            </Chip>
+          ))}
+        </div>
+
+        {/* Active Filters Badge */}
+        {(selectedType !== "all" || searchInput) && (
+          <div className="flex items-center gap-2">
+            <Chip size="sm" color="primary" variant="flat" className="px-2">
+              {selectedType !== "all" && searchInput
+                ? "2 filters active"
+                : "1 filter active"}
+            </Chip>
+            <Button
+              variant="light"
+              size="sm"
+              onClick={handleClearFilters}
+              className="text-default-500 hover:text-default-700"
+            >
+              Clear all
+            </Button>
+          </div>
+        )}
+
+        {/* Search Bar */}
+        <form onSubmit={handleSearchSubmit} className="flex gap-2 items-center">
+          <Input
+            classNames={{
+              base: "w-full",
+              inputWrapper: "shadow-sm",
+            }}
+            placeholder="Search posts by title or description..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            startContent={<SearchIcon />}
+            size="lg"
+          />
+          <Button
+            type="submit"
+            color="primary"
+            size="lg"
+            isDisabled={!searchInput.trim().length}
+          >
+            Search
+          </Button>
+        </form>
+      </div>
 
       {/* Error display */}
       {error && (

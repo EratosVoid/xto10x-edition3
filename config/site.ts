@@ -9,6 +9,11 @@ export const siteConfig = {
       href: "/dashboard",
     },
     {
+      label: "Ask AI",
+      href: "/ask-ai",
+      highlight: true,
+    },
+    {
       label: "Petitions",
       href: "/petitions",
     },
@@ -28,6 +33,18 @@ export const siteConfig = {
     {
       label: "Discussions",
       href: "/discussions",
+      preview: true,
+    },
+
+    {
+      label: "Awards",
+      href: "/awards",
+      preview: true,
+    },
+    {
+      label: "Leaderboard",
+      href: "/leaderboard",
+      preview: true,
     },
   ],
   navMenuItems: [
